@@ -1,0 +1,14 @@
+<?php
+
+namespace Modules\{{ module }}\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Model;
+
+#[Table('{{ table }}')]
+#[Fillable([])]
+class {{ name }} extends Model
+{
+    //
+}

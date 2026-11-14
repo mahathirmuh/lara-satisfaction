@@ -1,0 +1,19 @@
+<?php
+
+namespace Modules\{{ module }}\Repositories;
+
+use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\{{ module }}\Models\{{ name }};
+
+class {{ name }}Repository implements {{ name }}Interface
+{
+    /**
+     * {@inheritDoc}
+     */
+    public function paginate(array $params): LengthAwarePaginator
+    {
+        return {{ name }}::query()
+            ->orderBy($params['order_by'], $params['order_dir'])
+            ->paginate($params['per_page']);
+    }
+}

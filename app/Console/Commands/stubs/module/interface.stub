@@ -1,0 +1,15 @@
+<?php
+
+namespace Modules\{{ module }}\Repositories;
+
+use Illuminate\Pagination\LengthAwarePaginator;
+
+interface {{ name }}Interface
+{
+    /**
+     * Paginated rows for the table page.
+     *
+     * @param  array{per_page: int, search: string|null, order_by: string, order_dir: string}  $params
+     */
+    public function paginate(array $params): LengthAwarePaginator;
+}

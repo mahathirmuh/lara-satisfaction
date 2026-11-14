@@ -1,0 +1,13 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\{{ module }}\Http\Controllers\{{ module }}Controller;
+
+/*
+| Register a menu with the route "{{ slug }}.index" so the permission
+| middleware can grant this module to roles.
+*/
+Route::middleware(['web', 'auth', 'permission'])->prefix('{{ slug }}')->name('{{ slug }}.')->group(function () {
+    Route::get('/', [{{ module }}Controller::class, 'index'])->name('index');
+    Route::get('list', [{{ module }}Controller::class, 'list'])->name('list');
+});

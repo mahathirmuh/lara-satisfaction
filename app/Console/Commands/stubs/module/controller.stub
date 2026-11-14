@@ -1,0 +1,40 @@
+<?php
+
+namespace Modules\{{ module }}\Http\Controllers;
+
+use App\Helpers\Apps;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Modules\{{ module }}\Repositories\{{ module }}Interface;
+
+class {{ module }}Controller extends Controller
+{
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(protected {{ module }}Interface ${{ variable }}) {}
+
+    /**
+     * Module page.
+     */
+    public function index(Request $request): View
+    {
+        return view('{{ module }}::index', [
+            'can' => $request->user()->menuAbilities('{{ slug }}'),
+        ]);
+    }
+
+    /**
+     * Rows for the table (JSON). Only expose the attributes the page needs.
+     */
+    public function list(Request $request): JsonResponse
+    {
+        $params = Apps::tableParams($request, ['id'], 'id');
+
+        return Apps::tableResponse($this->{{ variable }}->paginate($params), fn ($item): array => [
+            'id' => $item->id,
+        ]);
+    }
+}

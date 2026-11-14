@@ -1,0 +1,20 @@
+<?php
+
+namespace Modules\{{ module }}\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class {{ name }}Controller extends Controller
+{
+    /**
+     * Display the page.
+     */
+    public function index(Request $request): View
+    {
+        return view('{{ module }}::index', [
+            'can' => $request->user()->menuAbilities('{{ slug }}'),
+        ]);
+    }
+}

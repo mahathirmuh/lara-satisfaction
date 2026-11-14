@@ -1,0 +1,13 @@
+<?php
+
+namespace Modules\{{ module }}\Providers;
+
+use App\Providers\BaseModuleServiceProvider;
+
+class {{ module }}ServiceProvider extends BaseModuleServiceProvider
+{
+    /**
+     * Folder name of the module, also used as its view namespace.
+     */
+    protected string $module = '{{ module }}';
+}

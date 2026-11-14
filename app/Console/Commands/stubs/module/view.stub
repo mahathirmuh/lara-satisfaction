@@ -1,0 +1,61 @@
+@extends('main.index')
+
+@section('page-title', '{{ title }}')
+
+@section('content')
+    <div class="row g-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div class="row g-2">
+                        <div class="col-12 d-flex flex-wrap justify-content-between gap-2">
+                            <div class="d-flex gap-2">
+                                <input type="text" id="{{ variable }}Search" class="form-control rounded-3"
+                                    autocomplete="off" placeholder="Search…" />
+                                <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
+                                    data-bs-toggle="tooltip" data-bs-title="Reset">
+                                    <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
+                                </x-global.btn-detail>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card overflow-hidden mdka-border-gray-200">
+                                <div class="card-body table-responsive p-0">
+                                    <table class="table table-vcenter mdka-border-gray-100 text-nowrap" id="{{ variable }}Table">
+                                        <thead>
+                                            <tr class="mdka-bg-gray-50">
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="id">ID</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pagination-container mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('javascript')
+    <script>
+        const {{ variable }}Table = initTablePage({
+            container: '#{{ variable }}Table',
+            url: @json(route('{{ slug }}.list')),
+            columns: ['index', {
+                key: 'id',
+                sortable: true
+            }],
+            searchInput: '#{{ variable }}Search',
+            resetButton: '#toggleResetButton',
+        });
+
+        $(function() {
+            {{ variable }}Table.reload();
+        });
+    </script>
+@endpush

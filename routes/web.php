@@ -1,0 +1,48 @@
+<?php
+
+use App\Http\Controllers\Account\PasswordController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\SsoController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Application-wide routes (landing page, authentication and account).
+| Module routes live in modules/{Module}/Routes/web and are loaded by each
+| module's service provider.
+|
+*/
+
+Route::get('/', LandingController::class)->name('landing');
+
+/** Authentication */
+Route::middleware('guest')->group(function () {
+    Route::get('login', [LoginController::class, 'create'])->name('login');
+    Route::post('login', [LoginController::class, 'store'])->name('login.store');
+
+    Route::get('auth/{provider}/redirect', [SsoController::class, 'redirect'])
+        ->whereIn('provider', array_keys(SsoController::DRIVERS))
+        ->name('sso.redirect');
+    Route::get('auth/{provider}/callback', [SsoController::class, 'callback'])
+        ->whereIn('provider', array_keys(SsoController::DRIVERS))
+        ->name('sso.callback');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
+
+    /** Account */
+    Route::get('account/password', [PasswordController::class, 'edit'])->name('account.password.edit');
+    Route::put('account/password', [PasswordController::class, 'update'])->name('account.password.update');
+
+    /** In-app notifications (own notifications only) */
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::get('notifications/{notification}', [NotificationController::class, 'show'])
+        ->whereUuid('notification')
+        ->name('notifications.show');
+});
