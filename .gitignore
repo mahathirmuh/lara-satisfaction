@@ -5,6 +5,8 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+/.claude/hooks/auto-commit-push.sh
+/.claude/settings.local.json
 /.codex
 /.cursor/
 /.idea
