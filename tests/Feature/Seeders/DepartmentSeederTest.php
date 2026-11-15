@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Seeders;
 
+use App\Models\Organization\Department;
+use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
 use Database\Seeders\DepartmentSeeder;
 use Database\Seeders\SurveySeeder;
@@ -26,5 +28,21 @@ class DepartmentSeederTest extends TestCase
         foreach ($steps as $step) {
             $this->assertNotEmpty($step['sections'], $step['department']->name.' has no sections to evaluate.');
         }
+    }
+
+    public function test_running_the_seeder_again_keeps_the_changes_made_in_master_data(): void
+    {
+        $this->seed(DepartmentSeeder::class);
+        $section = DepartmentSection::query()->where('name', 'Plant OHS')->sole();
+        $section->update(['name' => 'Plant Safety', 'description' => 'Edited in Master Data.']);
+        $interface = Department::query()->where('code', 'INTF')->sole();
+        $interface->update(['is_active' => false]);
+
+        $this->seed(DepartmentSeeder::class);
+
+        $this->assertDatabaseHas('department_sections', ['id' => $section->id, 'name' => 'Plant Safety', 'description' => 'Edited in Master Data.']);
+        $this->assertDatabaseMissing('department_sections', ['name' => 'Plant OHS']);
+        $this->assertFalse($interface->fresh()->is_active);
+        $this->assertDatabaseCount('departments', 6);
     }
 }

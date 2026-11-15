@@ -9,6 +9,7 @@ use App\Models\UserManagement\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Modules\SurveyForm\Services\SurveySubmissionService;
 use Tests\TestCase;
 
 class SectionTest extends TestCase
@@ -162,7 +163,26 @@ class SectionTest extends TestCase
             ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors([
-                'department_id' => 'This section is used by survey questions and cannot be moved to another department.',
+                'department_id' => 'This section is used in surveys and cannot be moved to another department.',
+            ]);
+
+        $this->assertSame($section->department_id, $section->fresh()->department_id);
+    }
+
+    public function test_evaluated_section_cannot_move_to_another_department(): void
+    {
+        $section = DepartmentSection::factory()->create();
+        $this->evaluate($section);
+
+        $this->actingAs($this->admin)
+            ->putJson(route('master-data.section.update', $section), [
+                'department_id' => Department::factory()->create()->id,
+                'name' => $section->name,
+                'is_active' => 1,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'department_id' => 'This section is used in surveys and cannot be moved to another department.',
             ]);
 
         $this->assertSame($section->department_id, $section->fresh()->department_id);
@@ -197,9 +217,38 @@ class SectionTest extends TestCase
         $this->actingAs($this->admin)
             ->deleteJson(route('master-data.section.destroy', $section))
             ->assertUnprocessable()
-            ->assertJsonPath('message', 'This section is used by survey questions. Deactivate it instead of deleting it.');
+            ->assertJsonPath('message', 'This section is used in surveys. Deactivate it instead of deleting it, so past results keep it.');
 
         $this->assertModelExists($section);
+    }
+
+    public function test_evaluated_section_cannot_be_deleted_so_past_answers_keep_it(): void
+    {
+        $section = DepartmentSection::factory()->create();
+        $this->evaluate($section);
+
+        $this->actingAs($this->admin)
+            ->deleteJson(route('master-data.section.destroy', $section))
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'This section is used in surveys. Deactivate it instead of deleting it, so past results keep it.');
+
+        $this->assertModelExists($section);
+        $this->assertDatabaseHas('survey_answers', ['department_section_id' => $section->id]);
+    }
+
+    public function test_list_marks_the_sections_used_in_surveys(): void
+    {
+        $evaluated = DepartmentSection::factory()->create(['name' => 'Evaluated', 'sort_order' => 1]);
+        DepartmentSection::factory()->for($evaluated->department)->create(['name' => 'Unused', 'sort_order' => 2]);
+        $this->evaluate($evaluated);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('master-data.section.list', ['department_id' => $evaluated->department_id]))
+            ->assertOk()
+            ->assertJsonPath('data.0.name', 'Evaluated')
+            ->assertJsonPath('data.0.is_used_in_surveys', true)
+            ->assertJsonPath('data.1.name', 'Unused')
+            ->assertJsonPath('data.1.is_used_in_surveys', false);
     }
 
     public function test_unused_section_can_be_deleted(): void
@@ -235,5 +284,18 @@ class SectionTest extends TestCase
             ->getJson(route('master-data.section.list', ['orderBy' => 'name) desc; drop table users; --', 'orderDir' => 'sideways']))
             ->assertOk()
             ->assertJsonPath('meta.total', 2);
+    }
+
+    /**
+     * An employee submits a survey that evaluates the section through a question
+     * of its department (not a question about this section only).
+     */
+    protected function evaluate(DepartmentSection $section): void
+    {
+        $question = SurveyQuestion::factory()->for($section->department)->create();
+
+        app(SurveySubmissionService::class)->submit($question->survey, $this->employee(), [], [
+            $section->id => [$question->id => 4],
+        ]);
     }
 }

@@ -12,6 +12,9 @@ use Illuminate\Database\Seeder;
  * level of each department's chart. Employees evaluate every section and read
  * its role overview first; the role overviews are short starting texts to
  * complete in Master Data.
+ *
+ * Initial data only: once departments exist, Master Data is the source of
+ * truth and running the seeders again leaves it untouched.
  */
 class DepartmentSeeder extends Seeder
 {
@@ -106,20 +109,25 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
+        if (Department::query()->exists()) {
+            $this->command?->info('Departments already exist, skipping (manage them in Master Data).');
+
+            return;
+        }
+
         foreach (self::DEPARTMENTS as $order => $attributes) {
             $sections = $attributes['sections'];
             unset($attributes['sections']);
 
-            $department = Department::query()->updateOrCreate(
-                ['code' => $attributes['code']],
-                [...$attributes, 'sort_order' => $order + 1, 'is_active' => true],
-            );
+            $department = Department::create([...$attributes, 'sort_order' => $order + 1, 'is_active' => true]);
 
             foreach (array_keys($sections) as $sectionOrder => $name) {
-                $department->sections()->updateOrCreate(
-                    ['name' => $name],
-                    ['description' => $sections[$name], 'sort_order' => $sectionOrder + 1, 'is_active' => true],
-                );
+                $department->sections()->create([
+                    'name' => $name,
+                    'description' => $sections[$name],
+                    'sort_order' => $sectionOrder + 1,
+                    'is_active' => true,
+                ]);
             }
         }
     }

@@ -35,6 +35,7 @@ class SectionRepository implements SectionInterface
             ->join('departments', 'departments.id', '=', 'department_sections.department_id')
             ->with('department:id,name,color,icon')
             ->withCount('questions')
+            ->withExists('answers')
             ->when(is_numeric($departmentId), fn (Builder $query) => $query->where('department_sections.department_id', (int) $departmentId))
             ->when($isActive !== null && $isActive !== '', fn (Builder $query) => $query->where('department_sections.is_active', (bool) $isActive))
             ->when($params['search'], fn (Builder $query, string $search) => $query->where(

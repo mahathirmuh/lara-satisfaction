@@ -156,7 +156,7 @@
                         </x-global.btn-detail>`;
                     }
 
-                    if (sectionCan.delete && item.questions_count === 0) {
+                    if (sectionCan.delete && !item.is_used_in_surveys) {
                         html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteSection(${item.id})" data-bs-toggle="tooltip" data-bs-title="Delete">
                             <x-slot:icon><i class="ti ti-trash"></i></x-slot:icon>
                         </x-global.btn-detail>`;

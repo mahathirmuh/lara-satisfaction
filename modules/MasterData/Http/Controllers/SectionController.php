@@ -60,6 +60,7 @@ class SectionController extends Controller
             'sort_order' => $section->sort_order,
             'is_active' => $section->is_active,
             'questions_count' => $section->questions_count,
+            'is_used_in_surveys' => $section->questions_count > 0 || $section->answers_exists,
         ]);
     }
 
@@ -103,13 +104,13 @@ class SectionController extends Controller
     }
 
     /**
-     * Delete a section that is not used by any question.
+     * Delete a section that no survey asks about or has evaluated.
      */
     public function destroy(DepartmentSection $section): JsonResponse
     {
-        if ($section->questions()->exists()) {
+        if ($section->isUsedInSurveys()) {
             return response()->json([
-                'message' => 'This section is used by survey questions. Deactivate it instead of deleting it.',
+                'message' => 'This section is used in surveys. Deactivate it instead of deleting it, so past results keep it.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 

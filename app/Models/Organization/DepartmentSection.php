@@ -3,6 +3,7 @@
 namespace App\Models\Organization;
 
 use App\Helpers\FileApps;
+use App\Models\Survey\SurveyAnswer;
 use App\Models\Survey\SurveyQuestion;
 use Database\Factories\Organization\DepartmentSectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -72,6 +73,26 @@ class DepartmentSection extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(SurveyQuestion::class);
+    }
+
+    /**
+     * Anonymous answers that evaluated this section.
+     *
+     * @return HasMany<SurveyAnswer, $this>
+     */
+    public function answers(): HasMany
+    {
+        return $this->hasMany(SurveyAnswer::class);
+    }
+
+    /**
+     * Whether a survey asks about this section or has evaluated it. Such a section
+     * keeps its department and is deactivated instead of deleted, so past results
+     * stay attributed to it.
+     */
+    public function isUsedInSurveys(): bool
+    {
+        return $this->questions()->exists() || $this->answers()->exists();
     }
 
     /**

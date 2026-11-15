@@ -4,7 +4,6 @@ namespace Modules\MasterData\Http\Requests;
 
 use App\Helpers\FileApps;
 use App\Models\Organization\DepartmentSection;
-use App\Models\Survey\SurveyQuestion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
@@ -68,7 +67,7 @@ class SectionRequest extends FormRequest
     }
 
     /**
-     * A section used by questions cannot move to another department.
+     * A section used in surveys cannot move to another department.
      *
      * @return array<int, callable(Validator): void>
      */
@@ -82,9 +81,8 @@ class SectionRequest extends FormRequest
                     return;
                 }
 
-                if ($this->integer('department_id') !== $section->department_id
-                    && SurveyQuestion::query()->whereBelongsTo($section, 'section')->exists()) {
-                    $validator->errors()->add('department_id', 'This section is used by survey questions and cannot be moved to another department.');
+                if ($this->integer('department_id') !== $section->department_id && $section->isUsedInSurveys()) {
+                    $validator->errors()->add('department_id', 'This section is used in surveys and cannot be moved to another department.');
                 }
             },
         ];
