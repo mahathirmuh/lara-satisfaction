@@ -93,7 +93,7 @@
         /* Departments: joined tiles like the original page */
         .department-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(var(--department-columns, 4), minmax(0, 1fr));
             gap: 1px;
             margin-top: 12px;
             border-radius: 6px;
@@ -248,7 +248,9 @@
             <div id="departments">
                 @if ($departments->isNotEmpty())
                     @php($hasImages = $departments->contains(fn ($department): bool => filled($department->image_path)))
-                    <div class="department-grid">
+                    {{-- Three tiles per row when that fills every row (6, 9 departments), otherwise four. --}}
+                    @php($columns = $departments->count() % 3 === 0 && $departments->count() % 4 !== 0 ? 3 : 4)
+                    <div class="department-grid" style="--department-columns: {{ $columns }}">
                         @foreach ($departments as $department)
                             <article class="department-tile">
                                 @if ($department->imageUrl())

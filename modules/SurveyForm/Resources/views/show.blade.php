@@ -505,6 +505,7 @@
                         .toggleClass('active', position === currentStep)
                         .toggleClass('passed', position < currentStep && isComplete(position));
                 });
+                keepIndicatorVisible(currentStep);
 
                 $('#btnPrevious').prop('disabled', currentStep === 0);
                 $('#btnNext').toggleClass('d-none', currentStep === lastStep);
@@ -516,6 +517,27 @@
 
                 window.scrollTo({
                     top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            /**
+             * Centre the active step in the stepper, which scrolls sideways when the
+             * departments do not fit the screen.
+             */
+            function keepIndicatorVisible(index) {
+                const stepper = document.getElementById('surveySteps');
+                const indicator = indicators.get(index);
+
+                if (!stepper || !indicator) {
+                    return;
+                }
+
+                const stepperBox = stepper.getBoundingClientRect();
+                const indicatorBox = indicator.getBoundingClientRect();
+
+                stepper.scrollBy({
+                    left: indicatorBox.left - stepperBox.left - (stepperBox.width - indicatorBox.width) / 2,
                     behavior: 'smooth'
                 });
             }

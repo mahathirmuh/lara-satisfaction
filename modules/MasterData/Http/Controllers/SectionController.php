@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Sections (focus areas) of the assessed departments,
- * e.g. Environmental: Sustainability & Impact.
+ * e.g. Environmental: Waste Management.
  */
 class SectionController extends Controller
 {

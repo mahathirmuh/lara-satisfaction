@@ -8,6 +8,7 @@ use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyQuestion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LandingPageTest extends TestCase
@@ -43,10 +44,31 @@ class LandingPageTest extends TestCase
 
         $this->get(route('landing'))
             ->assertOk()
-            ->assertSee('Sustainability &amp; Impact', false)
+            ->assertSee('Sustainability, Impact')
             ->assertDontSee('Retired Section')
             ->assertSee(asset('storage/departments/environment.webp'))
             ->assertSee('class="department-placeholder', false);
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: int}>
+     */
+    public static function completeRows(): array
+    {
+        return [
+            'six departments in two rows of three' => [6, 3],
+            'eight departments in two rows of four' => [8, 4],
+        ];
+    }
+
+    #[DataProvider('completeRows')]
+    public function test_department_tiles_fill_complete_rows(int $departments, int $columns): void
+    {
+        Department::factory()->count($departments)->create();
+
+        $this->get(route('landing'))
+            ->assertOk()
+            ->assertSee('style="--department-columns: '.$columns.'"', false);
     }
 
     public function test_departments_without_any_image_use_compact_tiles(): void

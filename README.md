@@ -4,9 +4,11 @@ Rebuild of the *satisfaction* application on **Laravel 13** following the archit
 style of **Base-Apps-Merdeka** (modular `modules/` structure, menu-based RBAC, Tabler/Merdeka UI,
 SweetAlert dialogs, activity & error logging, Microsoft/Google SSO).
 
-Employees rate the services of the assessed departments (Environmental, External Affairs,
-Human Resources, Supply Chain) once per survey period. Each department is split into sections
-(e.g. External Affairs: *Asset Protection*); employees read the overview of every section (team
+Employees rate the services of the support service departments (the departments under the Support
+Services Deputy General Manager in the MTI organization chart 2026: Supply Chain, Occupational Health
+& Safety, Environmental, External Affairs, Finance, Interface) once per survey period. Each department
+is split into sections, the units on the supervisor level of its chart (e.g. External Affairs:
+*Asset Protection*); employees read the overview of every section (team
 picture, work summary, role overview) and evaluate each one with the department's questions
 (criticality, service quality, feedback). Answers are anonymous by design and administrators
 analyse the results per department, section, question and company.

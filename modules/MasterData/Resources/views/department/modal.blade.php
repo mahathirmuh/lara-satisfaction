@@ -21,7 +21,7 @@
                                 <label for="departmentName" class="col-md-3 col-form-label required">Name</label>
                                 <div class="col-md-9">
                                     <input type="text" id="departmentName" class="form-control" maxlength="255"
-                                        placeholder="Human Resources" required>
+                                        placeholder="Supply Chain" required>
                                 </div>
                             </div>
                         </div>

@@ -41,21 +41,21 @@ class DemoSeeder extends Seeder
      *
      * @var array<string, float>
      */
-    protected const CURRENT_MEANS = ['ENV' => 3.8, 'EXT' => 3.4, 'HR' => 4.1, 'SCM' => 3.0];
+    protected const CURRENT_MEANS = ['SCM' => 3.0, 'OHS' => 4.0, 'ENV' => 3.8, 'EXT' => 3.4, 'FIN' => 3.6, 'INTF' => 3.2];
 
     /**
      * Average service quality rating per department code for the previous survey.
      *
      * @var array<string, float>
      */
-    protected const PREVIOUS_MEANS = ['ENV' => 3.5, 'EXT' => 3.3, 'HR' => 3.8, 'SCM' => 2.8];
+    protected const PREVIOUS_MEANS = ['SCM' => 2.8, 'OHS' => 3.7, 'ENV' => 3.5, 'EXT' => 3.3, 'FIN' => 3.4, 'INTF' => 3.0];
 
     /**
      * Average criticality rating per department code.
      *
      * @var array<string, float>
      */
-    protected const CRITICALITY_MEANS = ['ENV' => 3.6, 'EXT' => 4.0, 'HR' => 4.2, 'SCM' => 4.5];
+    protected const CRITICALITY_MEANS = ['SCM' => 4.5, 'OHS' => 4.6, 'ENV' => 3.6, 'EXT' => 4.0, 'FIN' => 3.9, 'INTF' => 3.4];
 
     /**
      * Quality rating shift per section name, so section scores differ within a department.
@@ -63,10 +63,13 @@ class DemoSeeder extends Seeder
      * @var array<string, float>
      */
     protected const SECTION_SHIFTS = [
-        'Environmental Monitoring' => 0.3, 'Waste Management' => -0.3, 'Rehabilitation' => 0.1,
-        'Asset Protection' => 0.4, 'Community Relations' => -0.2, 'Government Relations' => -0.3,
-        'Recruitment' => -0.2, 'Training' => 0.3, 'Employee Services' => 0.1,
-        'Procurement' => -0.3, 'Warehouse' => 0.2, 'Logistics' => -0.4,
+        'Logistic & Distribution' => -0.4, 'Heavy Equipment' => 0.2, 'Inventory & Expeditor' => -0.2,
+        'Emergency Response' => 0.3, 'Plant OHS' => 0.1, 'OHS System & Reporting' => -0.3, 'OHS Training' => 0.2,
+        'OHS Support & Fleet' => -0.2, 'Occupational Health (Paramedic)' => 0.4, 'Industrial Hygiene' => -0.1, 'Process Safety' => 0.0,
+        'Environmental Monitoring' => 0.3, 'Waste Management' => -0.3, 'Environmental System' => 0.1, 'Study & Project' => -0.1,
+        'Community Relations' => -0.2, 'Compliance & Corporate Communications' => 0.1, 'Asset Protection' => 0.4,
+        'Sales Support' => -0.2, 'Cost Control' => 0.2, 'Finance' => 0.1, 'Finance Analysis & Forecasting' => -0.3,
+        'Interface Management' => 0.2, 'Contract Management' => -0.3,
     ];
 
     /**
@@ -75,6 +78,18 @@ class DemoSeeder extends Seeder
      * @var array<string, array<int, string>>
      */
     protected const COMMENTS = [
+        'SCM' => [
+            'Material delivery to site is frequently delayed.',
+            'Heavy equipment requests should be scheduled further ahead.',
+            'Inventory data is not always accurate.',
+            'Fuel distribution runs smoothly, thank you.',
+        ],
+        'OHS' => [
+            'Emergency drills are well organised.',
+            'Please share the OHS reports with the plants more regularly.',
+            'OHS training schedules should fit the shift rotations.',
+            'The paramedic team responds quickly, thank you.',
+        ],
         'ENV' => [
             'Please share the monitoring results with site teams more regularly.',
             'Permit requirements are clear, but approvals still take quite long.',
@@ -83,21 +98,21 @@ class DemoSeeder extends Seeder
         ],
         'EXT' => [
             'Information about community activities often reaches us late.',
-            'Coordination with the local government went well during the last project.',
+            'Corporate announcements are clear and timely.',
             'Security escorts are always on time, thank you.',
-            'A single point of contact for stakeholder requests would be useful.',
+            'A single point of contact for compliance questions would be useful.',
         ],
-        'HR' => [
-            'Benefit claims are processed quickly, thank you.',
-            'Training schedules should be planned around shift rotations.',
-            'The new onboarding programme is a big improvement.',
-            'Clearer information on career paths would motivate the team.',
+        'FIN' => [
+            'Cost reports help us manage our budget, thank you.',
+            'Payment status updates could be faster.',
+            'Budget forecasts should be shared earlier in the month.',
+            'The finance team explains procedures clearly.',
         ],
-        'SCM' => [
-            'Material delivery to site is frequently delayed.',
-            'Please provide real-time status for purchase requests.',
-            'Warehouse staff are helpful, but stock data is not always accurate.',
-            'Urgent requests need a faster approval route.',
+        'INTF' => [
+            'Contract follow-up with vendors could be faster.',
+            'Coordination meetings are useful and well prepared.',
+            'Please share contract status updates more regularly.',
+            'Interface issues are escalated quickly, thank you.',
         ],
     ];
 
@@ -210,7 +225,7 @@ class DemoSeeder extends Seeder
             'start_date' => $start,
             'end_date' => $start->copy()->addDays(30),
             'status' => SurveyStatus::Closed,
-            'estimated_minutes' => 15,
+            'estimated_minutes' => 25,
             'created_by' => $current->created_by,
         ]);
 

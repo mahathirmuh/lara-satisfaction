@@ -44,7 +44,7 @@ class SurveySeeder extends Seeder
             'start_date' => today()->subDays(10),
             'end_date' => today()->addDays(20),
             'status' => SurveyStatus::Active,
-            'estimated_minutes' => 15,
+            'estimated_minutes' => 25,
             'created_by' => User::query()->orderBy('id')->value('id'),
         ]);
 

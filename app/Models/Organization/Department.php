@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Department whose services are assessed by the satisfaction survey
- * (e.g. Environmental, External Affairs, Human Resources, Supply Chain).
+ * (the support service departments, e.g. Supply Chain, Finance, Interface).
  * Each department is split into sections (focus areas).
  */
 #[Fillable(['code', 'name', 'description', 'icon', 'color', 'image_path', 'sort_order', 'is_active'])]
@@ -82,19 +82,14 @@ class Department extends Model
     }
 
     /**
-     * Section names as a phrase, e.g. "Sustainability & Impact".
+     * Section names as a comma-separated list, e.g. "Sales Support, Cost Control, Finance"
+     * (no "&" before the last name, because section names often contain one).
      *
      * @param  Collection<int, DepartmentSection>|null  $sections  Defaults to the loaded active sections.
      */
     public function sectionsLabel(?Collection $sections = null): string
     {
-        $names = ($sections ?? $this->sections->where('is_active', true))->pluck('name')->values();
-
-        if ($names->count() <= 1) {
-            return (string) $names->first();
-        }
-
-        return $names->slice(0, -1)->implode(', ').' & '.$names->last();
+        return ($sections ?? $this->sections->where('is_active', true))->pluck('name')->implode(', ');
     }
 
     /**
