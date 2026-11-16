@@ -7,7 +7,9 @@ use App\Enums\PermissionAction;
 use App\Helpers\JobTitles;
 use App\Models\Organization\Company;
 use App\Models\Organization\Department;
+use App\Models\Survey\SurveyDraft;
 use App\Models\Survey\SurveyParticipation;
+use App\Models\Survey\SurveyStart;
 use Database\Factories\UserManagement\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -124,6 +126,26 @@ class User extends Authenticatable implements HasLocalePreference
     public function participations(): HasMany
     {
         return $this->hasMany(SurveyParticipation::class);
+    }
+
+    /**
+     * Survey drafts the user saved (encrypted answers, never shown to admins).
+     *
+     * @return HasMany<SurveyDraft, $this>
+     */
+    public function surveyDrafts(): HasMany
+    {
+        return $this->hasMany(SurveyDraft::class);
+    }
+
+    /**
+     * Surveys whose form the user opened (In Progress until completed).
+     *
+     * @return HasMany<SurveyStart, $this>
+     */
+    public function surveyStarts(): HasMany
+    {
+        return $this->hasMany(SurveyStart::class);
     }
 
     /**

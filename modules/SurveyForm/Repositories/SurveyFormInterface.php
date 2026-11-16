@@ -16,11 +16,17 @@ interface SurveyFormInterface
 {
     /**
      * Surveys open today, flagged with whether the user already completed
-     * them (has_participated) or saved a draft (has_draft).
+     * them (has_participated), saved a draft (has_draft) or opened the form
+     * (has_started), with their ParticipationStatus (participation_status).
      *
      * @return Collection<int, Survey>
      */
     public function availableFor(User $user): Collection;
+
+    /**
+     * Record that the user opened the survey's form (the first time only).
+     */
+    public function recordStart(Survey $survey, User $user): void;
 
     /**
      * The user's latest completed surveys.

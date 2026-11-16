@@ -2,11 +2,13 @@
 
 namespace Modules\SurveyForm\Repositories;
 
+use App\Enums\ParticipationStatus;
 use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyDraft;
 use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyQuestion;
+use App\Models\Survey\SurveyStart;
 use App\Models\UserManagement\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -23,9 +25,26 @@ class SurveyFormRepository implements SurveyFormInterface
             ->withCount('questions')
             ->withExists(['participations as has_participated' => fn ($query) => $query->whereBelongsTo($user)])
             ->withExists(['drafts as has_draft' => fn ($query) => $query->whereBelongsTo($user)])
+            ->withExists(['starts as has_started' => fn ($query) => $query->whereBelongsTo($user)])
             ->orderBy('end_date')
             ->orderBy('id')
-            ->get();
+            ->get()
+            ->each(fn (Survey $survey) => $survey->setAttribute('participation_status', ParticipationStatus::resolve(
+                (bool) $survey->has_participated,
+                (bool) $survey->has_draft,
+                (bool) $survey->has_started,
+            )));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function recordStart(Survey $survey, User $user): void
+    {
+        SurveyStart::query()->createOrFirst(
+            ['survey_id' => $survey->id, 'user_id' => $user->id],
+            ['started_at' => now()],
+        );
     }
 
     /**

@@ -31,6 +31,7 @@ class MenuSeeder extends Seeder
             ],
         ],
         ['title' => 'Survey Report', 'route' => 'survey-report.index', 'icon' => 'chart-bar', 'section' => 'Survey'],
+        ['title' => 'Survey Progress', 'route' => 'survey-progress.index', 'icon' => 'progress-check', 'section' => 'Survey'],
         [
             'title' => 'User Management',
             'icon' => 'shield-chevron',

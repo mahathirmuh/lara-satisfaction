@@ -148,8 +148,10 @@ modules/{Module}/    Http/Controllers, Http/Requests, Repositories (Interface + 
   Dashboard          Open surveys + insights of the featured survey
   MasterData         Departments (with image), sections (with overview), landing page content
   SurveyForm         Employee wizard (one step per department, every section evaluated) and
-                     anonymous submission
-  SurveyManagement   Survey periods and questions (department + optional section)
+                     anonymous submission; each survey shows Not Started -> In Progress
+                     (opened, or "Saved as draft") -> Completed
+  SurveyProgress     Where every employee stands with a survey (status only, never answers)
+  SurveyManagement   Survey periods, questions (department + optional section) and reminders
   SurveyReport       Aggregated results per department/section, comments, CSV export
   UserManagement     Registered users, roles & menu/CRUD permission matrix
   SystemLog          Activity log and error log viewers

@@ -53,7 +53,7 @@ class SurveySubmissionTest extends TestCase
             ->get(route('survey-form.index'))
             ->assertOk()
             ->assertSee('Operational Audit 2026')
-            ->assertSee('Not started')
+            ->assertSee('Not Started')
             ->assertDontSee('Unpublished Draft');
     }
 

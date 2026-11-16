@@ -1,6 +1,7 @@
 @props([
     'number' => 1,
     'label' => null,
+    'note' => null,
     'active' => false,
     'passed' => false,
 ])
@@ -64,6 +65,14 @@
         .mcg-step.active .mcg-step-label {
             color: #3B82F6;
         }
+
+        .mcg-step-note {
+            font-size: 11px;
+            line-height: 1;
+            margin-top: -2px;
+            white-space: nowrap;
+            color: #6B7280;
+        }
     </style>
 @endPushOnce
 
@@ -73,4 +82,7 @@
         <span class="mcg-step-digit">{{ $number }}</span>
     </div>
     <div class="mcg-step-label">{{ $label ?? __('Step :number', ['number' => $number]) }}</div>
+    @if ($note)
+        <div class="mcg-step-note">{{ $note }}</div>
+    @endif
 </div>

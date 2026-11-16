@@ -167,7 +167,8 @@ class SurveyDraftTest extends TestCase
         $this->actingAs($employee)
             ->get(route('survey-form.index'))
             ->assertOk()
-            ->assertSee('Draft saved')
+            ->assertSee('In Progress')
+            ->assertSee('Saved as draft')
             ->assertSee('Continue Survey');
     }
 

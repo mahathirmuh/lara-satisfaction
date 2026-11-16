@@ -73,6 +73,16 @@ class Survey extends Model
     }
 
     /**
+     * When people first opened the form (In Progress until they complete it).
+     *
+     * @return HasMany<SurveyStart, $this>
+     */
+    public function starts(): HasMany
+    {
+        return $this->hasMany(SurveyStart::class);
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo

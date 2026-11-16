@@ -47,6 +47,7 @@ class SurveyFormController extends Controller
             return $redirect;
         }
 
+        $this->surveyForm->recordStart($survey, $request->user());
         $draft = $this->surveyForm->draftFor($survey, $request->user());
 
         return view('SurveyForm::show', [
