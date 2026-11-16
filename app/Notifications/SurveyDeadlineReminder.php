@@ -4,15 +4,18 @@ namespace App\Notifications;
 
 use App\Models\Survey\Survey;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
  * Reminds an employee who has not completed an open survey that its end
  * date is near (in-app notification and email). The texts are written in the
- * recipient's language (User::preferredLocale()).
+ * recipient's language (User::preferredLocale()). Queued, so reminding a few
+ * hundred people from the Reminders page does not wait for each e-mail; the
+ * "queue" container (docker-compose.yml) delivers them.
  */
-class SurveyDeadlineReminder extends Notification
+class SurveyDeadlineReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 

@@ -2,25 +2,19 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\PermissionAction;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyReminder;
-use App\Models\UserManagement\Menu;
-use App\Models\UserManagement\MenuRolePermission;
-use App\Models\UserManagement\User;
-use App\Notifications\SurveyDeadlineReminder;
+use App\Services\Survey\SurveyReminders;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
-use Throwable;
 
 /**
  * Daily job (see routes/console.php): reminds employees who have not
  * completed an open survey once it enters a reminder period before its end
  * date (config survey.reminder_days, by default 14 days). Every reminder day
  * is sent once per survey; a survey that opens inside the period is
- * reminded on the first run.
+ * reminded on the first run. Who is reminded: see SurveyReminders.
  */
 #[Signature('survey:send-deadline-reminders {--dry-run : Only report how many employees would be reminded}')]
 #[Description('Remind employees who have not completed an open survey that its end date is near')]
@@ -29,7 +23,7 @@ class SendSurveyDeadlineReminders extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(SurveyReminders $reminders): int
     {
         $reminderDays = collect(config('survey.reminder_days', []))->sort()->values();
 
@@ -47,7 +41,7 @@ class SendSurveyDeadlineReminders extends Command
                 continue;
             }
 
-            $recipients = $this->recipients($survey);
+            $recipients = $reminders->pendingFor($survey);
 
             if ($this->option('dry-run')) {
                 $this->info(sprintf(
@@ -58,16 +52,7 @@ class SendSurveyDeadlineReminders extends Command
                 continue;
             }
 
-            $sent = 0;
-
-            foreach ($recipients->lazyById(200) as $user) {
-                try {
-                    $user->notify(new SurveyDeadlineReminder($survey, $daysLeft));
-                    $sent++;
-                } catch (Throwable $exception) {
-                    report($exception);
-                }
-            }
+            $sent = $reminders->remind($survey, $recipients);
 
             SurveyReminder::create([
                 'survey_id' => $survey->id,
@@ -88,23 +73,5 @@ class SendSurveyDeadlineReminders extends Command
     protected function alreadyReminded(Survey $survey, int $reminderDay): bool
     {
         return SurveyReminder::query()->whereBelongsTo($survey)->where('days_before', $reminderDay)->exists();
-    }
-
-    /**
-     * Active users whose role may fill in surveys and who have not completed this one.
-     *
-     * @return Builder<User>
-     */
-    protected function recipients(Survey $survey): Builder
-    {
-        $rolesThatTakeSurveys = MenuRolePermission::query()
-            ->where('menu_id', Menu::idForKey('survey-form'))
-            ->where('permission_id', PermissionAction::Create->value)
-            ->select('role_id');
-
-        return User::query()
-            ->active()
-            ->whereHas('roles', fn (Builder $query) => $query->whereIn('roles.id', $rolesThatTakeSurveys))
-            ->whereDoesntHave('participations', fn (Builder $query) => $query->whereBelongsTo($survey));
     }
 }

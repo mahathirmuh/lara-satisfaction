@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\SurveyManagement\Http\Controllers\QuestionController;
+use Modules\SurveyManagement\Http\Controllers\ReminderController;
 use Modules\SurveyManagement\Http\Controllers\SurveyController;
 
 /*
-| Menu group "Survey Management": Survey Period and Questions (departments and
-| sections are master data). The permission middleware maps GET => Read,
+| Menu group "Survey Management": Survey Period, Questions and Reminders
+| (departments and sections are master data). The permission middleware maps GET => Read,
 | POST => Create, PUT/PATCH => Update and DELETE => Delete on the matching menu.
 */
 Route::middleware(['web', 'auth', 'permission'])->prefix('survey-management')->name('survey-management.')->group(function () {
@@ -28,5 +29,11 @@ Route::middleware(['web', 'auth', 'permission'])->prefix('survey-management')->n
         Route::get('{question}', 'show')->whereNumber('question')->name('show');
         Route::put('{question}', 'update')->whereNumber('question')->name('update');
         Route::delete('{question}', 'destroy')->whereNumber('question')->name('destroy');
+    });
+
+    Route::prefix('reminder')->name('reminder.')->controller(ReminderController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('recipients', 'recipients')->name('recipients');
+        Route::post('/', 'store')->name('store');
     });
 });

@@ -66,8 +66,9 @@ docker compose exec app php artisan migrate --seed --force    # first install on
 ```
 
 The image (PHP 8.4 + Apache, Microsoft ODBC Driver 18 for SQL Server, LDAP) reads the project
-`.env` and `certs/` (mounted read-only) and always runs in production mode. `app` serves the site
-and `scheduler` runs the deadline reminders and draft pruning. Uploaded images are kept in the
+`.env` and `certs/` (mounted read-only) and always runs in production mode. `app` serves the site,
+`scheduler` runs the deadline reminders and draft pruning, and `queue` delivers the queued
+reminders (`QUEUE_CONNECTION=database`; locally `sync` delivers at once). Uploaded images are kept in the
 `storage-app` volume. Set `APP_URL` to the address users open, and
 `DB_TRUST_SERVER_CERTIFICATE=true` when SQL Server uses its own (self-signed) certificate. After
 changing `.env`, run `docker compose up -d --force-recreate`.
@@ -106,7 +107,11 @@ deadline reminders daily at 08:00 and prunes drafts of surveys that are no longe
 
 Deadline reminders (`php artisan survey:send-deadline-reminders`, `--dry-run` to preview) go to
 active users whose role may fill in surveys and who have not submitted yet, as an in-app
-notification (navbar bell) and an email. Each reminder day is sent once per survey.
+notification (navbar bell) and an email. Each reminder day is sent once per survey. The same
+reminder can be sent by hand from **Survey Management > Reminders**, to everyone who has not
+completed an open survey or to chosen people (e.g. yourself, to test), with a history of every
+send. Only people with an account here are reminded: accounts are created at the first sign-in
+(or in User Management). Reminders are queued (`App\Services\Survey\SurveyReminders`).
 
 Survey drafts ("Save as Draft") are the only answers stored with a user: they are encrypted with
 `APP_KEY`, never shown to administrators, excluded from the activity log and deleted on submission.

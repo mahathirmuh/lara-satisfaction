@@ -27,6 +27,7 @@ class MenuSeeder extends Seeder
             'children' => [
                 ['title' => 'Survey Period', 'route' => 'survey-management.survey.index'],
                 ['title' => 'Questions', 'route' => 'survey-management.question.index'],
+                ['title' => 'Reminders', 'route' => 'survey-management.reminder.index'],
             ],
         ],
         ['title' => 'Survey Report', 'route' => 'survey-report.index', 'icon' => 'chart-bar', 'section' => 'Survey'],

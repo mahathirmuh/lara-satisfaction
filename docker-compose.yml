@@ -43,6 +43,15 @@ services:
       app:
         condition: service_healthy
 
+  # Delivers the queued reminders (in-app notification + e-mail), from the
+  # schedule and from Survey Management > Reminders (QUEUE_CONNECTION=database).
+  queue:
+    <<: *app
+    command: ["php", "artisan", "queue:work", "--tries=3", "--backoff=60", "--max-time=3600"]
+    depends_on:
+      app:
+        condition: service_healthy
+
 volumes:
   # Uploaded images (department, section and landing pictures).
   storage-app:
