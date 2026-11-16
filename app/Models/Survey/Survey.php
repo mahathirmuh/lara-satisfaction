@@ -36,6 +36,7 @@ class Survey extends Model
             'end_date' => 'date',
             'status' => SurveyStatus::class,
             'estimated_minutes' => 'integer',
+            'created_by' => 'integer',
         ];
     }
 
@@ -165,14 +166,16 @@ class Survey extends Model
     }
 
     /**
-     * Departments assessed by this survey, in display order.
+     * Departments assessed by this survey, in display order. The question
+     * subquery drops the relation's ordering: SQL Server rejects ORDER BY in a
+     * subquery.
      *
      * @return Collection<int, Department>
      */
     public function departments(): Collection
     {
         return Department::query()
-            ->whereIn('id', $this->questions()->getQuery()->whereNotNull('department_id')->select('department_id'))
+            ->whereIn('id', $this->questions()->getQuery()->reorder()->whereNotNull('department_id')->select('department_id'))
             ->ordered()
             ->get();
     }

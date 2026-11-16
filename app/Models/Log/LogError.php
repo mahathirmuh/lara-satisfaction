@@ -13,5 +13,15 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['subject', 'exception', 'message', 'stack_trace', 'file', 'line', 'url', 'method', 'data', 'user_id'])]
 class LogError extends Model
 {
-    //
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'user_id' => 'integer',
+        ];
+    }
 }

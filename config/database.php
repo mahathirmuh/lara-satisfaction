@@ -112,6 +112,11 @@ return [
             'prefix_indexes' => true,
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            // Return int columns and counts as PHP ints instead of strings, as the other drivers do
+            // (bigint ids and foreign keys still arrive as strings; the models cast them).
+            'options' => extension_loaded('pdo_sqlsrv') ? [
+                PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true,
+            ] : [],
         ],
 
     ],

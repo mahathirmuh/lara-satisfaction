@@ -18,8 +18,8 @@ use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\DB;
 use Modules\SurveyReport\Support\ReportScope;
 
 class SurveyReportRepository implements SurveyReportInterface
@@ -82,12 +82,16 @@ class SurveyReportRepository implements SurveyReportInterface
             ->toBase()
             ->whereNotNull('rating')
             ->selectRaw(
-                'COUNT(*) as total, AVG(rating) as average, SUM(CASE WHEN rating >= ? THEN 1 ELSE 0 END) as satisfied',
+                'COUNT(*) as total, SUM(rating) as rating_sum, SUM(CASE WHEN rating >= ? THEN 1 ELSE 0 END) as satisfied',
                 [$this->satisfiedThreshold()]
             )
             ->first();
 
-        $criticality = $this->answersOfType($scope, QuestionType::Criticality)->whereNotNull('rating')->avg('rating');
+        $criticalityStats = $this->answersOfType($scope, QuestionType::Criticality)
+            ->toBase()
+            ->whereNotNull('rating')
+            ->selectRaw('COUNT(*) as total, SUM(rating) as rating_sum')
+            ->first();
 
         $participants = SurveyParticipation::query()
             ->whereBelongsTo($scope->survey)
@@ -110,9 +114,9 @@ class SurveyReportRepository implements SurveyReportInterface
             'participants' => $participants,
             'eligible' => $eligible,
             'participation_rate' => $eligible > 0 ? round(min(100, $participants / $eligible * 100), 1) : null,
-            'average' => $isReportable && $ratings > 0 ? round((float) $ratingStats->average, 2) : null,
+            'average' => $isReportable ? $this->mean((int) ($ratingStats->rating_sum ?? 0), $ratings) : null,
             'csat' => $isReportable && $ratings > 0 ? round((int) $ratingStats->satisfied / $ratings * 100, 1) : null,
-            'criticality' => $isReportable && $criticality !== null ? round((float) $criticality, 2) : null,
+            'criticality' => $isReportable ? $this->mean((int) ($criticalityStats->rating_sum ?? 0), (int) ($criticalityStats->total ?? 0)) : null,
             'ratings' => $ratings,
             'comments' => $this->answerQuery($scope)->whereNotNull('comment')->count(),
             'is_reportable' => $isReportable,
@@ -320,9 +324,8 @@ class SurveyReportRepository implements SurveyReportInterface
                 'user_id',
                 User::withTrashed()->whereIn('company_id', $scope->companyIds)->select('id')
             ))
-            ->selectRaw('DATE(submitted_at) as day, COUNT(*) as total')
-            ->groupBy(DB::raw('DATE(submitted_at)'))
-            ->pluck('total', 'day');
+            ->pluck('submitted_at')
+            ->countBy(fn (string $submittedAt): string => Carbon::parse($submittedAt)->toDateString());
 
         $trend = ['labels' => [], 'daily' => [], 'cumulative' => []];
         $end = $scope->survey->end_date->min(today());
@@ -424,10 +427,10 @@ class SurveyReportRepository implements SurveyReportInterface
         return $this->answersOfType($scope, $type)
             ->toBase()
             ->whereNotNull('rating')
-            ->selectRaw("{$column} as group_key, AVG(rating) as average")
+            ->selectRaw("{$column} as group_key, COUNT(*) as total, SUM(rating) as rating_sum")
             ->groupBy($column)
             ->get()
-            ->mapWithKeys(fn (object $row): array => [(int) ($row->group_key ?? 0) => round((float) $row->average, 2)]);
+            ->mapWithKeys(fn (object $row): array => [(int) ($row->group_key ?? 0) => $this->mean((int) $row->rating_sum, (int) $row->total)]);
     }
 
     /**
@@ -488,7 +491,7 @@ class SurveyReportRepository implements SurveyReportInterface
 
         return [
             'ratings' => $total,
-            'average' => $total > 0 ? round($weighted / $total, 2) : null,
+            'average' => $this->mean($weighted, $total),
             'csat' => $total > 0 ? round($satisfied / $total * 100, 1) : null,
             'distribution' => $distribution,
         ];
@@ -504,9 +507,19 @@ class SurveyReportRepository implements SurveyReportInterface
         return [
             'company' => $company,
             'responses' => $responses,
-            'average' => $ratings > 0 ? round($ratingSum / $ratings, 2) : null,
+            'average' => $this->mean($ratingSum, $ratings),
             'csat' => $ratings > 0 ? round($satisfied / $ratings * 100, 1) : null,
         ];
+    }
+
+    /**
+     * Mean rating from the sum and count of the ratings, rounded for display.
+     * Averages are computed here rather than with SQL AVG(): SQL Server averages
+     * an integer column as an integer (3.6 would be reported as 3).
+     */
+    protected function mean(int $ratingSum, int $ratings): ?float
+    {
+        return $ratings > 0 ? round($ratingSum / $ratings, 2) : null;
     }
 
     /**

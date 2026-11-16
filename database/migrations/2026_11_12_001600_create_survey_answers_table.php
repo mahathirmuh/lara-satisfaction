@@ -12,7 +12,8 @@ return new class extends Migration
      * Answers use random (v4) UUIDs as well, so their insertion order is not
      * observable through sequential ids. A department question is answered
      * once for every section of the department (department_section_id);
-     * department and section are stored for fast aggregation.
+     * department and section are stored for fast aggregation. An evaluated
+     * department or section keeps its answers: it is deactivated, not deleted.
      */
     public function up(): void
     {
@@ -20,8 +21,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('survey_response_id')->constrained()->cascadeOnDelete();
             $table->foreignId('survey_question_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('department_section_id')->nullable()->comment('Section the employee evaluated')->constrained()->nullOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained()->noActionOnDelete();
+            $table->foreignId('department_section_id')->nullable()->comment('Section the employee evaluated')->constrained()->noActionOnDelete();
             $table->unsignedTinyInteger('rating')->nullable()->comment('1-5 for rating questions');
             $table->text('comment')->nullable()->comment('Free text for text questions');
 

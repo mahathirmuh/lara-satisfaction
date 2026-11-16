@@ -22,14 +22,15 @@ class NotificationComposer
     public function __construct(protected Request $request) {}
 
     /**
-     * Bind data to the view.
+     * Bind data to the view. The notifications relation already lists the
+     * newest first; ordering it again repeats the column, which SQL Server rejects.
      */
     public function compose(View $view): void
     {
         $user = $this->request->user();
 
         $view->with([
-            'notifications' => $user?->notifications()->latest()->limit(self::LIMIT)->get() ?? collect(),
+            'notifications' => $user?->notifications()->limit(self::LIMIT)->get() ?? collect(),
             'unreadNotificationCount' => $user?->unreadNotifications()->count() ?? 0,
         ]);
     }

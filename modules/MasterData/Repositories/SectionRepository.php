@@ -24,11 +24,15 @@ class SectionRepository implements SectionInterface
 
     /**
      * {@inheritDoc}
+     *
+     * The tie-breakers skip the column already sorted on: SQL Server rejects an
+     * ORDER BY list that names a column twice.
      */
     public function paginate(array $params, array $filters = []): LengthAwarePaginator
     {
         $departmentId = $filters['department_id'] ?? null;
         $isActive = $filters['is_active'] ?? null;
+        $sortColumn = self::SORT_COLUMNS[$params['order_by']] ?? self::SORT_COLUMNS['department'];
 
         return DepartmentSection::query()
             ->select('department_sections.*')
@@ -43,9 +47,9 @@ class SectionRepository implements SectionInterface
                     ->where('department_sections.name', 'like', Apps::likePattern($search))
                     ->orWhere('departments.name', 'like', Apps::likePattern($search))
             ))
-            ->orderBy(self::SORT_COLUMNS[$params['order_by']] ?? self::SORT_COLUMNS['department'], $params['order_dir'])
-            ->orderBy('departments.sort_order')
-            ->orderBy('department_sections.sort_order')
+            ->orderBy($sortColumn, $params['order_dir'])
+            ->when($sortColumn !== 'departments.sort_order', fn (Builder $query) => $query->orderBy('departments.sort_order'))
+            ->when($sortColumn !== 'department_sections.sort_order', fn (Builder $query) => $query->orderBy('department_sections.sort_order'))
             ->orderBy('department_sections.id')
             ->paginate($params['per_page']);
     }

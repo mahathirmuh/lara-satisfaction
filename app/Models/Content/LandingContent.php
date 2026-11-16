@@ -55,6 +55,18 @@ class LandingContent extends Model
     ];
 
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'updated_by' => 'integer',
+        ];
+    }
+
+    /**
      * The stored content, or the defaults when nothing was saved yet.
      */
     public static function current(): self

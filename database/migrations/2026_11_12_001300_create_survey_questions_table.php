@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('survey_id')->constrained()->cascadeOnDelete();
             $table->foreignId('department_id')->nullable()->comment('Null means a general (cross-department) question')
-                ->constrained()->restrictOnDelete();
+                ->constrained()->noActionOnDelete();
             $table->foreignId('department_section_id')->nullable()->comment('Null: asked about the section the employee chooses')
-                ->constrained()->restrictOnDelete();
+                ->constrained()->noActionOnDelete();
             $table->string('type', 20)->default('rating')->comment('rating (service quality 1-5), criticality (1-5) or text');
             $table->text('question');
             $table->string('help_text', 500)->nullable();
