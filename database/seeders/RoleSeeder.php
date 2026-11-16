@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\DepartmentScope;
 use App\Enums\PermissionAction;
-use App\Enums\RoleScope;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\MenuRolePermission;
 use App\Models\UserManagement\Role;
@@ -90,7 +89,7 @@ class RoleSeeder extends Seeder
         $menus = Menu::query()->get();
 
         foreach (self::GRANTS as $roleName => $grants) {
-            $role = Role::query()->firstOrCreate(['name' => $roleName], ['func_role' => RoleScope::All]);
+            $role = Role::query()->firstOrCreate(['name' => $roleName]);
 
             $homeRoute = self::HOME_PAGES[$roleName] ?? null;
             $role->update([

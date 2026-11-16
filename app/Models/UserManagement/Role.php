@@ -3,7 +3,6 @@
 namespace App\Models\UserManagement;
 
 use App\Enums\DepartmentScope;
-use App\Enums\RoleScope;
 use App\Helpers\JobTitles;
 use Database\Factories\UserManagement\RoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -15,11 +14,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Role with menu access (menu_role), CRUD permissions per menu
- * (menu_role_permission), a company scope (func_role + setting_role) and a
- * department scope for survey results. A role with job title rules is given
- * automatically at sign-in to the people whose job title matches them.
+ * (menu_role_permission) and a department scope for survey results. A role
+ * with job title rules is given automatically at sign-in to the people whose
+ * job title matches them.
  */
-#[Fillable(['name', 'func_role', 'setting_role', 'home_page', 'job_titles', 'department_scope'])]
+#[Fillable(['name', 'home_page', 'job_titles', 'department_scope'])]
 class Role extends Model
 {
     /** @use HasFactory<RoleFactory> */
@@ -33,8 +32,6 @@ class Role extends Model
     protected function casts(): array
     {
         return [
-            'func_role' => RoleScope::class,
-            'setting_role' => 'array',
             'home_page' => 'integer',
             'job_titles' => 'array',
             'department_scope' => DepartmentScope::class,
@@ -95,19 +92,5 @@ class Role extends Model
     public function matchesJobTitle(?string $jobTitle): bool
     {
         return $this->isGivenByJobTitle() && JobTitles::matches($this->job_titles, $jobTitle);
-    }
-
-    /**
-     * Company ids covered by a COMPANY scoped role.
-     *
-     * @return array<int, int>
-     */
-    public function companyIds(): array
-    {
-        if ($this->func_role !== RoleScope::Company) {
-            return [];
-        }
-
-        return array_map('intval', $this->setting_role ?? []);
     }
 }

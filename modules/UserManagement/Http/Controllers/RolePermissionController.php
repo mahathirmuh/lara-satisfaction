@@ -3,10 +3,8 @@
 namespace Modules\UserManagement\Http\Controllers;
 
 use App\Enums\DepartmentScope;
-use App\Enums\RoleScope;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
-use App\Models\Organization\Company;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\Permission;
 use App\Models\UserManagement\Role;
@@ -19,9 +17,9 @@ use Modules\UserManagement\Repositories\RolePermissionInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Roles with menu access (ACCESS), per-menu CRUD permissions, data scopes and
- * the job title rules that give them. Changing the rules refreshes the roles
- * of every user at once.
+ * Roles with menu access (ACCESS), per-menu CRUD permissions, the departments
+ * whose survey results they see and the job title rules that give them.
+ * Changing the rules refreshes the roles of every user at once.
  */
 class RolePermissionController extends Controller
 {
@@ -46,8 +44,6 @@ class RolePermissionController extends Controller
                 ->orderBy('id')
                 ->get(),
             'permissions' => Permission::query()->orderBy('id')->get(['id', 'name']),
-            'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
-            'scopes' => RoleScope::options(),
             'departmentScopes' => DepartmentScope::options(),
             'can' => $request->user()->menuAbilities('user-management.role-permission'),
         ]);
@@ -59,18 +55,13 @@ class RolePermissionController extends Controller
     public function list(Request $request): JsonResponse
     {
         $actor = $request->user();
-        $params = Apps::tableParams($request, ['name', 'func_role', 'users_count'], 'id');
-        $companyNames = Company::query()->pluck('name', 'id');
+        $params = Apps::tableParams($request, ['name', 'users_count'], 'id');
 
         $roles = $this->roles->paginate($params, $actor->isItAdmin());
 
         return Apps::tableResponse($roles, fn (Role $role): array => [
             'id' => $role->id,
             'name' => $role->name,
-            'func_role' => $role->func_role->value,
-            'scope' => $role->func_role === RoleScope::All
-                ? 'All companies'
-                : collect($role->companyIds())->map(fn (int $id): string => $companyNames[$id] ?? '#'.$id)->implode(', '),
             'users_count' => $role->users_count,
             'menus_count' => $role->menus_count,
             'job_titles' => $role->isGivenByJobTitle() ? $role->job_titles : [],
@@ -91,8 +82,6 @@ class RolePermissionController extends Controller
             'data' => [
                 'id' => $role->id,
                 'name' => $role->name,
-                'func_role' => $role->func_role->value,
-                'setting_role' => $role->companyIds(),
                 'home_page' => $role->home_page,
                 'job_titles' => implode("\n", $role->job_titles ?? []),
                 'department_scope' => ($role->department_scope ?? DepartmentScope::All)->value,

@@ -7,7 +7,6 @@ use App\Models\Organization\Department;
 use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyQuestion;
-use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\SurveyForm\Services\SurveySubmissionService;
@@ -211,20 +210,21 @@ class SurveyReportTest extends TestCase
             ->assertSessionHas('alert.title', 'Export unavailable');
     }
 
-    public function test_company_scoped_role_only_sees_its_companies(): void
+    public function test_report_can_be_narrowed_to_one_company_without_breaking_anonymity(): void
     {
         $this->seedResponses();
-        $viewer = $this->reportViewerFor([$this->mainCompany->id]);
+        $admin = $this->superAdmin();
 
-        $this->actingAs($viewer)
-            ->get(route('survey-report.show', $this->survey))
+        $this->actingAs($admin)
+            ->get(route('survey-report.show', ['survey' => $this->survey, 'company_id' => $this->mainCompany->id]))
             ->assertOk()
             ->assertViewHas('summary', fn (array $summary): bool => $summary['responses'] === 6 && $summary['average'] === 4.5)
             ->assertViewHas('companyBreakdown', fn ($rows): bool => $rows->isEmpty());
 
-        $this->actingAs($viewer)
+        $this->actingAs($admin)
             ->get(route('survey-report.show', ['survey' => $this->survey, 'company_id' => $this->smallCompany->id]))
-            ->assertForbidden();
+            ->assertOk()
+            ->assertViewHas('summary', fn (array $summary): bool => ! $summary['is_reportable'] && $summary['average'] === null);
     }
 
     public function test_comments_can_be_filtered_by_department(): void
@@ -283,14 +283,14 @@ class SurveyReportTest extends TestCase
             ->assertNotFound();
     }
 
-    public function test_report_list_counts_responses_inside_the_role_scope(): void
+    public function test_report_list_counts_the_responses_of_every_company(): void
     {
         $this->seedResponses();
 
-        $this->actingAs($this->reportViewerFor([$this->smallCompany->id]))
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.index'))
             ->assertOk()
-            ->assertViewHas('surveys', fn ($surveys): bool => $surveys->sole()->responses_count === 2);
+            ->assertViewHas('surveys', fn ($surveys): bool => $surveys->sole()->responses_count === 8);
     }
 
     public function test_manager_only_sees_the_departments_their_job_title_manages(): void
@@ -385,18 +385,5 @@ class SurveyReportTest extends TestCase
     protected function respondent(Company $company): User
     {
         return User::factory()->create(['company_id' => $company->id]);
-    }
-
-    /**
-     * A user whose role reads survey reports for the given companies only.
-     *
-     * @param  array<int, int>  $companyIds
-     */
-    protected function reportViewerFor(array $companyIds): User
-    {
-        $role = Role::query()->where('name', 'Super Admin')->sole();
-        $role->update(['func_role' => 'COMPANY', 'setting_role' => $companyIds]);
-
-        return User::factory()->withRole($role)->create(['company_id' => $companyIds[0]]);
     }
 }

@@ -24,8 +24,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Anonymous survey results, limited to the companies of the user's role scope
- * and, for managers, to the departments their job title manages.
+ * Anonymous survey results, optionally filtered on one company and, for
+ * managers, limited to the departments their job title manages.
  */
 class SurveyReportController extends Controller
 {
@@ -45,7 +45,7 @@ class SurveyReportController extends Controller
     public function index(Request $request): View
     {
         return view('SurveyReport::index', [
-            'surveys' => $this->reports->reportableSurveys($request->user()->scopedCompanyIds()),
+            'surveys' => $this->reports->reportableSurveys(),
             'noDepartmentMessage' => $request->user()->reportDepartmentIds() === [] ? self::NO_DEPARTMENT_MESSAGE : null,
         ]);
     }
@@ -67,9 +67,9 @@ class SurveyReportController extends Controller
             'departmentScores' => $isReportable ? $this->reports->departmentScores($scope) : collect(),
             'sectionScores' => $isReportable ? $this->reports->sectionScores($scope) : collect(),
             'questionBreakdown' => $isReportable ? $this->reports->questionBreakdown($scope) : collect(),
-            'companyBreakdown' => $isReportable && $this->isMultiCompany($scope) ? $this->reports->companyBreakdown($scope) : collect(),
+            'companyBreakdown' => $isReportable && ! $scope->isRestricted() ? $this->reports->companyBreakdown($scope) : collect(),
             'trend' => $this->reports->participationTrend($scope),
-            'companies' => $this->companyOptions($request),
+            'companies' => $this->companyOptions(),
             'selectedCompanyId' => $request->integer('company_id') ?: null,
             'departments' => $survey->departments()->filter(fn (Department $department): bool => $scope->coversDepartment($department->id))->values(),
             'ratingScale' => QuestionType::Rating->scaleLabels(),
@@ -143,50 +143,26 @@ class SurveyReportController extends Controller
     }
 
     /**
-     * Report scope from the user's role scope (companies and departments) and
-     * the optional company filter.
+     * Report scope from the optional company filter and the departments the
+     * user may see.
      */
     protected function scopeFor(Request $request, Survey $survey): ReportScope
     {
-        $allowedCompanyIds = $request->user()->scopedCompanyIds();
         $departmentIds = $request->user()->reportDepartmentIds();
         $companyId = $request->integer('company_id') ?: null;
 
         abort_if($departmentIds === [], Response::HTTP_FORBIDDEN, self::NO_DEPARTMENT_MESSAGE);
 
-        if ($companyId === null) {
-            return new ReportScope($survey, $allowedCompanyIds, $departmentIds);
-        }
-
-        abort_if(
-            $allowedCompanyIds !== null && ! in_array($companyId, $allowedCompanyIds, true),
-            Response::HTTP_FORBIDDEN,
-            'You may not view results of this company.'
-        );
-
-        return new ReportScope($survey, [$companyId], $departmentIds);
+        return new ReportScope($survey, $companyId === null ? null : [$companyId], $departmentIds);
     }
 
     /**
-     * Whether a company breakdown is meaningful for the scope.
-     */
-    protected function isMultiCompany(ReportScope $scope): bool
-    {
-        return $scope->companyIds === null || count($scope->companyIds) > 1;
-    }
-
-    /**
-     * Companies the user may filter on.
+     * Companies to filter the report on.
      *
      * @return Collection<int, string>
      */
-    protected function companyOptions(Request $request): Collection
+    protected function companyOptions(): Collection
     {
-        $allowedCompanyIds = $request->user()->scopedCompanyIds();
-
-        return Company::query()
-            ->when($allowedCompanyIds !== null, fn ($query) => $query->whereIn('id', $allowedCompanyIds))
-            ->orderBy('name')
-            ->pluck('name', 'id');
+        return Company::query()->orderBy('name')->pluck('name', 'id');
     }
 }

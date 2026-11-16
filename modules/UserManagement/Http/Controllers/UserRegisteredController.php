@@ -18,9 +18,8 @@ use Modules\UserManagement\Repositories\UserRegisteredInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Registered users, limited to the companies of the administrator's role scope.
- * Roles given by job title follow the user's job title; only the others are
- * assigned here.
+ * Registered users. Roles given by job title follow the user's job title;
+ * only the others are assigned here, and only an IT admin manages IT admins.
  */
 class UserRegisteredController extends Controller
 {
@@ -40,7 +39,7 @@ class UserRegisteredController extends Controller
         $actor = $request->user();
 
         return view('UserManagement::user-registered.index', [
-            'companies' => $this->companiesFor($actor),
+            'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
             'roles' => $this->assignableRoles($actor),
             'automaticRoleIds' => $this->jobTitleRoles->automaticRoleIds(),
             'can' => $actor->menuAbilities('user-management.user-registered'),
@@ -59,7 +58,7 @@ class UserRegisteredController extends Controller
             'company' => array_map('intval', Arr::wrap($request->query('company', []))),
             'role' => array_map('intval', Arr::wrap($request->query('role', []))),
             'is_active' => in_array($request->query('is_active'), ['0', '1'], true) ? $request->query('is_active') : null,
-        ], $actor->scopedCompanyIds(), $actor->isItAdmin());
+        ], $actor->isItAdmin());
 
         return Apps::tableResponse($users, fn (User $user): array => [
             'id' => $user->id,
@@ -150,33 +149,7 @@ class UserRegisteredController extends Controller
      */
     protected function ensureManageable(User $actor, User $user): void
     {
-        if ($actor->isItAdmin()) {
-            return;
-        }
-
-        $allowedCompanyIds = $actor->scopedCompanyIds();
-
-        abort_if($user->isItAdmin(), Response::HTTP_FORBIDDEN, 'Only an IT admin can manage this account.');
-        abort_if(
-            $allowedCompanyIds !== null && ! in_array((int) $user->company_id, $allowedCompanyIds, true),
-            Response::HTTP_FORBIDDEN,
-            'This user belongs to a company outside your scope.'
-        );
-    }
-
-    /**
-     * Companies the administrator may assign.
-     *
-     * @return Collection<int, Company>
-     */
-    protected function companiesFor(User $actor): Collection
-    {
-        $allowedCompanyIds = $actor->scopedCompanyIds();
-
-        return Company::query()
-            ->when($allowedCompanyIds !== null, fn ($query) => $query->whereIn('id', $allowedCompanyIds))
-            ->orderBy('name')
-            ->get(['id', 'code', 'name']);
+        abort_if(! $actor->isItAdmin() && $user->isItAdmin(), Response::HTTP_FORBIDDEN, 'Only an IT admin can manage this account.');
     }
 
     /**
@@ -189,6 +162,6 @@ class UserRegisteredController extends Controller
         return Role::query()
             ->unless($actor->isItAdmin(), fn ($query) => $query->whereKeyNot((int) config('merdeka.it_admin_role_id')))
             ->orderBy('id')
-            ->get(['id', 'name', 'func_role']);
+            ->get(['id', 'name']);
     }
 }

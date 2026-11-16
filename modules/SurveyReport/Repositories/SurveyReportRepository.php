@@ -27,14 +27,11 @@ class SurveyReportRepository implements SurveyReportInterface
     /**
      * {@inheritDoc}
      */
-    public function reportableSurveys(?array $companyIds): Collection
+    public function reportableSurveys(): Collection
     {
         return Survey::query()
             ->whereIn('status', [SurveyStatus::Active, SurveyStatus::Closed])
-            ->withCount(['responses' => fn (Builder $query) => $query->when(
-                $companyIds !== null,
-                fn (Builder $query) => $query->whereIn('company_id', $companyIds),
-            )])
+            ->withCount('responses')
             ->orderByDesc('start_date')
             ->orderByDesc('id')
             ->get();

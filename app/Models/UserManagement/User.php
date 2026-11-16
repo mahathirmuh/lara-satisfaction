@@ -4,7 +4,6 @@ namespace App\Models\UserManagement;
 
 use App\Enums\DepartmentScope;
 use App\Enums\PermissionAction;
-use App\Enums\RoleScope;
 use App\Helpers\JobTitles;
 use App\Models\Organization\Company;
 use App\Models\Organization\Department;
@@ -229,26 +228,6 @@ class User extends Authenticatable
         }
 
         return $abilities;
-    }
-
-    /**
-     * Company ids whose data the user may see; null means every company.
-     *
-     * @return array<int, int>|null
-     */
-    public function scopedCompanyIds(): ?array
-    {
-        $companyIds = [];
-
-        foreach ($this->roles as $role) {
-            if ($role->func_role === RoleScope::All) {
-                return null;
-            }
-
-            $companyIds = [...$companyIds, ...$role->companyIds()];
-        }
-
-        return array_values(array_unique($companyIds));
     }
 
     /**

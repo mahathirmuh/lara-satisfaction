@@ -56,32 +56,6 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="roleTypeSelect" class="col-md-3 col-form-label required">Data Scope</label>
-                                <div class="col-md-6">
-                                    <select id="roleTypeSelect" class="form-select" required>
-                                        @foreach ($scopes as $value => $label)
-                                            <option value="{{ $value }}">{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12" id="columnCompany" style="display: none">
-                            <div class="row">
-                                <label for="roleCompanySelect" class="col-md-3 col-form-label required">Companies</label>
-                                <div class="col-md-9">
-                                    <select id="roleCompanySelect" class="form-select" multiple="multiple">
-                                        @foreach ($companies as $company)
-                                            <option value="{{ $company->id }}">{{ $company->code }} - {{ $company->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <small class="form-hint">Users and survey results outside these companies are hidden
-                                        for this role.</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="row">
                                 <label for="homePageSelect" class="col-md-3 col-form-label">Home Page</label>
                                 <div class="col-md-6">
                                     <select id="homePageSelect" class="form-select">
@@ -220,16 +194,6 @@
         };
 
         $(function() {
-            $('#roleCompanySelect').select2({
-                theme: 'bootstrap-5',
-                placeholder: 'Select Company',
-                dropdownParent: $('#roleModal'),
-                width: '100%',
-                closeOnSelect: false,
-            });
-
-            $('#roleTypeSelect').on('change', toggleCompanyColumn);
-
             $('#selectAllMenus').on('change', function() {
                 const checked = $(this).prop('checked');
 
@@ -258,10 +222,6 @@
             });
         });
 
-        function toggleCompanyColumn() {
-            $('#columnCompany').toggle($('#roleTypeSelect').val() === 'COMPANY');
-        }
-
         function syncPermissionRow(menuId) {
             const hasAccess = $(`.menu-access-checkbox[data-menu-id="${menuId}"]`).prop('checked');
             const permissions = $(`.menu-permission-checkbox[data-menu-id="${menuId}"]`);
@@ -277,12 +237,10 @@
             const form = $('#roleForm');
             form[0].reset();
             form.find('#roleJobTitles').prop('disabled', false);
-            form.find('#roleCompanySelect').val(null).trigger('change');
             form.find('#selectAllMenus, .menu-access-checkbox, .menu-permission-checkbox').prop('checked', false);
             form.find('.menu-access-checkbox').each(function() {
                 syncPermissionRow($(this).data('menu-id'));
             });
-            toggleCompanyColumn();
         }
 
         function toggleRoleModal(mode, id = null) {
@@ -306,12 +264,9 @@
                     data
                 }) => {
                     modal.find('#roleName').val(data.name);
-                    modal.find('#roleTypeSelect').val(data.func_role);
-                    modal.find('#roleCompanySelect').val((data.setting_role || []).map(String)).trigger('change');
                     modal.find('#homePageSelect').val(data.home_page ?? '');
                     modal.find('#roleDepartmentScopeSelect').val(data.department_scope);
                     modal.find('#roleJobTitles').val(data.job_titles || '').prop('disabled', !!data.is_it_admin);
-                    toggleCompanyColumn();
 
                     (data.menu_list || []).forEach((menuId) => {
                         modal.find(`.menu-access-checkbox[data-menu-id="${parseInt(menuId, 10)}"]`).prop('checked', true);
@@ -345,8 +300,6 @@
 
             const data = {
                 name: $('#roleName').val().trim(),
-                func_role: $('#roleTypeSelect').val(),
-                setting_role: $('#roleCompanySelect').val() || [],
                 home_page: $('#homePageSelect').val() || null,
                 department_scope: $('#roleDepartmentScopeSelect').val(),
                 job_titles: $('#roleJobTitles').prop('disabled') ? '' : $('#roleJobTitles').val(),
@@ -358,10 +311,6 @@
 
             if (!data.name) {
                 errors.push('Role name cannot be empty.');
-            }
-
-            if (data.func_role === 'COMPANY' && !data.setting_role.length) {
-                errors.push('Select at least one company for a COMPANY scoped role.');
             }
 
             if (errors.length) {

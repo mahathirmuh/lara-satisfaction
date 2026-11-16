@@ -20,14 +20,13 @@ class UserRegisteredRepository implements UserRegisteredInterface
     /**
      * {@inheritDoc}
      */
-    public function paginate(array $params, array $filters, ?array $companyIds, bool $includeItAdmins): LengthAwarePaginator
+    public function paginate(array $params, array $filters, bool $includeItAdmins): LengthAwarePaginator
     {
         $itAdminRoleId = (int) config('merdeka.it_admin_role_id');
         $isActive = $filters['is_active'] ?? null;
 
         return User::query()
             ->with(['company:id,name,code', 'roles:id,name'])
-            ->when($companyIds !== null, fn (Builder $query) => $query->whereIn('company_id', $companyIds))
             ->unless($includeItAdmins, fn (Builder $query) => $query->whereDoesntHave(
                 'roles',
                 fn (Builder $query) => $query->whereKey($itAdminRoleId)

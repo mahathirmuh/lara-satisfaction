@@ -1,10 +1,5 @@
 @extends('main.index')
 
-@push('style')
-    <link rel="stylesheet" href="{{ asset('assets/libs/select2/select2.min.css') }}?v=4.1.0-rc.0" />
-    <link rel="stylesheet" href="{{ asset('assets/libs/select2/select2-bootstrap.min.css') }}" />
-@endpush
-
 @section('page-title', 'Role & Permission')
 
 @section('content')
@@ -43,7 +38,7 @@
                                                 <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="name">Role</th>
                                                 <th class="text-capitalize fs-5 py-3">Given By</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="func_role">Data Scope</th>
+                                                <th class="text-capitalize fs-5 py-3">Survey Results</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center">Menus</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="users_count">Users</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center">Action</th>
@@ -65,7 +60,6 @@
 @endsection
 
 @push('javascript')
-    <script src="{{ asset('assets/libs/select2/select2.min.js') }}?v=4.1.0-rc.0"></script>
     <script>
         const urlRoleList = @json(route('user-management.role-permission.list'));
         const urlRoleDestroy = @json(route('user-management.role-permission.destroy', ':id'));
@@ -91,11 +85,8 @@
                 },
             },
             {
-                key: 'func_role',
-                sortable: true,
-                render: (item) => `<span class="badge bg-secondary-lt me-1">${escapeHtml(item.func_role)}</span>
-                    <span class="text-secondary small text-wrap">${escapeHtml(item.scope)}</span>
-                    <div class="text-secondary small">Results: ${escapeHtml(item.department_scope)}</div>`,
+                key: 'department_scope',
+                render: (item) => `<span class="text-secondary small text-wrap">${escapeHtml(item.department_scope)}</span>`,
             },
             {
                 key: 'menus_count',

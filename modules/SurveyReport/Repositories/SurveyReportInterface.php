@@ -15,13 +15,12 @@ use Modules\SurveyReport\Support\ReportScope;
 interface SurveyReportInterface
 {
     /**
-     * Surveys that have a report (active or closed), newest first, with the
-     * number of responses inside the given company scope.
+     * Surveys that have a report (active or closed), newest first, with their
+     * number of responses.
      *
-     * @param  array<int, int>|null  $companyIds
      * @return Collection<int, Survey>
      */
-    public function reportableSurveys(?array $companyIds): Collection;
+    public function reportableSurveys(): Collection;
 
     /**
      * Survey highlighted on the dashboard: the latest open survey, otherwise

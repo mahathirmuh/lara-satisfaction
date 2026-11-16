@@ -84,7 +84,6 @@
                                                             aria-label="Select all roles" />
                                                     </th>
                                                     <th class="py-2">Role</th>
-                                                    <th class="py-2">Scope</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -102,7 +101,6 @@
                                                                 <span class="badge bg-azure-lt ms-1">by job title</span>
                                                             @endif
                                                         </td>
-                                                        <td>{{ $role->func_role->value }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

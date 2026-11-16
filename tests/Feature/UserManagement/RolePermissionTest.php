@@ -3,7 +3,6 @@
 namespace Tests\Feature\UserManagement;
 
 use App\Enums\PermissionAction;
-use App\Models\Organization\Company;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\MenuRolePermission;
 use App\Models\UserManagement\Role;
@@ -33,7 +32,6 @@ class RolePermissionTest extends TestCase
         $this->actingAs($this->admin)
             ->postJson(route('user-management.role-permission.store'), [
                 'name' => 'Report Viewer',
-                'func_role' => 'ALL',
                 'department_scope' => 'ALL',
                 'home_page' => $reportMenu->id,
                 'menu_list' => [$reportMenu->id, $questionMenu->id],
@@ -59,31 +57,6 @@ class RolePermissionTest extends TestCase
         $this->assertSame($reportMenu->id, $role->home_page);
     }
 
-    public function test_company_scoped_role_requires_companies(): void
-    {
-        $this->actingAs($this->admin)
-            ->postJson(route('user-management.role-permission.store'), [
-                'name' => 'Site HR',
-                'func_role' => 'COMPANY',
-                'department_scope' => 'ALL',
-            ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['setting_role']);
-
-        $company = Company::factory()->create();
-
-        $this->actingAs($this->admin)
-            ->postJson(route('user-management.role-permission.store'), [
-                'name' => 'Site HR',
-                'func_role' => 'COMPANY',
-                'department_scope' => 'ALL',
-                'setting_role' => [$company->id],
-            ])
-            ->assertCreated();
-
-        $this->assertSame([$company->id], Role::query()->where('name', 'Site HR')->sole()->companyIds());
-    }
-
     public function test_granted_permissions_take_effect_for_the_role_users(): void
     {
         $role = Role::factory()->create();
@@ -95,7 +68,6 @@ class RolePermissionTest extends TestCase
         $this->actingAs($this->admin)
             ->putJson(route('user-management.role-permission.update', $role), [
                 'name' => $role->name,
-                'func_role' => 'ALL',
                 'department_scope' => 'ALL',
                 'menu_list' => [$reportMenu->id],
                 'menu_permission' => [$reportMenu->id => [PermissionAction::Read->value]],
@@ -113,7 +85,7 @@ class RolePermissionTest extends TestCase
         $delegate = $this->userWithFullUserManagement();
 
         $this->actingAs($delegate)
-            ->putJson(route('user-management.role-permission.update', $itAdminRole), ['name' => 'Hijacked', 'func_role' => 'ALL'])
+            ->putJson(route('user-management.role-permission.update', $itAdminRole), ['name' => 'Hijacked', 'department_scope' => 'ALL'])
             ->assertForbidden();
 
         $this->actingAs($delegate)
@@ -152,7 +124,6 @@ class RolePermissionTest extends TestCase
         $this->actingAs($this->admin)
             ->postJson(route('user-management.role-permission.store'), [
                 'name' => 'Supervisor',
-                'func_role' => 'ALL',
                 'department_scope' => 'MANAGED',
                 'job_titles' => "*Supervisor\n\n  !OHS *  ",
             ])
@@ -178,7 +149,6 @@ class RolePermissionTest extends TestCase
         $this->actingAs($this->admin)
             ->putJson(route('user-management.role-permission.update', $itAdminRole), [
                 'name' => 'IT Admin',
-                'func_role' => 'ALL',
                 'department_scope' => 'ALL',
                 'job_titles' => 'IT Support Officer',
             ])

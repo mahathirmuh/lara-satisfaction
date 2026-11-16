@@ -120,29 +120,28 @@ class UserRegisteredTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_company_scoped_admin_only_manages_users_of_its_companies(): void
+    public function test_admin_manages_users_of_every_company(): void
     {
         $otherCompany = Company::factory()->create();
-        $insider = User::factory()->create(['company_id' => $this->company->id, 'name' => 'Insider']);
+        User::factory()->create(['company_id' => $this->company->id, 'name' => 'Insider']);
         $outsider = User::factory()->create(['company_id' => $otherCompany->id, 'name' => 'Outsider']);
-        $admin = $this->companyScopedAdmin();
+        $admin = User::factory()->withRole(Role::query()->where('name', 'Super Admin')->sole())->create([
+            'company_id' => $this->company->id,
+        ]);
 
         $this->actingAs($admin)
             ->getJson(route('user-management.user-registered.list'))
             ->assertOk()
             ->assertJsonFragment(['name' => 'Insider'])
-            ->assertJsonMissing(['name' => 'Outsider']);
+            ->assertJsonFragment(['name' => 'Outsider']);
 
         $this->actingAs($admin)
             ->getJson(route('user-management.user-registered.show', $outsider))
-            ->assertForbidden();
+            ->assertOk();
 
         $this->actingAs($admin)
             ->postJson(route('user-management.user-registered.store'), $this->payload(['company_id' => $otherCompany->id]))
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['company_id']);
-
-        $this->assertModelExists($insider);
+            ->assertCreated();
     }
 
     public function test_admin_cannot_delete_their_own_account(): void
@@ -200,16 +199,5 @@ class UserRegisteredTest extends TestCase
             'role_id' => [(int) config('merdeka.default_role_id')],
             ...$overrides,
         ];
-    }
-
-    /**
-     * Super admin limited to the test company.
-     */
-    protected function companyScopedAdmin(): User
-    {
-        $role = Role::query()->where('name', 'Super Admin')->sole();
-        $role->update(['func_role' => 'COMPANY', 'setting_role' => [$this->company->id]]);
-
-        return User::factory()->withRole($role)->create(['company_id' => $this->company->id]);
     }
 }

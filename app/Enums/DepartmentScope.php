@@ -4,7 +4,7 @@ namespace App\Enums;
 
 /**
  * Which departments' survey results a role sees (the `department_scope`
- * column), next to its company scope.
+ * column).
  */
 enum DepartmentScope: string
 {

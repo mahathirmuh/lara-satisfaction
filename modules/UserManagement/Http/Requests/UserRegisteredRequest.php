@@ -8,10 +8,10 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Register / update a user. Companies and roles are limited to what the
- * signed-in administrator may assign. There is no password: the user signs in
- * with SSO or the network account (LDAP) that has this email. The roles given
- * by job title follow the job title, so only the other roles are submitted.
+ * Register / update a user. Roles are limited to what the signed-in
+ * administrator may assign. There is no password: the user signs in with SSO
+ * or the network account (LDAP) that has this email. The roles given by job
+ * title follow the job title, so only the other roles are submitted.
  */
 class UserRegisteredRequest extends FormRequest
 {
@@ -46,20 +46,13 @@ class UserRegisteredRequest extends FormRequest
     {
         $target = $this->route('user');
         $actor = $this->user();
-        $allowedCompanyIds = $actor->scopedCompanyIds();
-
-        $companyRule = Rule::exists('companies', 'id');
-
-        if ($allowedCompanyIds !== null) {
-            $companyRule->whereIn('id', $allowedCompanyIds === [] ? [0] : $allowedCompanyIds);
-        }
 
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email:rfc', 'max:255', Rule::unique('users', 'email')->ignore($target)->withoutTrashed()],
             'employee_id' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'employee_id')->ignore($target)->withoutTrashed()],
             'job_title' => ['nullable', 'string', 'max:255'],
-            'company_id' => ['required', 'integer', $companyRule],
+            'company_id' => ['required', 'integer', Rule::exists('companies', 'id')],
             'is_active' => ['required', 'boolean'],
             'role_id' => ['nullable', 'array'],
             'role_id.*' => [
