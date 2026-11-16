@@ -22,7 +22,7 @@ class DepartmentSeederTest extends TestCase
         $steps = app(SurveyFormInterface::class)->stepsFor(Survey::query()->sole());
 
         $this->assertSame(
-            ['Supply Chain', 'Occupational Health & Safety', 'Environmental', 'External Affairs', 'Finance', 'Interface'],
+            ['Supply Chain', 'Occupational Health & Safety', 'Environmental', 'External Affairs', 'Finance', 'Interface', 'Human Resources'],
             $steps->pluck('department.name')->all(),
         );
         foreach ($steps as $step) {
@@ -43,6 +43,6 @@ class DepartmentSeederTest extends TestCase
         $this->assertDatabaseHas('department_sections', ['id' => $section->id, 'name' => 'Plant Safety', 'description' => 'Edited in Master Data.']);
         $this->assertDatabaseMissing('department_sections', ['name' => 'Plant OHS']);
         $this->assertFalse($interface->fresh()->is_active);
-        $this->assertDatabaseCount('departments', 6);
+        $this->assertDatabaseCount('departments', 7);
     }
 }

@@ -8,9 +8,11 @@ use Illuminate\Database\Seeder;
 /**
  * The support service departments assessed by the survey: the departments
  * under the Support Services Deputy General Manager in the MTI organization
- * chart 2026, in chart order. Their sections are the units on the supervisor
- * level of each department's chart. Employees evaluate every section and read
- * its role overview first; the role overviews are short starting texts to
+ * chart 2026, in chart order, then Human Resources (HR, General Services and
+ * ICT under the HRGS & IT Manager), which the "NOW" chart also places under
+ * Support Services. Their sections are the units on the supervisor level of
+ * each department's chart. Employees evaluate every section and read its
+ * role overview first; the role overviews are short starting texts to
  * complete in Master Data.
  *
  * Initial data only: once departments exist, Master Data is the source of
@@ -107,6 +109,26 @@ class DepartmentSeeder extends Seeder
             'sections' => [
                 'Interface Management' => 'Interface Management coordinates the interfaces between the parties involved in the operation.',
                 'Contract Management' => 'Contract Management administers the contracts and follows up their execution.',
+            ],
+        ],
+        [
+            'code' => 'HR',
+            'name' => 'Human Resources',
+            'description' => 'HR operation, people development, rewards & recruitment, general services (dormitory, catering, transport, facilities), translation and ICT.',
+            'icon' => 'users',
+            'color' => 'pink',
+            'manager_job_titles' => ['HR Manager', 'Human Resource* Manager', 'HRGS & IT Manager'],
+            'sections' => [
+                'IT System & Support' => 'IT System & Support runs the business applications and helps users with their computers, accounts and applications.',
+                'IT Infrastructure & Security' => 'IT Infrastructure & Security runs the network, servers and communication systems and keeps them secure.',
+                'ER/IR & Formalities' => 'ER/IR & Formalities looks after employee and industrial relations and the formalities of employees, such as permits and official documents.',
+                'HR Operation' => 'HR Operation runs the daily HR administration: attendance, leave, payroll data and employee records.',
+                'People & Organization Development' => 'People & Organization Development develops employees through training and career programs and maintains the organization structure.',
+                'Dormitory & Catering' => 'Dormitory & Catering manages the employee dormitories and the catering services.',
+                'General Admin & Transport' => 'General Admin & Transport handles the general administration and the employee transport.',
+                'Asset & Facility' => 'Asset & Facility maintains the offices and facilities and manages the general assets.',
+                'Rewards & Recruitment' => 'Rewards & Recruitment recruits new employees and manages compensation and benefits.',
+                'Translator' => 'Translator provides Mandarin and Indonesian translation and interpretation for meetings and documents.',
             ],
         ],
     ];
