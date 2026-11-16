@@ -3,15 +3,18 @@
 namespace App\View\Composers;
 
 use App\Models\UserManagement\Menu;
+use App\Models\UserManagement\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Supplies the breadcrumb (main.breadcrumb) with the menu path of the current
- * page: the menu that owns the route (same mapping as the permission
- * middleware, e.g. survey-report.show => Survey Report) and its parents.
- * Pages add their own items (a survey title...) on the "breadcrumbs" stack.
+ * Supplies the path at the top of a page (main.breadcrumb), as MTI Radio Management draws it: "Dashboard › Survey
+ * Management › Reminders". The dashboard comes first for whoever may open it; then the group and the entry of the
+ * sidebar the page belongs to (any route of the entry's menu key, as the sidebar marks it: a survey's report belongs to
+ * Survey Report); then the page itself when it is deeper than its entry ("Operational Audit 2026"). A page that belongs
+ * to no entry (My Profile) is the dashboard and its name.
  */
 class BreadcrumbComposer
 {
@@ -25,32 +28,61 @@ class BreadcrumbComposer
      */
     public function compose(View $view): void
     {
-        $view->with([
-            'homeUrl' => $this->request->user()?->homeUrl() ?? route('dashboard.index'),
-            'trail' => $this->menuTrail((string) $this->request->route()?->getName()),
-        ]);
+        $sections = $view->getFactory();
+        // What the page calls itself (@section('crumb')), else its title. A section is kept escaped: the view escapes again.
+        $page = html_entity_decode(trim($sections->yieldContent('crumb') ?: $sections->yieldContent('page-title')), ENT_QUOTES | ENT_HTML5);
+
+        $view->with('crumbs', $this->crumbs((string) $this->request->route()?->getName(), $this->request->user(), $page));
     }
 
     /**
-     * The menu path of the route, root first; the menu whose own page is open
-     * is marked current.
+     * The path to the page, the page that is open last.
      *
-     * @return array<int, array{label: string, url: string|null, current: bool}>
+     * @param  string  $page  what the page calls itself; '' for nothing
+     * @return list<array{label: string, url: ?string}> the open page has no url
      */
-    protected function menuTrail(string $routeName): array
+    protected function crumbs(string $current, ?User $user, string $page): array
     {
-        $menuId = $routeName === '' ? null : Menu::idForRoute($routeName);
-        $menu = $menuId === null ? null : Menu::query()->with('parent.parent.parent')->find($menuId);
-        $trail = [];
+        $entry = $this->entry($current);
+        $crumbs = [];
 
-        for ($node = $menu; $node !== null; $node = $node->parent) {
-            array_unshift($trail, [
-                'label' => __($node->title),
-                'url' => $node->route !== null && Route::has($node->route) ? route($node->route) : null,
-                'current' => $node->is($menu) && $node->route === $routeName,
-            ]);
+        if ($current !== 'dashboard.index' && $user?->canAccessMenu('dashboard') && Route::has('dashboard.index')) {
+            $crumbs[] = ['label' => __('Dashboard'), 'url' => route('dashboard.index')];
         }
 
-        return $trail;
+        if ($entry === null) {
+            return $page === '' ? $crumbs : [...$crumbs, ['label' => $page, 'url' => null]];
+        }
+
+        if ($entry->parent !== null) {
+            $crumbs[] = ['label' => __($entry->parent->title), 'url' => null];
+        }
+
+        // On a page below the entry, the entry leads back to its list, and the page names itself after it.
+        $label = __($entry->title);
+        $isBelow = $current !== $entry->route && $page !== '' && $page !== $label;
+        $crumbs[] = ['label' => $label, 'url' => $isBelow ? route($entry->route) : null];
+
+        if ($isBelow) {
+            $crumbs[] = ['label' => $page, 'url' => null];
+        }
+
+        return $crumbs;
+    }
+
+    /**
+     * The entry of the sidebar that the route belongs to: the one with the longest menu key that covers it.
+     */
+    protected function entry(string $current): ?Menu
+    {
+        if ($current === '') {
+            return null;
+        }
+
+        return Menu::query()->whereNotNull('route')->with('parent')->get()
+            ->filter(fn (Menu $menu): bool => Route::has($menu->route)
+                && ($current === $menu->route || Str::startsWith($current, Menu::keyForRoute($menu->route).'.')))
+            ->sortByDesc(fn (Menu $menu): int => strlen(Menu::keyForRoute($menu->route)))
+            ->first();
     }
 }

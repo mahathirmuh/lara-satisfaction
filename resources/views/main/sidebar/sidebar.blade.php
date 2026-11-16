@@ -1,121 +1,124 @@
 <!-- Sidebar -->
-<aside class="navbar navbar-vertical navbar-expand-lg mdka-bg-gray-50" data-bs-theme="light">
+<aside class="navbar navbar-vertical navbar-expand-lg rm-sidebar d-print-none" data-bs-theme="light" aria-label="{{ __('Main menu') }}">
     <div class="container-fluid overflow-x-hidden">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
-            aria-controls="sidebar-menu" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+            aria-controls="sidebar-menu" aria-expanded="false" aria-label="{{ __('Open the menu') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <h1 class="navbar-brand navbar-brand-autodark">
-            <a href="{{ route('dashboard.index') }}" class="d-flex flex-column gap-2 align-items-center link-underline link-underline-opacity-0">
-                <img src="{{ asset('assets/img/branding/mcg-logo.png') }}" height="32" alt="Merdeka Copper Gold"
-                    class="navbar-brand-image">
-                <img src="{{ asset('assets/img/branding/mbm-logo.png') }}" height="32" alt="Merdeka Battery Materials"
-                    class="navbar-brand-image">
-
-                <img src="{{ asset('assets/img/branding/favicon.ico') }}" height="20" alt="Merdeka"
-                    class="navbar-brand-image-small d-none">
-                <img src="{{ asset('assets/img/branding/mbm-logo-small.png') }}" height="24" alt="Merdeka"
-                    class="navbar-brand-image-small d-none">
-            </a>
-        </h1>
-
-        <div class="navbar-nav flex-row d-lg-none align-items-center gap-3">
-            <x-global.locale-switcher />
+        <a href="{{ route('dashboard.index') }}" class="rm-brand" aria-label="{{ config('merdeka.app_name') }}">
+            <img src="{{ asset('assets/img/branding/mcg-logo.png') }}" alt="Merdeka Copper Gold" class="rm-brand-full">
+            <img src="{{ asset('assets/img/branding/mbm-logo.png') }}" alt="Merdeka Battery Materials" class="rm-brand-full">
+            {{-- In the icon rail: the two marks side by side. --}}
+            <span class="rm-brand-rail">
+                <img src="{{ asset('assets/img/branding/favicon.ico') }}" alt="Merdeka Copper Gold">
+                <img src="{{ asset('assets/img/branding/mbm-logo-small.png') }}" alt="Merdeka Battery Materials">
+            </span>
+        </a>
+        {{-- The top bar is hidden below 992px: the bell stays beside the menu button. --}}
+        <div class="d-lg-none ms-auto me-2">
             @include('main.navbar.notifications')
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
-                    aria-label="{{ __('Open user menu') }}">
-                    <span class="avatar avatar-sm rounded-circle"
-                        style="background-image: url({{ Auth::user()->photoUrl() ?? asset('assets/img/avatar/1.png') }})"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <span class="dropdown-header">{{ Auth::user()->name }}</span>
-                    <a href="{{ route('profile.show') }}" class="dropdown-item">
-                        <i class="ti ti-user-circle me-2"></i> {{ __('My Profile') }}
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="{{ route('logout') }}" class="dropdown-item text-danger" onclick="logout(event)">
-                        <i class="ti ti-logout me-2"></i> {{ __('Logout') }}
-                    </a>
-                </div>
-            </div>
         </div>
         <div class="collapse navbar-collapse" id="sidebar-menu">
-            <ul class="navbar-nav py-lg-3">
+            <ul class="navbar-nav rm-nav">
                 @include('main.sidebar.menu')
+                {{-- The top bar with the user menu is hidden below 992px: keep the language, the profile and a way to sign out. --}}
+                <li class="rm-nav-section d-lg-none" role="presentation"><span>{{ Auth::user()->name }}</span></li>
+                <li class="rm-nav-item d-lg-none">
+                    <form method="POST" action="{{ route('locale.update') }}">
+                        @csrf
+                        @foreach (collect(config('app.available_locales'))->except(app()->getLocale()) as $locale => $language)
+                            <button type="submit" name="locale" value="{{ $locale }}" class="rm-nav-link" lang="{{ str_replace('_', '-', $locale) }}"
+                                aria-label="{{ __('Language') }}: {{ $language }}">
+                                <span class="rm-nav-icon"><i class="ti ti-language"></i></span>
+                                <span class="rm-nav-label">{{ $language }}</span>
+                            </button>
+                        @endforeach
+                    </form>
+                </li>
+                <li class="rm-nav-item d-lg-none">
+                    <a class="rm-nav-link" href="{{ route('profile.show') }}">
+                        <span class="rm-nav-icon"><i class="ti ti-user-circle"></i></span>
+                        <span class="rm-nav-label">{{ __('My Profile') }}</span>
+                    </a>
+                </li>
+                <li class="rm-nav-item d-lg-none">
+                    <a class="rm-nav-link" href="{{ route('logout') }}" onclick="logout(event)">
+                        <span class="rm-nav-icon"><i class="ti ti-logout"></i></span>
+                        <span class="rm-nav-label">{{ __('Logout') }}</span>
+                    </a>
+                </li>
             </ul>
         </div>
-        <img class="sidebar-background" src="{{ asset('assets/img/branding/sidebar-background.png') }}" alt=""
-            style="user-select: none; pointer-events: none;">
+        <div class="rm-sidebar-mark" aria-hidden="true">
+            <img src="{{ asset('assets/img/branding/sidebar-background.png') }}" alt="">
+        </div>
     </div>
 </aside>
+<div class="rm-nav-tip" id="rmNavTip" role="tooltip" hidden></div>
 
 @push('javascript')
     <script>
-        $(function() {
-            if (localStorage.getItem('sidebarState') === 'collapsed') {
-                collapseSidebar();
-            } else {
-                expandSidebar();
-            }
-
-            $('#sidebarControl').on('click', function() {
-                if ($('.navbar-expand-lg').hasClass('collapsed')) {
-                    expandSidebar();
-                    localStorage.setItem('sidebarState', 'expanded');
-                } else {
-                    collapseSidebar();
-                    localStorage.setItem('sidebarState', 'collapsed');
+        // The sidebar (main.sidebar.sidebar): full width or the icon rail, the groups that fold, and the name of an icon in
+        // the rail. The choice of width is kept in localStorage ("sidebarState"); the head of the page applies it before
+        // anything is drawn (main.index), this script only changes it.
+        const sidebarUi = {
+            key: 'sidebarState',
+            rail: false,
+            read() {
+                try {
+                    return window.localStorage.getItem(this.key) === 'collapsed';
+                } catch (e) {
+                    return false;
                 }
-            });
+            },
+            write(rail) {
+                try {
+                    window.localStorage.setItem(this.key, rail ? 'collapsed' : 'expanded');
+                } catch (e) {
+                    // A private window, or storage turned off: the choice lasts for this page only.
+                }
+            },
+            apply(rail) {
+                this.rail = rail;
+                $('html').toggleClass('rm-rail', rail);
+                $('#sidebarControl').attr('aria-pressed', rail ? 'true' : 'false');
+                if (!rail) this.hideTip();
+            },
+            toggle() {
+                this.apply(!this.rail);
+                this.write(this.rail);
+            },
+            /** A group opens or closes; in the rail its icon goes to its first page instead. */
+            group(id, first) {
+                if (this.rail) {
+                    if (first) window.location.href = first;
+                    return;
+                }
+                const button = $(`[data-rm-group="${id}"]`);
+                const open = button.attr('aria-expanded') !== 'true';
+                button.attr('aria-expanded', open ? 'true' : 'false');
+                $(`#rm-navgroup-${id}`).toggleClass('is-open', open);
+            },
+            rectOf: element => element.getBoundingClientRect(),
+            /** The name of an icon, to the right of it (only the rail hides the names). */
+            showTip(text, rect) {
+                if (!this.rail || !text) return;
+                $('#rmNavTip').text(text).css({ left: `${rect.right + 10}px`, top: `${rect.top + rect.height / 2}px` }).removeAttr('hidden');
+            },
+            hideTip() {
+                $('#rmNavTip').attr('hidden', 'hidden');
+            },
+        };
+
+        sidebarUi.apply(sidebarUi.read());
+        $('#sidebarControl').on('click', () => sidebarUi.toggle());
+        $(document).on('click', '[data-rm-group]', function() {
+            sidebarUi.group($(this).attr('data-rm-group'), $(this).attr('data-rm-first'));
         });
-
-        function expandSidebar() {
-            const navbar = $('.navbar-expand-lg');
-
-            navbar.removeClass('collapsed').css({
-                width: '',
-                'overflow-y': 'auto'
-            });
-
-            $('.navbar-nav').css('gap', '');
-            $('.sidebar-control').removeClass('d-none');
-            $('.navbar-brand-image').removeClass('d-none');
-            $('.navbar-brand-image-small').addClass('d-none');
-            $('.sidebar-item').css('padding-left', 'calc(calc(calc(var(--tblr-page-padding) * 2)/ 2) + 1.75rem)');
-            $('.nav-link-icon').css({
-                'padding-left': '0',
-                transform: 'scale(1)'
-            });
-
-            if (window.innerWidth >= 992) {
-                $('.navbar-expand-md').css('margin-left', '15rem');
-                $('.page-wrapper').css('margin-left', '15rem');
-            }
-        }
-
-        function collapseSidebar() {
-            const navbar = $('.navbar-expand-lg');
-
-            navbar.addClass('collapsed').css({
-                width: '80px',
-                'overflow-y': 'auto'
-            });
-
-            $('.navbar-nav').css('gap', '0.5rem');
-            $('.sidebar-control').addClass('d-none');
-            $('.navbar-brand-image').addClass('d-none');
-            $('.navbar-brand-image-small').removeClass('d-none');
-            $('.sidebar-item').css('padding-left', '15px');
-            $('.nav-link-icon').css({
-                'padding-left': '10px',
-                transform: 'scale(1.2)'
-            });
-
-            if (window.innerWidth >= 992) {
-                $('.navbar-expand-md').css('margin-left', '80px');
-                $('.page-wrapper').css('margin-left', '80px');
-            }
-        }
+        $(document).on('mouseenter focusin', '[data-rm-tip]', function() {
+            sidebarUi.showTip($(this).attr('data-rm-tip'), sidebarUi.rectOf(this));
+        });
+        $(document).on('mouseleave focusout', '[data-rm-tip]', () => sidebarUi.hideTip());
+        $('.rm-sidebar').on('scroll', () => sidebarUi.hideTip());
     </script>
 @endpush

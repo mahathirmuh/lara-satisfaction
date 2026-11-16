@@ -1,0 +1,3037 @@
+/*
+ * merdeka-ui.css: the design layer of MTI Radio Management (its public/assets/css/radio-ui.css, the design handoff of
+ * October 2026), taken over so that both applications look and behave alike. Loaded after custom.css on every page and
+ * on the sign-in page. apps.min.css (Tabler) is never edited: what the design changes of it is changed here.
+ *
+ * Only the parts this application uses are here; "rm-" is the prefix the layer has in Radio Management, kept so that a
+ * piece of markup can be taken over from there as it is.
+ *
+ * 1. Tokens          the design's colours (Tailwind slate, emerald, rose, amber, ...), shadows, easing, mono font
+ * 2. Tabler          the primary colour and the page background, through Tabler's own variables
+ * 3. Shell           sidebar and icon rail, top bar, path to the page, main area, footer, version history
+ * 4. Recipes         title block, content card, toolbar, box, table, segmented control, tabs, buttons, fields, badges,
+ *                    dialogs, alerts, the foot of a table, the calendar of a range of days, a card with a title
+ * 5. Motion          keyframes, and no motion for those who asked for none
+ */
+
+/* 1. Tokens ---------------------------------------------------------------------------------------------------------- */
+
+:root {
+    --rm-brand-50: #eff6ff;
+    --rm-brand-100: #dbeafe;
+    --rm-brand-200: #bfdbfe;
+    --rm-brand-300: #93c5fd;
+    /* The line of the version history beside a version that changed something, and the ring of its patches. */
+    --rm-brand-400: #60a5fa;
+    --rm-brand-500: #3b82f6;
+    --rm-brand-600: #2563eb;
+    --rm-brand-700: #1d4ed8;
+    --rm-brand-800: #1e40af;
+
+    --rm-gray-50: #f8fafc;
+    --rm-gray-100: #f1f5f9;
+    --rm-gray-200: #e2e8f0;
+    --rm-gray-300: #cbd5e1;
+    --rm-gray-400: #94a3b8;
+    --rm-gray-500: #64748b;
+    --rm-gray-600: #475569;
+    --rm-gray-700: #334155;
+    --rm-gray-800: #1e293b;
+    --rm-gray-900: #0f172a;
+
+    --rm-success-50: #ecfdf5;
+    --rm-success-100: #d1fae5;
+    --rm-success-400: #34d399;
+    --rm-success-500: #10b981;
+    --rm-success-600: #059669;
+    --rm-success-700: #047857;
+
+    --rm-error-50: #fff1f2;
+    --rm-error-100: #ffe4e6;
+    --rm-error-200: #fecdd3;
+    /* The version history: the line beside a version that removed something, its dots. */
+    --rm-error-400: #fb7185;
+    --rm-error-500: #f43f5e;
+    --rm-error-600: #e11d48;
+    --rm-error-700: #be123c;
+
+    --rm-warning-50: #fffbeb;
+    --rm-warning-100: #fef3c7;
+    --rm-warning-200: #fde68a;
+    --rm-warning-500: #f59e0b;
+    --rm-warning-600: #d97706;
+    --rm-warning-700: #b45309;
+
+    --rm-orange-50: #fff7ed;
+    --rm-orange-100: #ffedd5;
+    --rm-orange-200: #fed7aa;
+    /* The version history: the line beside a version that fixed something. */
+    --rm-orange-400: #fb923c;
+    --rm-orange-500: #f97316;
+    --rm-orange-600: #ea580c;
+    --rm-orange-700: #c2410c;
+
+    --rm-purple-100: #f3e8ff;
+    --rm-purple-600: #9333ea;
+    --rm-purple-700: #7e22ce;
+    --rm-pink-500: #ec4899;
+    --rm-cyan-600: #0891b2;
+    --rm-violet-500: #8b5cf6;
+    /* The purple of the faded badge (README .rm-badge.purple). */
+    --rm-violet-100: #ede9fe;
+    --rm-violet-600: #7c3aed;
+    /* The version history: a version with a security change (node fill, line, notes). */
+    --rm-violet-50: #f5f3ff;
+    --rm-violet-400: #a78bfa;
+    --rm-violet-700: #6d28d9;
+
+    /* Green (not the success emerald): the tint and the edge of the column "Siap diambil" on the service board. */
+    --rm-green-50: #f0fdf4;
+    --rm-green-200: #bbf7d0;
+
+    --rm-sky-100: #e0f2fe;
+    --rm-sky-700: #0369a1;
+
+    --rm-ring: 0 0 0 1px var(--rm-gray-200);
+    --rm-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, .10), 0 4px 6px -4px rgba(15, 23, 42, .10);
+    --rm-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, .10), 0 8px 10px -6px rgba(15, 23, 42, .10);
+    --rm-ease: cubic-bezier(.2, .8, .2, 1);
+    --rm-hover: rgba(15, 23, 42, .045);
+    --rm-press: rgba(15, 23, 42, .09);
+    --rm-mono: ui-monospace, "IBM Plex Mono", Menlo, monospace;
+
+    --rm-sidebar: 240px;
+    --rm-rail: 80px;
+    /* The sidebar's background, as production's (mdka-bg-gray-50). */
+    --rm-sidebar-bg: var(--rm-gray-50);
+}
+
+/* 2. Tabler ---------------------------------------------------------------------------------------------------------- */
+
+/* brand-600 is the primary action colour (README "Design tokens"): buttons, links, checkboxes, focus rings. */
+:root {
+    --tblr-primary: #2563eb;
+    --tblr-primary-rgb: 37, 99, 235;
+    --tblr-primary-darken: #1d4ed8;
+    --tblr-primary-lt: #eff6ff;
+    --tblr-primary-lt-rgb: 239, 246, 255;
+    --tblr-primary-text-emphasis: #1e40af;
+    --tblr-primary-bg-subtle: #dbeafe;
+    --tblr-primary-border-subtle: #bfdbfe;
+    --tblr-link-color: #2563eb;
+    --tblr-link-color-rgb: 37, 99, 235;
+    --tblr-link-hover-color: #1d4ed8;
+    --tblr-link-hover-color-rgb: 29, 78, 216;
+    /* The page behind the cards: white, beside the grey sidebar (--rm-sidebar-bg). */
+    --tblr-body-bg: #fff;
+    --tblr-body-bg-rgb: 255, 255, 255;
+}
+
+.rm-mono {
+    font-family: var(--rm-mono);
+}
+
+/* 3. Shell ----------------------------------------------------------------------------------------------------------- */
+
+/* Sidebar (main.sidebar.sidebar). Below 992px it is Tabler's folding menu at the top of the page. */
+.rm-sidebar.navbar {
+    background: var(--rm-sidebar-bg);
+    border: 0;
+}
+
+/* The two logos as production shows them: 32 high, side by side in the middle. */
+.rm-sidebar .rm-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 56px;
+    margin: 0;
+    padding: 0 8px;
+    flex: none;
+}
+
+.rm-sidebar .rm-brand img {
+    display: block;
+    height: 32px;
+    width: auto;
+}
+
+.rm-sidebar .rm-brand-rail {
+    display: none !important;
+}
+
+/* The list where production puts it: the first row 18px under the logos, rows 36 high every 40px and 12px in from both
+   sides, the icon 16px into its row and the name 8px after it; a section's name 18px under the row above it. */
+.rm-nav.navbar-nav {
+    gap: 4px;
+    margin: 0;
+    padding: 18px 12px 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.rm-nav-item {
+    list-style: none;
+}
+
+.rm-nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--rm-gray-700);
+    font-size: 13px;
+    line-height: 1.4286;
+    font-weight: 400;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow .12s ease-out, background-color .15s ease-out, color .15s ease-out;
+}
+
+.rm-nav-link:hover,
+.rm-nav-link:focus {
+    color: var(--rm-gray-700);
+    text-decoration: none;
+    box-shadow: inset 0 0 0 100px var(--rm-hover);
+}
+
+.rm-nav-link:active {
+    box-shadow: inset 0 0 0 100px var(--rm-press);
+}
+
+.rm-nav-link:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: -2px;
+}
+
+.rm-nav-link.is-active,
+.rm-nav-link.is-active:hover {
+    background: var(--rm-brand-50);
+    color: var(--rm-brand-700);
+    font-weight: 600;
+}
+
+.rm-nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 20px;
+    height: 20px;
+}
+
+.rm-nav-icon .ti {
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.rm-nav-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.rm-nav-count {
+    flex: none;
+}
+
+.rm-nav-dot {
+    display: none;
+    position: absolute;
+    top: 5px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--rm-gray-400);
+    box-shadow: 0 0 0 2px var(--rm-sidebar-bg);
+}
+
+.rm-nav-dot.red {
+    background: var(--rm-error-600);
+}
+
+.rm-nav-dot.blue {
+    background: var(--rm-brand-600);
+}
+
+/* 3px into the padding: where production's arrow is. */
+.rm-nav-chevron {
+    display: inline-flex;
+    flex: none;
+    margin-right: -3px;
+    color: var(--rm-gray-400);
+    font-size: 14px;
+    transition: transform .22s ease-out;
+}
+
+.rm-nav-group.is-open > .rm-nav-link .rm-nav-chevron {
+    transform: rotate(180deg);
+}
+
+/* A group folds by its rows (1fr <-> 0fr); a folded one cannot be reached with the keyboard either. */
+.rm-nav-kids {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows .22s ease-out, visibility 0s linear .22s;
+}
+
+.rm-nav-group.is-open > .rm-nav-kids {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows .22s ease-out, visibility 0s;
+}
+
+.rm-nav-kids-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.rm-nav-group.is-open > .rm-nav-kids .rm-nav-kids-inner {
+    padding-top: 4px;
+}
+
+/* A page of a group: its name 32px into the row (in line with production's), in 0.8rem, rows 31 high every 33px. */
+.rm-nav-link.rm-nav-kid {
+    padding: 6.4px 16px 6.4px 32px;
+    font-size: .8rem;
+}
+
+.rm-nav-subhead {
+    padding: 8px 16px 4px 32px;
+    font-size: 10px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--rm-gray-500);
+}
+
+.rm-nav-section {
+    list-style: none;
+    padding: 14px 4px 2px;
+    font-size: 10px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--rm-gray-500);
+}
+
+/* The mark at the foot of the sidebar: under the menu, never in the way. */
+.rm-sidebar-mark {
+    display: none;
+}
+
+/* The name of an icon in the rail. */
+.rm-nav-tip {
+    position: fixed;
+    z-index: 1080;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--rm-gray-900);
+    color: #fff;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: var(--rm-shadow-lg);
+    transform: translateY(-50%);
+    animation: rm-fade-in .12s ease-out backwards;
+}
+
+.rm-nav-tip[hidden] {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .rm-sidebar.navbar-vertical.navbar-expand-lg {
+        width: var(--rm-sidebar);
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        box-shadow: inset -1px 0 0 var(--rm-gray-200);
+        transition: width .24s var(--rm-ease);
+    }
+
+    .rm-sidebar.navbar-vertical ~ .navbar,
+    .rm-sidebar.navbar-vertical ~ .page-wrapper {
+        margin-left: var(--rm-sidebar);
+        transition: margin-left .24s var(--rm-ease);
+    }
+
+    .rm-sidebar .rm-brand,
+    .rm-sidebar .rm-nav {
+        width: var(--rm-sidebar);
+        box-sizing: border-box;
+    }
+
+    .rm-sidebar .rm-brand {
+        box-shadow: inset 0 -1px 0 var(--rm-gray-200);
+    }
+
+    .rm-sidebar-mark {
+        display: block;
+        position: sticky;
+        bottom: 0;
+        height: 0;
+        flex: none;
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .rm-sidebar-mark img {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        display: block;
+        width: var(--rm-sidebar);
+        max-width: none;
+        height: auto;
+    }
+
+    /* The icon rail. The <html> element carries the choice, so it is there before the page is drawn. */
+    html.rm-rail .rm-sidebar.navbar-vertical.navbar-expand-lg {
+        width: var(--rm-rail);
+    }
+
+    html.rm-rail .rm-sidebar.navbar-vertical ~ .navbar,
+    html.rm-rail .rm-sidebar.navbar-vertical ~ .page-wrapper {
+        margin-left: var(--rm-rail);
+    }
+
+    html.rm-rail .rm-sidebar .rm-brand,
+    html.rm-rail .rm-sidebar .rm-nav {
+        width: var(--rm-rail);
+    }
+
+    html.rm-rail .rm-sidebar .rm-brand {
+        justify-content: center;
+        align-items: flex-start;
+        padding: 12px 0 0;
+    }
+
+    html.rm-rail .rm-sidebar .rm-brand-full {
+        display: none !important;
+    }
+
+    /* The two marks as production shows them in the rail: Merdeka Copper Gold 20 high, Merdeka Battery Materials 24,
+       side by side with their middles in line, 12px from the top. */
+    html.rm-rail .rm-sidebar .rm-brand-rail {
+        display: flex !important;
+        align-items: center;
+        gap: 5px;
+    }
+
+    html.rm-rail .rm-sidebar .rm-brand-rail img:first-child {
+        height: 20px;
+    }
+
+    html.rm-rail .rm-sidebar .rm-brand-rail img:last-child {
+        height: 24px;
+    }
+
+    /* The rail as production has it: icons of 22px in rows 36 high every 48px, the first 66px from the top. */
+    html.rm-rail .rm-nav.navbar-nav {
+        gap: 12px;
+        padding-top: 10px;
+    }
+
+    html.rm-rail .rm-nav-link {
+        justify-content: center;
+        padding: 8px 0;
+    }
+
+    html.rm-rail .rm-nav-icon .ti {
+        font-size: 1.375rem;
+    }
+
+    html.rm-rail .rm-nav-label,
+    html.rm-rail .rm-nav-section > span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    html.rm-rail .rm-nav-chevron,
+    html.rm-rail .rm-nav-count,
+    html.rm-rail .rm-nav-kids,
+    html.rm-rail .rm-sidebar-mark {
+        display: none;
+    }
+
+    html.rm-rail .rm-nav-dot {
+        display: block;
+    }
+
+    html.rm-rail .rm-nav-section {
+        height: 1px;
+        margin: 7px 8px 8px;
+        padding: 0;
+        background: var(--rm-gray-200);
+    }
+
+    /* In the rail a group is its icon: it shows as the current page when one of its pages is. */
+    html.rm-rail .rm-nav-group.has-active > .rm-nav-link {
+        background: var(--rm-brand-50);
+        color: var(--rm-brand-700);
+        font-weight: 600;
+    }
+}
+
+/* Top bar (main.navbar.navbar). */
+.rm-topbar.navbar {
+    height: 56px;
+    min-height: 56px;
+    padding: 0 24px;
+    background: #fff;
+    border: 0;
+    box-shadow: inset 0 -1px 0 var(--rm-gray-200);
+}
+
+.rm-topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+}
+
+.rm-topbar-title {
+    min-width: 0;
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+    color: var(--rm-gray-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The path to the page, at the top of the content under the bar: "Dashboard › Master Data Radio › Tipe Radio". What
+   comes before the page is grey (a link where it leads somewhere); the page itself is dark, cut short with "…" when the
+   line is too narrow. */
+.rm-crumbbar {
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 400;
+}
+
+.rm-crumbbar ol {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rm-crumbbar li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    color: var(--rm-gray-500);
+}
+
+.rm-crumbbar li:last-child {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.rm-crumbbar li:last-child > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rm-crumbbar a {
+    color: var(--rm-gray-500);
+    text-decoration: none;
+    transition: color .12s ease-out;
+}
+
+.rm-crumbbar a:hover {
+    color: var(--rm-gray-900);
+}
+
+.rm-crumbbar [aria-current] {
+    color: var(--rm-gray-900);
+    font-weight: 500;
+}
+
+.rm-crumbbar .ti {
+    color: var(--rm-gray-400);
+    font-size: 14px;
+}
+
+.rm-topbar-end {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.rm-topbar-company {
+    font-size: 13px;
+    color: var(--rm-gray-500);
+    white-space: nowrap;
+}
+
+/* The language of the screens in the top bar (ID | EN): a segmented control 32 high, as the bell and the avatar. */
+.rm-topbar-lang.rm-seg {
+    margin: 0;
+    padding: 3px;
+}
+
+.rm-topbar-lang.rm-seg > button {
+    padding: 5px 8px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+}
+
+.rm-topbar-lang.rm-seg > button.is-on {
+    cursor: default;
+}
+
+.rm-topbar-lang.rm-seg > button:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 1px;
+}
+
+.rm-icon-btn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--rm-gray-500);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color .12s ease-out;
+}
+
+.rm-icon-btn .ti {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.rm-icon-btn:hover,
+.rm-icon-btn:focus {
+    color: var(--rm-gray-500);
+    text-decoration: none;
+}
+
+.rm-icon-btn:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 0;
+}
+
+.rm-icon-btn.is-ringed {
+    box-shadow: inset 0 0 0 1px var(--rm-gray-200);
+}
+
+.rm-icon-btn.is-ringed:hover {
+    background: var(--rm-gray-50);
+}
+
+.rm-icon-btn.is-ringed:active {
+    background: var(--rm-gray-100);
+}
+
+.rm-bell .ti {
+    font-size: 18px;
+}
+
+.rm-bell:hover,
+.rm-bell[aria-expanded="true"] {
+    background: var(--rm-gray-100);
+}
+
+.rm-bell:active {
+    background: var(--rm-gray-200);
+}
+
+.rm-bell-count {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    box-sizing: border-box;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--rm-error-600);
+    color: #fff;
+    font-size: 10px;
+    line-height: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.rm-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -4px -8px;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--rm-gray-900);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-user-btn:hover,
+.rm-user-btn[aria-expanded="true"] {
+    background: var(--rm-gray-50);
+}
+
+.rm-user-btn:active {
+    background: var(--rm-gray-100);
+}
+
+.rm-user-btn:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 0;
+}
+
+.rm-avatar {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    object-fit: cover;
+}
+
+.rm-user-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.rm-user-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rm-user-role {
+    font-size: 12px;
+    color: var(--rm-gray-500);
+}
+
+/* A menu that opens under a button (the user menu; later the other dropdowns). */
+.rm-menu.dropdown-menu {
+    min-width: 0;
+    padding: 6px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring), var(--rm-shadow-lg);
+}
+
+.rm-user-menu.dropdown-menu {
+    width: 228px;
+}
+
+.rm-menu-head {
+    margin-bottom: 6px;
+    padding: 8px 10px 10px;
+    box-shadow: inset 0 -1px 0 var(--rm-gray-100);
+}
+
+.rm-menu-head-name {
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 600;
+    color: var(--rm-gray-900);
+}
+
+.rm-menu-head-mail {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--rm-gray-500);
+    overflow-wrap: anywhere;
+}
+
+.rm-menu .rm-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rm-gray-700);
+    font-size: 14px;
+    line-height: 20px;
+    text-decoration: none;
+    transition: background-color .12s ease-out;
+}
+
+.rm-menu .rm-menu-item .ti {
+    font-size: 16px;
+}
+
+.rm-menu .rm-menu-item:hover,
+.rm-menu .rm-menu-item:focus {
+    background: var(--rm-gray-50);
+    color: var(--rm-gray-700);
+}
+
+.rm-menu .rm-menu-item:active {
+    background: var(--rm-gray-100);
+}
+
+.rm-menu .rm-menu-item.is-danger,
+.rm-menu .rm-menu-item.is-danger:hover,
+.rm-menu .rm-menu-item.is-danger:focus {
+    color: var(--rm-error-600);
+}
+
+
+/* Main area and footer (main.index, main.footer.footer): the main area takes the height left, so the footer stays at the
+   foot of the window on a short page. */
+.rm-page {
+    min-height: 100vh;
+}
+
+.rm-main.page-body {
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 24px;
+}
+
+.rm-main > .rm-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.rm-footer.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: 14px 24px;
+    border: 0;
+    background: transparent;
+    box-shadow: inset 0 1px 0 var(--rm-gray-200);
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.rm-footer a {
+    color: inherit;
+}
+
+/* The version: it opens what changed in each version (main.footer.footer). */
+.rm-footer .rm-version {
+    padding: 1px 6px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--rm-gray-700);
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-footer .rm-version:hover {
+    background: var(--rm-gray-900);
+}
+
+.rm-footer .rm-version:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 2px;
+}
+
+/* What changed in each version (the design's ChangelogDialog): a timeline of CHANGELOG.md, newest first. A series ("1.14")
+   is a node with its minor release, its patches hang below it as branches; every version takes the colour of its strongest
+   kind of change, for its node, its notes and the stretch of line beside it. */
+.rm-dialog-body.rm-changelog {
+    gap: 0;
+    padding: 16px 24px 24px;
+}
+
+.rm-changelog-note {
+    padding: 24px 0;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* The colours of a kind of change: Added, Changed, Fixed, Removed, Security, Deprecated (and any other heading: grey). */
+.rm-cl-kind-added {
+    --rm-cl-50: var(--rm-success-50);
+    --rm-cl-100: var(--rm-success-100);
+    --rm-cl-400: var(--rm-success-400);
+    --rm-cl-500: var(--rm-success-500);
+    --rm-cl-600: var(--rm-success-600);
+    --rm-cl-700: var(--rm-success-700);
+}
+
+.rm-cl-kind-changed {
+    --rm-cl-50: var(--rm-brand-50);
+    --rm-cl-100: var(--rm-brand-100);
+    --rm-cl-400: var(--rm-brand-400);
+    --rm-cl-500: var(--rm-brand-500);
+    --rm-cl-600: var(--rm-brand-600);
+    --rm-cl-700: var(--rm-brand-700);
+}
+
+.rm-cl-kind-fixed {
+    --rm-cl-50: var(--rm-orange-50);
+    --rm-cl-100: var(--rm-orange-100);
+    --rm-cl-400: var(--rm-orange-400);
+    --rm-cl-500: var(--rm-orange-500);
+    --rm-cl-600: var(--rm-orange-600);
+    --rm-cl-700: var(--rm-orange-700);
+}
+
+.rm-cl-kind-removed {
+    --rm-cl-50: var(--rm-error-50);
+    --rm-cl-100: var(--rm-error-100);
+    --rm-cl-400: var(--rm-error-400);
+    --rm-cl-500: var(--rm-error-500);
+    --rm-cl-600: var(--rm-error-600);
+    --rm-cl-700: var(--rm-error-700);
+}
+
+.rm-cl-kind-security {
+    --rm-cl-50: var(--rm-violet-50);
+    --rm-cl-100: var(--rm-violet-100);
+    --rm-cl-400: var(--rm-violet-400);
+    --rm-cl-500: var(--rm-violet-500);
+    --rm-cl-600: var(--rm-violet-600);
+    --rm-cl-700: var(--rm-violet-700);
+}
+
+.rm-cl-kind-deprecated,
+.rm-cl-kind-other {
+    --rm-cl-50: var(--rm-gray-50);
+    --rm-cl-100: var(--rm-gray-100);
+    --rm-cl-400: var(--rm-gray-400);
+    --rm-cl-500: var(--rm-gray-500);
+    --rm-cl-600: var(--rm-gray-600);
+    --rm-cl-700: var(--rm-gray-700);
+}
+
+/* The legend: a minor and a patch release, then the kinds of change the file has. */
+.rm-cl-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+    margin-bottom: 16px;
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+    animation: rm-rise .3s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+.rm-cl-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rm-cl-key-minor {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--rm-brand-50);
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+.rm-cl-key-patch {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+}
+
+.rm-cl-key-patch > span {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px var(--rm-brand-400);
+}
+
+.rm-cl-key-rule {
+    width: 1px;
+    height: 14px;
+    background: var(--rm-gray-200);
+}
+
+.rm-cl-key-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--rm-cl-500);
+}
+
+/* A version: the rail (36px; a patch 64px, its node on a branch) beside its number, date and notes. */
+.rm-cl-release {
+    animation: rm-rise .34s cubic-bezier(.2, .8, .2, 1) var(--rm-cl-delay, 0ms) backwards;
+}
+
+.rm-cl-row,
+.rm-cl-era {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 14px;
+}
+
+.rm-cl-release.is-patch .rm-cl-row {
+    grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.rm-cl-rail {
+    position: relative;
+}
+
+.rm-cl-line,
+.rm-cl-era-line {
+    position: absolute;
+    left: 17px;
+    border-left: 2px solid var(--rm-cl-400);
+}
+
+.rm-cl-line {
+    transform-origin: top;
+    animation: rm-grow-y .34s cubic-bezier(.2, .8, .2, 1) var(--rm-cl-delay, 0ms) backwards;
+}
+
+.rm-cl-line.is-top {
+    top: 0;
+    height: 16px;
+}
+
+.rm-cl-line.is-bottom,
+.rm-cl-era-line {
+    top: 16px;
+    bottom: 0;
+}
+
+.rm-cl-era-line {
+    top: 0;
+}
+
+.rm-cl-elbow {
+    position: absolute;
+    top: 15px;
+    left: 19px;
+    width: 21px;
+    border-top: 2px solid var(--rm-cl-400);
+}
+
+.rm-cl-node,
+.rm-cl-ping {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+}
+
+.rm-cl-node {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    background: var(--rm-cl-50);
+    box-shadow: inset 0 0 0 2px var(--rm-cl-600);
+    color: var(--rm-cl-700);
+    font-size: 10px;
+    line-height: 12px;
+    font-weight: 600;
+    animation: rm-check .3s cubic-bezier(.2, .8, .2, 1) calc(var(--rm-cl-delay, 0ms) + 110ms) backwards;
+}
+
+/* A major release (x.0.0): a filled violet node with a halo, its number larger, and a badge. */
+.rm-cl-release.is-major .rm-cl-node,
+.rm-cl-release.is-major .rm-cl-ping {
+    top: -2px;
+    left: 0;
+    width: 36px;
+    height: 36px;
+}
+
+.rm-cl-release.is-major .rm-cl-node {
+    background: var(--rm-violet-600);
+    box-shadow: 0 0 0 4px var(--rm-violet-100);
+    color: #fff;
+}
+
+.rm-cl-release.is-patch .rm-cl-node,
+.rm-cl-release.is-patch .rm-cl-ping {
+    top: 10px;
+    left: 40px;
+    width: 12px;
+    height: 12px;
+}
+
+.rm-cl-release.is-patch .rm-cl-node {
+    background: #fff;
+    box-shadow: inset 0 0 0 2px var(--rm-cl-500);
+}
+
+.rm-cl-release.is-patch.is-current .rm-cl-node {
+    background: var(--rm-cl-600);
+    box-shadow: 0 0 0 3px var(--rm-cl-100);
+}
+
+/* The version this server runs: its node pings. */
+.rm-cl-ping {
+    background: var(--rm-cl-600);
+    animation: rm-ping 1.9s ease-out .7s infinite;
+}
+
+.rm-cl-content {
+    min-width: 0;
+}
+
+.rm-cl-release.has-next .rm-cl-content {
+    padding-bottom: 16px;
+}
+
+.rm-cl-release.is-patch.has-next .rm-cl-content {
+    padding-bottom: 14px;
+}
+
+.rm-cl-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    margin-bottom: 4px;
+}
+
+.rm-cl-version {
+    color: var(--rm-gray-900);
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 600;
+}
+
+.rm-cl-release.is-patch .rm-cl-version {
+    font-size: 14px;
+}
+
+.rm-cl-release.is-major .rm-cl-version {
+    font-size: 17px;
+}
+
+.rm-cl-date {
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.rm-badge.rm-cl-major {
+    background: var(--rm-violet-600);
+    color: #fff;
+}
+
+/* Where a major version begins: "VERSI 1" and a hairline, the line of the timeline running through it. */
+.rm-cl-era-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 0 12px;
+    color: var(--rm-gray-500);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.rm-cl-legend + .rm-cl-release .rm-cl-era-label {
+    padding-top: 0;
+}
+
+.rm-cl-hair {
+    flex: 1;
+    height: 1px;
+    background: var(--rm-gray-200);
+}
+
+/* The notes (in Indonesian, as CHANGELOG.md writes them): a pill per kind of change, the bullets in its colour. */
+.rm-cl-section {
+    margin: 12px 0 6px;
+}
+
+.rm-cl-notes > .rm-cl-section:first-child {
+    margin-top: 0;
+}
+
+.rm-cl-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--rm-cl-100);
+    color: var(--rm-cl-700);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.rm-cl-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--rm-cl-500);
+}
+
+.rm-cl-text {
+    color: var(--rm-gray-700);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+}
+
+.rm-cl-text p,
+.rm-cl-text ul,
+.rm-cl-text ol {
+    margin: 0;
+    padding: 0;
+}
+
+.rm-cl-text ul {
+    list-style: none;
+}
+
+.rm-cl-text ol {
+    padding-left: 18px;
+}
+
+.rm-cl-text ul > li {
+    position: relative;
+    padding-left: 18px;
+}
+
+.rm-cl-text ul > li::before {
+    content: "•";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    color: var(--rm-cl-500);
+    font-weight: 700;
+    text-align: center;
+}
+
+.rm-cl-text li li::before {
+    content: "–";
+    color: var(--rm-gray-400);
+}
+
+.rm-cl-text > * + *,
+.rm-cl-text li + li,
+.rm-cl-text li > * + *,
+.rm-cl-text li > ul,
+.rm-cl-text li > ol {
+    margin-top: 4px;
+}
+
+.rm-cl-text strong {
+    color: var(--rm-gray-900);
+    font-weight: 600;
+}
+
+.rm-cl-text code {
+    padding: 0 4px;
+    border-radius: 4px;
+    background: var(--rm-gray-100);
+    color: var(--rm-gray-900);
+    font-family: var(--rm-mono);
+    font-size: 12px;
+}
+
+/* No link is underlined when it is pointed at, anywhere (the owner's wish; Tabler underlines every a:hover). A link shows
+   that it can be clicked by its colour and the pointer; a tile or a row by its background. */
+a:hover,
+a:focus {
+    text-decoration: none;
+}
+
+/* Notifications: the panel of the bell (400 wide) and the page, with the same rows. */
+.dropdown-menu.rm-notif-menu {
+    width: 400px;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: var(--rm-shadow-xl), var(--rm-ring);
+}
+
+.rm-notif-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px 12px;
+}
+
+.rm-notif-head-title {
+    margin: 0;
+    color: var(--rm-gray-900);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+}
+
+.rm-notif-readall {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--rm-brand-600);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.rm-notif-readall:hover {
+    color: var(--rm-brand-700);
+}
+
+.rm-notif-menu .rm-notif-list {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.rm-notif-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    box-shadow: inset 0 1px 0 var(--rm-gray-100);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color .12s ease-out;
+}
+
+.rm-notif-item.is-unread {
+    background: var(--rm-brand-50);
+}
+
+.rm-notif-item:hover,
+.rm-notif-item:focus-visible {
+    background: var(--rm-gray-50);
+    color: inherit;
+}
+
+.rm-notif-disc {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--rm-gray-100);
+    color: var(--rm-gray-600);
+    font-size: 16px;
+}
+
+.rm-notif-disc.tone-red {
+    background: var(--rm-error-100);
+    color: var(--rm-error-600);
+}
+
+.rm-notif-disc.tone-green {
+    background: var(--rm-success-100);
+    color: var(--rm-success-700);
+}
+
+.rm-notif-disc.tone-blue {
+    background: var(--rm-brand-100);
+    color: var(--rm-brand-700);
+}
+
+.rm-notif-disc.tone-orange {
+    background: var(--rm-orange-100);
+    color: var(--rm-orange-700);
+}
+
+.rm-notif-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.rm-notif-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.rm-notif-title {
+    color: var(--rm-gray-900);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.rm-notif-item.is-unread .rm-notif-title {
+    font-weight: 600;
+}
+
+.rm-notif-time {
+    flex: none;
+    margin-left: auto;
+    color: var(--rm-gray-400);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.rm-notif-body {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    line-height: 18px;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.rm-notif-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: var(--rm-brand-600);
+}
+
+.rm-notif-empty {
+    padding: 24px 16px;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    text-align: center;
+}
+
+.rm-notif-foot {
+    display: block;
+    padding: 12px 16px;
+    box-shadow: inset 0 1px 0 var(--rm-gray-200);
+    color: var(--rm-brand-600);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color .12s ease-out;
+}
+
+.rm-notif-foot:hover {
+    background: var(--rm-gray-50);
+    color: var(--rm-brand-700);
+}
+
+/* 4. Recipes --------------------------------------------------------------------------------------------------------- */
+
+/* Page title block: above the content card. */
+.rm-title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--rm-gray-900);
+}
+
+.rm-sub {
+    margin: 0;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--rm-gray-500);
+}
+
+/* Content card: the toolbar and the boxes of a page. */
+.rm-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+}
+
+.rm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.rm-toolbar .rm-end {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* A toolbar of one row of controls of the same height (search, buttons, a segmented control). */
+.rm-toolbar.rm-toolbar-tight {
+    align-items: center;
+    gap: 8px;
+}
+
+/* A bordered box inside the card (tables, sheets, diffs, timelines): a real border, because rows with a background of
+   their own paint over an inset ring. */
+.rm-box {
+    overflow: hidden;
+    border: 1px solid var(--rm-gray-200);
+    border-radius: 8px;
+    background: #fff;
+}
+
+/* Table. */
+.rm-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.rm-table > thead > tr > th {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--rm-gray-200);
+    background: var(--rm-gray-50);
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.rm-table > tbody > tr > td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--rm-gray-100);
+    color: var(--rm-gray-900);
+    font-size: 13px;
+    line-height: 1.35;
+    vertical-align: middle;
+}
+
+/* The last column (a row's buttons) stays in view while a wide table scrolls sideways, without a line beside it. */
+.rm-table > tbody > tr > td.rm-sticky-end {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: #fff;
+}
+
+.rm-table > thead > tr > th.rm-sticky-end {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+}
+
+.rm-table.compact > tbody > tr > td {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.rm-table > tbody > tr:last-child > td {
+    border-bottom: 0;
+}
+
+.rm-table > tbody > tr:hover > td {
+    background: var(--rm-gray-50);
+}
+
+.rm-table > tbody > tr.is-selected > td {
+    background: var(--rm-brand-50);
+}
+
+.rm-foot {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+}
+
+/* Segmented control (Board | List, Table | Log activity, Active | Archived | All, Grid | List). */
+.rm-seg {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+}
+
+.rm-seg > * {
+    padding: 5px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rm-gray-700);
+    font-size: 14px;
+    line-height: 20px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .15s ease-out, color .15s ease-out;
+}
+
+.rm-seg > .is-on {
+    background: var(--rm-brand-50);
+    color: var(--rm-brand-700);
+    font-weight: 600;
+}
+
+.rm-seg > :not(.is-on):hover {
+    background: var(--rm-gray-50);
+}
+
+/* Line tabs (Master data, Edit approvals, Notifications). */
+.rm-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 20px;
+    box-shadow: inset 0 -1px 0 var(--rm-gray-200);
+}
+
+.rm-tabs > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 4px;
+    white-space: nowrap;
+    border: 0;
+    background: transparent;
+    color: var(--rm-gray-500);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rm-tabs > .is-on {
+    color: var(--rm-brand-700);
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 var(--rm-brand-600);
+}
+
+/* Buttons: regular 36px, small 28px. */
+.btn-rm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 36px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .12s ease-out, box-shadow .12s ease-out;
+}
+
+.btn-rm .ti {
+    font-size: 16px;
+}
+
+.btn-rm.sm {
+    height: 28px;
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 16px;
+    gap: 6px;
+}
+
+.btn-rm.sm .ti {
+    font-size: 14px;
+}
+
+/* A button that is only its icon (Refresh in a toolbar): square, as high as the fields beside it. */
+.btn-rm.is-icon {
+    width: 36px;
+    padding: 0;
+}
+
+.btn-rm.primary {
+    background: var(--rm-brand-600);
+    color: #fff;
+}
+
+.btn-rm.primary:hover {
+    background: var(--rm-brand-700);
+    color: #fff;
+}
+
+.btn-rm.primary:active {
+    background: var(--rm-brand-800);
+}
+
+.btn-rm.secondary {
+    background: #fff;
+    color: var(--rm-gray-700);
+    box-shadow: var(--rm-ring);
+}
+
+.btn-rm.secondary:hover {
+    background: var(--rm-gray-50);
+    color: var(--rm-gray-700);
+}
+
+.btn-rm.secondary:active {
+    background: var(--rm-gray-100);
+}
+
+.btn-rm.success {
+    background: var(--rm-success-500);
+    color: #fff;
+}
+
+.btn-rm.success:hover {
+    background: var(--rm-success-600);
+    color: #fff;
+}
+
+.btn-rm.destructive {
+    background: var(--rm-error-600);
+    color: #fff;
+}
+
+.btn-rm.destructive:hover {
+    background: var(--rm-error-700);
+    color: #fff;
+}
+
+.btn-rm:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 2px;
+}
+
+/* A link drawn as a button that leads nowhere now (the first page has no "previous"). */
+.btn-rm.disabled {
+    opacity: .5;
+    pointer-events: none;
+}
+
+.btn-rm:disabled,
+.btn-rm.disabled {
+    background: var(--rm-gray-100);
+    color: var(--rm-gray-400);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-rm.is-busy {
+    pointer-events: none;
+}
+
+.btn-rm.is-busy::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: rm-spin .7s linear infinite;
+}
+
+.btn-rm.secondary.is-busy::before {
+    border-color: rgba(51, 65, 85, .25);
+    border-top-color: var(--rm-gray-700);
+}
+
+/* Fields. */
+.rm-field label,
+.rm-field .form-label {
+    margin-bottom: 6px;
+    color: var(--rm-gray-700);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 500;
+}
+
+.rm-field .form-control,
+.rm-field .form-select {
+    height: 36px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px var(--rm-gray-300);
+}
+
+.rm-field .form-control:focus,
+.rm-field .form-select:focus {
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+/* Badge (faded): radius 4, padding 2px 4px, 12/16. */
+.rm-badge {
+    display: inline-block;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.rm-badge.blue {
+    background: var(--rm-brand-100);
+    color: var(--rm-brand-600);
+}
+
+.rm-badge.green {
+    background: var(--rm-success-100);
+    color: var(--rm-success-500);
+}
+
+.rm-badge.yellow {
+    background: var(--rm-warning-100);
+    color: var(--rm-warning-600);
+}
+
+.rm-badge.orange {
+    background: var(--rm-orange-100);
+    color: var(--rm-orange-600);
+}
+
+.rm-badge.red {
+    background: var(--rm-error-100);
+    color: var(--rm-error-600);
+}
+
+.rm-badge.purple {
+    background: var(--rm-violet-100);
+    color: var(--rm-violet-600);
+}
+
+.rm-badge.gray {
+    background: var(--rm-gray-200);
+    color: var(--rm-gray-700);
+}
+
+
+/* Search field with its icon, in a toolbar. */
+.rm-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 320px;
+    max-width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+    color: var(--rm-gray-400);
+    transition: box-shadow .15s ease-out;
+}
+
+.rm-search:focus-within {
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+.rm-search .ti {
+    font-size: 16px;
+}
+
+.rm-search input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+}
+
+.rm-search input::placeholder {
+    color: var(--rm-gray-400);
+    font-style: normal !important;
+}
+
+/* A segmented control made of radio inputs and their labels. */
+.rm-seg > input {
+    position: absolute;
+    clip: rect(0, 0, 0, 0);
+    pointer-events: none;
+}
+
+.rm-seg > input:checked + label {
+    background: var(--rm-brand-50);
+    color: var(--rm-brand-700);
+    font-weight: 600;
+}
+
+.rm-seg > input:not(:checked) + label:hover {
+    box-shadow: inset 0 0 0 100px rgba(15, 23, 42, .04);
+}
+
+.rm-seg > input:focus-visible + label {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 1px;
+}
+
+.rm-seg.sm > label,
+.rm-seg.sm > a,
+.rm-seg.sm > button {
+    font-size: 13px;
+}
+
+.rm-seg > label {
+    margin: 0;
+}
+
+/* A panel inside the card (the filters). */
+.rm-panel {
+    padding: 16px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+}
+
+.rm-panel-title {
+    margin-bottom: 12px;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rm-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px 16px;
+}
+
+@media (max-width: 991.98px) {
+    .rm-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .rm-filter-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.rm-filter-grid .form-label,
+.rm-filter-grid label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--rm-gray-700);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+}
+
+.rm-panel .form-select,
+.rm-panel .form-control {
+    min-height: 34px;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: var(--rm-ring);
+    font-size: 13px;
+}
+
+.rm-panel .form-select:focus,
+.rm-panel .form-control:focus {
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+.rm-panel .select2-container--bootstrap-5 .select2-selection {
+    min-height: 34px;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: var(--rm-ring);
+    font-size: 13px;
+}
+
+.rm-panel .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.rm-panel .select2-container--bootstrap-5.select2-container--open .select2-selection {
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+.rm-panel .select2-selection__placeholder,
+.rm-panel .select2-search__field::placeholder {
+    color: var(--rm-gray-400) !important;
+    font-style: normal !important;
+}
+
+.rm-panel-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+/* Dialogs (Bootstrap modals with .rm-modal): 520 wide (760 with .wide), radius 12, a header with a round icon tile,
+   the body, and a footer with a hairline on top. */
+.rm-modal .modal-dialog {
+    max-width: 520px;
+    margin-top: 70px;
+}
+
+.rm-modal.wide .modal-dialog {
+    max-width: 760px;
+}
+
+/* A dialog that scrolls inside: as tall as the screen allows below its 70px (Bootstrap reckons with its own margin), and
+   its body is what scrolls. */
+.rm-modal .modal-dialog-scrollable {
+    height: calc(100% - 70px - var(--tblr-modal-margin));
+}
+
+.rm-modal .modal-dialog-scrollable .rm-dialog-body {
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.rm-modal .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: var(--rm-shadow-xl), var(--rm-ring);
+}
+
+.rm-dialog-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 24px 24px 16px;
+}
+
+.rm-dialog-head.is-ruled {
+    gap: 12px;
+    padding: 20px 24px 16px;
+    box-shadow: inset 0 -1px 0 var(--rm-gray-200);
+}
+
+.rm-dialog-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--rm-brand-100);
+    color: var(--rm-brand-600);
+    font-size: 20px;
+}
+
+.rm-dialog-icon.tone-green {
+    background: var(--rm-success-100);
+    color: var(--rm-success-600);
+}
+
+.rm-dialog-icon.tone-orange {
+    background: var(--rm-orange-100);
+    color: var(--rm-orange-600);
+}
+
+.rm-dialog-icon.tone-red {
+    background: var(--rm-error-100);
+    color: var(--rm-error-600);
+}
+
+.rm-dialog-icon.tone-yellow {
+    background: var(--rm-warning-100);
+    color: var(--rm-warning-600);
+}
+
+.rm-dialog-titles {
+    flex: 1;
+    min-width: 0;
+}
+
+.rm-dialog-title {
+    margin: 0;
+    color: var(--rm-gray-900);
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 600;
+}
+
+.rm-dialog-sub {
+    margin: 0;
+    color: var(--rm-gray-500);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.rm-dialog-close {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--rm-gray-400);
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-dialog-head.is-ruled .rm-dialog-close {
+    width: 32px;
+    height: 32px;
+    color: var(--rm-gray-500);
+}
+
+.rm-dialog-close .ti {
+    font-size: 18px;
+}
+
+.rm-dialog-close:hover {
+    background: var(--rm-gray-100);
+}
+
+.rm-dialog-close:active {
+    background: var(--rm-gray-200);
+}
+
+.rm-dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 24px 20px;
+    color: var(--rm-gray-700);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.rm-dialog-body.is-form {
+    gap: 22px;
+    padding: 20px 24px;
+}
+
+.rm-dialog-section-title {
+    margin-bottom: 12px;
+    color: var(--rm-gray-900);
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 600;
+}
+
+.rm-dialog-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 24px;
+    box-shadow: inset 0 1px 0 var(--rm-gray-200);
+}
+
+.rm-dialog-foot.is-gray {
+    gap: 12px;
+    background: var(--rm-gray-50);
+}
+
+.rm-dialog-foot .rm-dialog-note {
+    margin-right: auto;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    line-height: 20px;
+}
+
+/* Fields of the dialogs (36px, radius 8, a grey ring that turns blue in focus). */
+.rm-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* The mark of a field that must be filled: 4px from its name, as in production (Tabler's own). */
+.rm-field .form-label.required::after,
+.rm-field label.required::after {
+    content: "*";
+    margin-left: .25rem;
+    color: var(--rm-error-600);
+}
+
+.rm-field textarea.form-control {
+    height: auto;
+    min-height: 84px;
+    padding: 8px 12px;
+    resize: none;
+}
+
+.rm-field .form-hint,
+.rm-field .rm-hint {
+    margin-top: 6px;
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.rm-field .form-control:disabled,
+.rm-field .form-select:disabled {
+    background: var(--rm-gray-50);
+    color: var(--rm-gray-500);
+    box-shadow: inset 0 0 0 1px var(--rm-gray-200);
+}
+
+.rm-field .form-control.is-invalid,
+.rm-field .form-select.is-invalid {
+    box-shadow: inset 0 0 0 1px var(--rm-error-600);
+}
+
+.rm-field .select2-container--bootstrap-5 .select2-selection {
+    min-height: 36px;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px var(--rm-gray-300);
+    font-size: 14px;
+}
+
+.rm-field .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    padding-left: 0;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+}
+
+.rm-field .select2-container .select2-selection--single .select2-selection__placeholder,
+.rm-panel .select2-container .select2-selection .select2-selection__placeholder,
+.rm-field input::placeholder,
+.rm-field textarea::placeholder {
+    color: var(--rm-gray-400) !important;
+    font-style: normal !important;
+}
+
+.rm-input-group .rm-suffix:empty {
+    display: none;
+}
+
+.rm-field .rm-search {
+    margin-bottom: 0;
+}
+
+/* A switch or a box to tick in a form of the layer: its text in the size of the form (the global 0.65rem is for the
+   old pages). */
+.rm-field .form-check-label,
+.rm-modal .form-check-label,
+.rm-card .form-check-label {
+    padding-top: 0;
+    color: var(--rm-gray-700);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.rm-field .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.rm-field .select2-container--bootstrap-5.select2-container--open .select2-selection {
+    box-shadow: inset 0 0 0 2px var(--rm-brand-600);
+}
+
+/* A box that warns, or tells. */
+.rm-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--rm-brand-50);
+    box-shadow: inset 0 0 0 1px var(--rm-brand-200);
+    color: var(--rm-gray-700);
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.rm-alert > .ti {
+    flex: none;
+    margin-top: 1px;
+    color: var(--rm-brand-600);
+    font-size: 16px;
+}
+
+.rm-alert.warning {
+    background: var(--rm-warning-50);
+    box-shadow: inset 0 0 0 1px var(--rm-warning-200);
+}
+
+.rm-alert.warning > .ti {
+    color: var(--rm-warning-600);
+}
+
+.rm-alert.warning b {
+    color: var(--rm-warning-700);
+}
+
+.rm-alert.danger {
+    background: var(--rm-error-50);
+    box-shadow: inset 0 0 0 1px var(--rm-error-200);
+}
+
+.rm-alert.danger > .ti {
+    color: var(--rm-error-600);
+}
+
+.rm-alert.danger b {
+    color: var(--rm-error-700);
+}
+
+.rm-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.rm-note > .ti {
+    flex: none;
+    font-size: 16px;
+}
+
+/* Table cells. */
+.rm-table .rm-strong {
+    font-weight: 600;
+}
+
+.rm-table .rm-line2 {
+    color: var(--rm-gray-500);
+    font-size: 12px;
+}
+
+.rm-table .rm-none {
+    color: var(--rm-gray-400);
+}
+
+.rm-table .rm-code {
+    font-family: var(--rm-mono);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.rm-table .rm-ok {
+    display: inline-flex;
+    color: var(--rm-success-600);
+    font-size: 16px;
+}
+
+.rm-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.rm-tag {
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--rm-brand-100);
+    color: var(--rm-brand-700);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+}
+
+.rm-table > tbody > tr > td.rm-pick,
+.rm-table > thead > tr > th.rm-pick {
+    width: 44px;
+    padding-right: 0;
+    padding-left: 16px;
+}
+
+.rm-table > tbody > tr[data-href] {
+    cursor: pointer;
+}
+
+.rm-table > tbody > tr.is-dim > td {
+    opacity: .55;
+}
+
+.rm-table > tbody > tr:has(> td.rm-pick input:checked) > td {
+    background: var(--rm-brand-50);
+}
+
+.rm-table > tbody > tr > td.rm-empty,
+.rm-table > tbody > tr:hover > td.rm-empty {
+    padding: 24px 16px;
+    background: transparent;
+    color: var(--rm-gray-500);
+    font-size: 13px;
+    text-align: center;
+}
+
+.rm-table .form-check-input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid var(--rm-gray-300);
+    border-radius: 4px;
+    box-shadow: none;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: border-color .12s ease-out;
+}
+
+.rm-table .form-check-input:hover {
+    border-color: var(--rm-gray-500);
+}
+
+.rm-table .form-check-input:checked,
+.rm-table .form-check-input:indeterminate {
+    border-color: var(--rm-brand-600);
+    background-color: var(--rm-brand-600);
+}
+
+/* Sortable headers. */
+.rm-table > thead > tr > th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color .12s ease-out;
+}
+
+.rm-table > thead > tr > th.is-sorted {
+    color: var(--rm-gray-900);
+}
+
+.rm-sort {
+    display: inline-flex;
+    margin-left: 4px;
+    color: var(--rm-gray-300);
+    font-size: 12px;
+    vertical-align: -2px;
+    transition: color .12s ease-out;
+}
+
+th.is-sorted .rm-sort {
+    color: var(--rm-brand-600);
+}
+
+/* Row actions: 28px icon buttons with a ring. */
+.rm-acts {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.rm-act {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--rm-gray-200);
+    color: var(--rm-gray-500);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-act .ti {
+    font-size: 14px;
+}
+
+.rm-act:hover,
+.rm-act:focus {
+    background: var(--rm-gray-100);
+    color: var(--rm-gray-500);
+}
+
+.rm-act:active {
+    background: var(--rm-gray-200);
+}
+
+.rm-act:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 1px;
+}
+
+.rm-act.is-danger,
+.rm-act.is-danger:hover {
+    color: var(--rm-error-600);
+}
+
+.rm-act:disabled {
+    color: var(--rm-gray-300);
+    cursor: not-allowed;
+}
+
+/* The foot of a table: what is shown, the page size, the pages. */
+.rm-foot .rm-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.rm-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rm-size-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px 5px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+    color: var(--rm-gray-700);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-size-btn:hover {
+    background: var(--rm-gray-50);
+}
+
+.rm-size-btn:active {
+    background: var(--rm-gray-100);
+}
+
+.rm-size-btn .ti {
+    font-size: 14px;
+    transition: transform .18s ease-out;
+}
+
+.rm-size-btn[aria-expanded="true"] .ti {
+    transform: rotate(180deg);
+}
+
+.rm-size-menu.dropdown-menu {
+    width: 84px;
+    min-width: 84px;
+    padding: 4px;
+}
+
+.rm-menu .rm-size-item {
+    /* Tabler gives every item of a menu 11rem at least: here it would reach out of the 84px menu, over the table. */
+    min-width: 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: var(--rm-gray-700);
+    font-size: 13px;
+}
+
+.rm-menu .rm-size-item:hover {
+    background: var(--rm-gray-50);
+}
+
+.rm-menu .rm-size-item.is-on {
+    background: var(--rm-brand-50);
+    color: var(--rm-brand-700);
+    font-weight: 600;
+}
+
+.rm-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.rm-pager-arrow,
+.rm-pager-page {
+    display: inline-grid;
+    place-items: center;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rm-gray-700);
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-pager-arrow {
+    width: 28px;
+    box-shadow: inset 0 0 0 1px var(--rm-gray-200);
+}
+
+.rm-pager-arrow .ti {
+    font-size: 14px;
+}
+
+.rm-pager-arrow:hover {
+    background: var(--rm-gray-50);
+}
+
+.rm-pager-arrow:disabled {
+    background: transparent;
+    color: var(--rm-gray-400);
+    cursor: default;
+}
+
+.rm-pager-page {
+    min-width: 28px;
+    padding: 0 6px;
+}
+
+.rm-pager-page:hover {
+    background: var(--rm-gray-100);
+}
+
+.rm-pager-page:active {
+    background: var(--rm-gray-200);
+}
+
+.rm-pager-page.is-on,
+.rm-pager-page.is-on:hover {
+    background: var(--rm-brand-600);
+    color: #fff;
+    font-weight: 500;
+    cursor: default;
+}
+
+.rm-pager-dots {
+    min-width: 20px;
+    color: var(--rm-gray-400);
+    text-align: center;
+}
+
+/* The calendar of a range of days (Audit Log: "Custom range…"): a month, a band between the two days chosen. */
+.rm-cal {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1060;
+    width: 304px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: var(--rm-ring), var(--rm-shadow-lg);
+}
+
+.rm-cal[hidden] {
+    display: none;
+}
+
+.rm-cal-head {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: 8px;
+}
+
+.rm-cal-title {
+    flex: 1;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.rm-cal-nav {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--rm-gray-500);
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-cal-nav .ti {
+    font-size: 16px;
+}
+
+.rm-cal-nav:hover {
+    background: var(--rm-gray-100);
+}
+
+.rm-cal-nav:active {
+    background: var(--rm-gray-200);
+}
+
+.rm-cal-nav:disabled {
+    opacity: .35;
+    background: transparent;
+    cursor: default;
+}
+
+.rm-cal-week,
+.rm-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.rm-cal-week span {
+    height: 24px;
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 24px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.rm-cal-cell {
+    display: grid;
+    place-items: center;
+    height: 34px;
+}
+
+.rm-cal-day {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--rm-gray-900);
+    font-size: 13px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: background-color .12s ease-out;
+}
+
+.rm-cal-day:hover {
+    background: var(--rm-gray-100);
+}
+
+.rm-cal-day.is-today {
+    box-shadow: inset 0 0 0 1px var(--rm-brand-300);
+}
+
+.rm-cal-day.is-on,
+.rm-cal-day.is-on:hover {
+    background: var(--rm-brand-600);
+    box-shadow: none;
+    color: #fff;
+    font-weight: 600;
+}
+
+.rm-cal-day:disabled {
+    background: transparent;
+    color: var(--rm-gray-300);
+    cursor: default;
+}
+
+.rm-cal-day:focus-visible,
+.rm-cal-nav:focus-visible {
+    outline: 2px solid var(--rm-brand-600);
+    outline-offset: 1px;
+}
+
+.rm-cal-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    box-shadow: inset 0 1px 0 var(--rm-gray-100);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+}
+
+.rm-cal-foot a {
+    color: var(--rm-gray-500);
+    text-decoration: none;
+}
+
+.rm-cal-foot a[data-act="today"] {
+    margin-left: auto;
+    color: var(--rm-brand-600);
+}
+
+.rm-cal-foot a:hover {
+    color: var(--rm-gray-900);
+}
+
+.rm-cal-foot a[data-act="today"]:hover {
+    color: var(--rm-brand-700);
+}
+
+/* A range of days on the calendar (Audit log): a band between the two days chosen (or the first and the day under the
+   pointer), the summary and its buttons under it. */
+.rm-cal-cell.is-band {
+    background: var(--rm-brand-50);
+}
+
+.rm-cal-cell.is-start {
+    background: linear-gradient(to right, transparent 50%, var(--rm-brand-50) 50%);
+}
+
+.rm-cal-cell.is-end {
+    background: linear-gradient(to left, transparent 50%, var(--rm-brand-50) 50%);
+}
+
+.rm-cal-day.is-preview {
+    background: var(--rm-brand-100);
+    color: var(--rm-brand-700);
+}
+
+.rm-cal-sum {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    box-shadow: inset 0 1px 0 var(--rm-gray-100);
+}
+
+.rm-cal-sum-text {
+    flex: 1;
+    min-width: 0;
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+/* A card with a title (and a line under it, and a link on the right), as on the detail of a radio. */
+.rm-cardbox {
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--rm-ring);
+}
+
+.rm-cardbox-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 16px 12px;
+}
+
+.rm-cardbox-title {
+    margin: 0;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+}
+
+.rm-cardbox-sub {
+    margin-top: 2px;
+    color: var(--rm-gray-500);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.rm-cardbox-link {
+    margin-left: auto;
+    color: var(--rm-brand-600);
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.rm-cardbox-link:hover {
+    color: var(--rm-brand-700);
+}
+
+.rm-cardbox-body {
+    padding: 0 16px 16px;
+    color: var(--rm-gray-900);
+    font-size: 14px;
+    line-height: 20px;
+}
+
+/* The heading of the page on a phone (the top bar, which has it, is hidden there), and the greeting of the dashboard. */
+.rm-title-phone,
+.rm-welcome {
+    margin-bottom: 16px;
+}
+
+/* Bootstrap's dialogs get the scrim of the design. */
+.modal-backdrop {
+    --tblr-backdrop-bg: #0f172a;
+    --tblr-backdrop-opacity: .5;
+}
+
+/* 5. Motion ---------------------------------------------------------------------------------------------------------- */
+
+/* Where each animation of the design is used (the keyframes follow). prefers-reduced-motion stops all of them (end of
+   this section); the scripts that count or move something ask for it too (rmMotion). */
+
+/* The page fades in. */
+.rm-main > .rm-container {
+    animation: rm-fade-in .22s ease-out backwards;
+}
+
+/* Dialogs: the scrim in .18s and out .15s; the dialog pops in .22s and out .15s (Bootstrap's; SweetAlert keeps its own). */
+.modal-backdrop.fade {
+    transition: opacity .15s linear;
+}
+
+.modal-backdrop.fade.show {
+    transition-duration: .18s;
+}
+
+.modal.fade .modal-dialog {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+    transition: transform .15s ease-in, opacity .15s ease-in;
+}
+
+.modal.show .modal-dialog {
+    opacity: 1;
+    transform: none;
+    transition: transform .22s cubic-bezier(.2, .8, .2, 1), opacity .22s ease-out;
+}
+
+
+/* Menus (the user, the bell, the pickers, the page size) drop in from the side they open from. The menu is placed by
+   Popper with "transform": the animation moves it with "translate" and "scale", which add to it. */
+.dropdown-menu.show {
+    transform-origin: top left;
+    animation: rm-drop-in-menu .16s ease-out;
+}
+
+.dropdown-menu.dropdown-menu-end.show {
+    transform-origin: top right;
+}
+
+/* A table's rows fade in each time they are drawn again (a filter, a page, a view); two keyframes take turns so that
+   the animation starts again (rmMotion.tableFade). */
+.rm-fade-a {
+    animation: rm-fade-in .2s ease-out;
+}
+
+.rm-fade-b {
+    animation: rm-fade-in-b .2s ease-out;
+}
+
+/* What appears above a list: the bar of the ticked rows, the chips of the filters on, the panel of the filters. */
+.rm-bulk:not(.d-none),
+.rm-panel:not(.d-none) {
+    transform-origin: top left;
+    animation: rm-drop-in .22s cubic-bezier(.2, .8, .2, 1);
+}
+
+.rm-chip {
+    animation: rm-rise .22s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+/* A box being ticked. */
+.rm-table .form-check-input:checked {
+    animation: rm-check .18s ease-out;
+}
+
+/* Log activity: the entries rise one after another (26 ms apart; --i is the place of the entry). */
+.audit-event {
+    animation: rm-rise .26s cubic-bezier(.2, .8, .2, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 26ms);
+}
+
+/* Line tabs whose content is drawn again by a script: the line under the open tab slides to the next one
+   (rmMotion.ink). */
+.rm-ink-wrap {
+    position: relative;
+}
+
+.rm-tab-ink {
+    position: absolute;
+    left: 0;
+    width: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--rm-brand-600);
+    pointer-events: none;
+}
+
+.rm-tab-ink.is-moving {
+    transition: left .3s cubic-bezier(.2, .8, .2, 1), width .3s cubic-bezier(.2, .8, .2, 1), top .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.rm-tabs.has-ink > .is-on {
+    box-shadow: none;
+}
+
+@keyframes rm-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rm-fade-in-b { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rm-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes rm-pop-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes rm-pop-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px) scale(.985); } }
+@keyframes rm-drop-in { from { opacity: 0; transform: translateY(-6px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes rm-drop-in-menu { from { opacity: 0; translate: 0 -6px; scale: .97; } to { opacity: 1; translate: none; scale: none; } }
+@keyframes rm-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes rm-rise-b { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes rm-toast-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes rm-toast-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(10px); } }
+@keyframes rm-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes rm-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes rm-check { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes rm-grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes rm-ping { 0% { transform: scale(1); opacity: .45; } 100% { transform: scale(2.8); opacity: 0; } }
+@keyframes rm-spin { to { transform: rotate(360deg); } }
+@keyframes rm-pulse { from { box-shadow: 0 0 0 0 rgba(37, 99, 235, .45); } to { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); } }
+@keyframes rm-slide-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes rm-xfade { 0% { opacity: 0; } 3% { opacity: 1; } 25% { opacity: 1; } 28% { opacity: 0; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+
+    /* The running version does not ping. */
+    .rm-cl-ping {
+        display: none;
+    }
+}

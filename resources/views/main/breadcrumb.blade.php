@@ -1,23 +1,30 @@
-{{-- Breadcrumb of the current page: home, the menu path of the page and the items the page pushes onto the "breadcrumbs" stack (x-global.breadcrumb-item). Without a current item the page title closes it. Data: App\View\Composers\BreadcrumbComposer. --}}
-@php($hasPageItems = ! $__env->isStackEmpty('breadcrumbs'))
-@php($hasCurrentMenu = collect($trail)->contains('current', true))
-<nav aria-label="{{ __('Breadcrumb') }}" class="mb-2">
-    <ol class="breadcrumb breadcrumb-arrows breadcrumb-muted mb-0 small">
-        <li class="breadcrumb-item">
-            <a href="{{ $homeUrl }}" title="{{ __('Home') }}" aria-label="{{ __('Home') }}"><i class="ti ti-home"></i></a>
-        </li>
-        @foreach ($trail as $item)
-            @if ($item['current'] && ! $hasPageItems)
-                <li class="breadcrumb-item active" aria-current="page">{{ $item['label'] }}</li>
-            @elseif ($item['url'])
-                <li class="breadcrumb-item"><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
-            @else
-                <li class="breadcrumb-item">{{ $item['label'] }}</li>
-            @endif
-        @endforeach
-        @stack('breadcrumbs')
-        @if (! $hasPageItems && ! $hasCurrentMenu)
-            <li class="breadcrumb-item active" aria-current="page">@yield('page-title')</li>
-        @endif
-    </ol>
-</nav>
+{{-- The path to the page, at the top of the content under the top bar: "Dashboard › Survey Management › Reminders" (as in
+     MTI Radio Management). What comes before the page is grey, a link where it leads somewhere; the page itself is dark.
+     A page may name itself here (@section('crumb')), else its title is used; a greeting (@section('welcome')) takes the
+     place of the path. On a phone the heading of the page follows, as the top bar that has it is hidden there.
+     Data: App\View\Composers\BreadcrumbComposer. --}}
+@hasSection('welcome')
+    <p class="rm-title rm-welcome">@yield('welcome')</p>
+@else
+    <nav class="rm-crumbbar" aria-label="{{ __('Breadcrumb') }}">
+        <ol>
+            @foreach ($crumbs as $crumb)
+                <li>
+                    @unless ($loop->first)
+                        <i class="ti ti-chevron-right" aria-hidden="true"></i>
+                    @endunless
+                    @if ($crumb['url'] !== null)
+                        <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
+                    @else
+                        <span @if ($loop->last) aria-current="page" @endif>{{ $crumb['label'] }}</span>
+                    @endif
+                </li>
+            @endforeach
+        </ol>
+    </nav>
+    @if ($heading !== '')
+        <div class="rm-title-phone d-lg-none">
+            <h1 class="rm-title">{!! $heading !!}</h1>
+        </div>
+    @endif
+@endif

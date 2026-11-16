@@ -1,47 +1,51 @@
-<!-- Navbar -->
-<header class="navbar navbar-expand-md bg-white d-none d-lg-flex d-print-none sticky-top border-bottom">
-    <div class="container-xl">
-        <div class="d-flex align-items-center gap-2">
-            <button id="sidebarControl" type="button" class="btn bg-secondary-lt p-1 d-none d-md-flex align-items-center"
-                aria-label="{{ __('Toggle sidebar') }}">
-                <i class="ti ti-layout-sidebar text-dark h2 mb-0"></i>
-            </button>
-            <div class="fw-bolder mdka-text-brand-500 h3 mb-0">
-                @yield('page-title')
-            </div>
-        </div>
-        <div class="navbar-nav flex-row order-md-last align-items-center">
-            @if (Auth::user()->company)
-                <p class="mb-0 text-primary me-3" style="font-size: 13px">
-                    <strong>{{ Auth::user()->company->name }}</strong>
-                </p>
-            @endif
-
-            <x-global.locale-switcher class="me-3" />
-
-            <div class="me-3">
-                @include('main.navbar.notifications')
-            </div>
-
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
-                    aria-label="{{ __('Open user menu') }}">
-                    <span class="avatar avatar-sm rounded-circle position-relative"
-                        style="background-image: url({{ Auth::user()->photoUrl() ?? asset('assets/img/avatar/1.png') }})">
-                        <span class="status-dot status-dot-animated bg-green position-absolute bottom-0 end-0 d-block"></span>
+<!-- Top bar -->
+@php
+    $me = Auth::user();
+    $myRoles = $me->roles->pluck('name')->filter()->implode(', ');
+@endphp
+<header class="navbar navbar-expand-md d-none d-lg-flex d-print-none sticky-top rm-topbar">
+    <div class="rm-topbar-inner">
+        <button id="sidebarControl" type="button" class="rm-icon-btn is-ringed" aria-controls="sidebar-menu"
+            aria-pressed="false" aria-label="{{ __('Expand or collapse the menu') }}" title="{{ __('Expand or collapse the menu') }}">
+            <i class="ti ti-layout-sidebar" aria-hidden="true"></i>
+        </button>
+        {{-- The heading of the page (main.index); the path to it is under the bar. --}}
+        <h1 class="rm-topbar-title">{!! $heading !!}</h1>
+        <div class="rm-topbar-end">
+            <span class="rm-topbar-company">{{ $me->company?->name }}</span>
+            {{-- The language of the screens, as on the sign-in page: EN | ID | 中文, the one in use marked. --}}
+            <form method="POST" action="{{ route('locale.update') }}" class="rm-seg rm-topbar-lang" id="languageSwitch"
+                aria-label="{{ __('Language') }}">
+                @csrf
+                @foreach (config('app.available_locales') as $locale => $language)
+                    <button type="submit" name="locale" value="{{ $locale }}" lang="{{ str_replace('_', '-', $locale) }}"
+                        title="{{ $language }}" aria-label="{{ $language }}"
+                        aria-pressed="{{ app()->getLocale() === $locale ? 'true' : 'false' }}"
+                        @class(['is-on' => app()->getLocale() === $locale])>{{ $locale === 'zh_CN' ? '中文' : strtoupper($locale) }}</button>
+                @endforeach
+            </form>
+            @include('main.navbar.notifications')
+            <div class="dropdown">
+                <button type="button" class="rm-user-btn" data-bs-toggle="dropdown" data-bs-offset="0,10" aria-expanded="false"
+                    aria-label="{{ __('User menu') }}">
+                    <img src="{{ $me->photoUrl() ?? asset('assets/img/avatar/1.png') }}" alt="" class="rm-avatar" width="32" height="32">
+                    <span class="rm-user-text">
+                        <span class="rm-user-name">{{ $me->name }}</span>
+                        @if ($myRoles !== '')
+                            <span class="rm-user-role">{{ $myRoles }}</span>
+                        @endif
                     </span>
-                    <div class="d-none d-xl-block ps-2">
-                        <div>{{ Auth::user()->name }}</div>
-                        <div class="mt-1 small text-muted">{{ Auth::user()->email }}</div>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end rm-menu rm-user-menu">
+                    <div class="rm-menu-head">
+                        <div class="rm-menu-head-name">{{ $me->name }}</div>
+                        <div class="rm-menu-head-mail">{{ $me->email }}</div>
                     </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <a href="{{ route('profile.show') }}" class="dropdown-item">
-                        <i class="ti ti-user-circle me-2"></i> {{ __('My Profile') }}
+                    <a href="{{ route('profile.show') }}" class="dropdown-item rm-menu-item">
+                        <i class="ti ti-user-circle" aria-hidden="true"></i> {{ __('My Profile') }}
                     </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="{{ route('logout') }}" class="dropdown-item text-danger" onclick="logout(event)">
-                        <i class="ti ti-logout me-2"></i> {{ __('Logout') }}
+                    <a href="{{ route('logout') }}" class="dropdown-item rm-menu-item is-danger" onclick="logout(event)">
+                        <i class="ti ti-logout" aria-hidden="true"></i> {{ __('Logout') }}
                     </a>
                 </div>
             </div>

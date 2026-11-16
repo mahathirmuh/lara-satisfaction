@@ -3,6 +3,9 @@
 <link href="{{ asset('assets/libs/tabler-icons/tabler-icons.min.css') }}?v=2.36.0" rel="stylesheet" />
 <link href="{{ asset('assets/css/fonts/fonts.css') }}" rel="stylesheet" />
 <link href="{{ asset('assets/css/custom.css') }}?v={{ $assetVersion }}" rel="stylesheet" />
+{{-- The design layer taken from MTI Radio Management: the sidebar and its icon rail, the top bar, the path to the page,
+     the footer and their motion are in it. --}}
+<link href="{{ asset('assets/css/merdeka-ui.css') }}?v={{ @filemtime(public_path('assets/css/merdeka-ui.css')) }}" rel="stylesheet" />
 @stack('style')
 <style>
     body {
@@ -65,24 +68,6 @@
         font-size: 0.8rem;
     }
 
-    .dropdown-menu-columns {
-        background-color: rgb(239, 244, 251);
-        color: #000;
-    }
-
-    .navbar-vertical {
-        overflow: auto !important;
-    }
-
-    .navbar-expand-lg {
-        transition: width 0.2s ease-in-out;
-    }
-
-    .page-wrapper,
-    .navbar-expand-md {
-        transition: margin-left 0.2s ease-in-out;
-    }
-
     .table thead th {
         background-color: transparent;
     }
@@ -106,42 +91,15 @@
         }
     }
 
-    /* Notification bell */
-    .notification-card {
-        width: 360px;
-        max-width: calc(100vw - 2rem);
-    }
-
-    .notification-list {
-        max-height: 360px;
-        overflow-y: auto;
-    }
-
-    .notification-bell .badge-notification {
-        position: absolute;
-        top: -.25rem;
-        right: -.6rem;
-        font-size: .65rem;
-        padding: .15rem .35rem;
-    }
-
-    /* Mobile header: the sidebar clips overflowing content, so pin the list to the viewport */
+    /* The bell beside the menu button on a phone: the sidebar clips what overflows it, so the panel is pinned to the
+       window. */
     @media (max-width: 991.98px) {
         aside .notification-bell .dropdown-menu {
             position: fixed !important;
             inset: 4.25rem .75rem auto .75rem !important;
+            width: auto;
             transform: none !important;
             margin: 0 !important;
-        }
-
-        aside .notification-bell .dropdown-menu-arrow::before,
-        aside .notification-bell .dropdown-menu-arrow::after {
-            display: none;
-        }
-
-        aside .notification-bell .notification-card {
-            width: 100%;
-            max-width: none;
         }
     }
 </style>

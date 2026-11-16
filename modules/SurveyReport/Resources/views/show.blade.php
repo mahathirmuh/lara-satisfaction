@@ -2,9 +2,7 @@
 
 @section('page-title', __('Survey Report'))
 
-@push('breadcrumbs')
-    <x-global.breadcrumb-item current>{{ $survey->title }}</x-global.breadcrumb-item>
-@endpush
+@section('crumb', $survey->title)
 
 @push('style')
     <link rel="stylesheet" href="{{ asset('assets/libs/apexcharts/apexcharts.css') }}?v=3.40.0" />

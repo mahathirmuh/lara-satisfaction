@@ -2,10 +2,6 @@
 
 @section('page-title', $survey->title)
 
-@push('breadcrumbs')
-    <x-global.breadcrumb-item current>{{ $survey->title }}</x-global.breadcrumb-item>
-@endpush
-
 @push('style')
     <style>
         .rating-option .form-selectgroup-label {

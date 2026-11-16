@@ -12,28 +12,40 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/branding/favicon.ico') }}" />
     <!--  Main Style -->
     @include('main.components.style.style')
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#ffffff">
     <script>
         // Interface language for Intl number/date formatting in page scripts, e.g. "id" or "zh-CN".
         window.appLocale = @json(str_replace('_', '-', app()->getLocale()));
+
+        // The sidebar as the person left it (full width or the icon rail), before anything is drawn. main.sidebar.sidebar.
+        try {
+            if (window.localStorage.getItem('sidebarState') === 'collapsed') document.documentElement.classList.add('rm-rail');
+        } catch (e) {
+            // No storage (a private window): the full sidebar.
+        }
     </script>
 </head>
 
 <body class="layout-fluid">
-    <div class="page">
+    @php
+        // The heading of the page: its own (@section('heading')), else its title; in the top bar, and above the content on
+        // a phone, where the top bar is hidden. (A section is kept escaped.)
+        $heading = trim($__env->yieldContent('heading') ?: $__env->yieldContent('page-title'));
+    @endphp
+    <div class="page rm-page">
         <!--  Sidebar -->
         @include('main.sidebar.sidebar')
-        <!--  Navbar -->
+        <!--  Top bar -->
         @include('main.navbar.navbar')
 
         <div class="page-wrapper">
             <!--  Main Page -->
-            <div class="page-body mt-1">
-                <div class="container-xl" style="max-width: 1440px">
+            <main class="page-body rm-main">
+                <div class="container-xl rm-container">
                     @include('main.breadcrumb')
                     @yield('content')
                 </div>
-            </div>
+            </main>
             <!--  End OF Main Page -->
             @include('main.footer.footer')
         </div>
