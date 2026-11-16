@@ -61,8 +61,9 @@ return [
 
     /*
     | PEM file of the internal CA that issued the domain controller
-    | certificate, e.g. /var/www/html/certs/ca.pem in Docker (./certs is
-    | mounted there). Empty: the system trust store.
+    | certificate: an absolute path, or one relative to the project root.
+    | "certs/ca.pem" works both locally and in Docker (./certs is mounted at
+    | /var/www/html/certs). Empty: the system trust store.
     */
 
     'ca_cert' => env('LDAP_CA_CERT'),

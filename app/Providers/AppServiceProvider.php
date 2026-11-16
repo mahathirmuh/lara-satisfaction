@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use SocialiteProviders\Azure\Provider as AzureProvider;
@@ -31,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureModels();
         $this->configureSecurity();
+        $this->configureUrls();
         $this->registerSocialiteProviders();
         $this->registerBladeDirectives();
 
@@ -55,6 +57,22 @@ class AppServiceProvider extends ServiceProvider
     protected function configureSecurity(): void
     {
         DB::prohibitDestructiveCommands($this->app->isProduction());
+    }
+
+    /**
+     * In production every link, redirect and asset uses the public HTTPS
+     * address (APP_URL, e.g. https://survey.merdekabattery.com), whatever
+     * address the reverse proxy forwards to the container. Otherwise pages
+     * served over HTTPS would load their scripts over plain HTTP.
+     */
+    protected function configureUrls(): void
+    {
+        $appUrl = (string) config('app.url');
+
+        if ($this->app->isProduction() && str_starts_with($appUrl, 'https://')) {
+            URL::forceRootUrl($appUrl);
+            URL::forceScheme('https');
+        }
     }
 
     /**

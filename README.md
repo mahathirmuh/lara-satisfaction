@@ -72,6 +72,20 @@ and `scheduler` runs the deadline reminders and draft pruning. Uploaded images a
 `DB_TRUST_SERVER_CERTIFICATE=true` when SQL Server uses its own (self-signed) certificate. After
 changing `.env`, run `docker compose up -d --force-recreate`.
 
+#### Production (`https://survey.merdekabattery.com`)
+
+1. On the server, put the production environment file (kept locally as `.env.production`, never
+   committed) next to `docker-compose.yml` **as `.env`**, and the CA certificate at `certs/ca.pem`.
+   It sets `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://survey.merdekabattery.com`,
+   `SESSION_SECURE_COOKIE=true` and `TRUSTED_PROXIES`.
+2. Point the DNS name at a reverse proxy that holds the TLS certificate and forwards to
+   `http://<server>:26113` with the `X-Forwarded-For`, `-Proto`, `-Host` and `-Port` headers. In
+   production every link uses `APP_URL`; narrow `TRUSTED_PROXIES` from `*` to the proxy's IP when
+   port 26113 is reachable from elsewhere.
+3. Add `https://survey.merdekabattery.com/auth/microsoft/callback` as a **Web** redirect URI of
+   the Entra app registration (the one in `MS_GRAPH_CLIENT_ID`, shared with trilingual-docon).
+4. `docker compose up -d --build`, then `docker compose exec app php artisan migrate --force`.
+
 ## Configuration
 
 | Variable | Purpose |
@@ -112,8 +126,9 @@ Survey drafts ("Save as Draft") are the only answers stored with a user: they ar
 1. Set `LDAP_URL` (`ldaps://<domain controller>:636`), `LDAP_BASE_DN`, the read-only service
    account `LDAP_BIND_DN` / `LDAP_BIND_PASSWORD` and `LDAP_USER_SEARCH_BASE`, the narrowest unit
    holding everyone who may sign in. Same settings as trilingual-docon.
-2. Keep `LDAP_TLS_VERIFY=true` and put the internal CA certificate (PEM) at `certs/ca.pem`, with
-   `LDAP_CA_CERT=/var/www/html/certs/ca.pem` in Docker. The `certs/` folder is not committed.
+2. Keep `LDAP_TLS_VERIFY=true`, put the internal CA certificate (PEM) at `certs/ca.pem` and set
+   `LDAP_CA_CERT=certs/ca.pem` (relative to the project root: works locally and in Docker). The
+   `certs/` folder is not committed. Locally, PHP needs `extension=ldap` in `php.ini`.
 3. People type their network username (an email works too: the part before "@" is used). Their
    account here is found by the directory email (`mail`, else `userPrincipalName`).
 

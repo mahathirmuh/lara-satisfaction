@@ -5,6 +5,8 @@
 #
 # The application reads the project .env (database, mail, SSO). The containers
 # always run in production mode; set APP_URL in .env to the address users open.
+# Production (https://survey.merdekabattery.com): the server's .env is the
+# local .env.production, behind a TLS reverse proxy (README, "Production").
 name: lara-satisfaction
 
 x-app: &app

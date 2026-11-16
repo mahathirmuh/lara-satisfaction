@@ -27,6 +27,24 @@ class LdapAuthenticatorTest extends TestCase
         $this->assertNull(app(LdapAuthenticator::class)->authenticate($username, $password));
     }
 
+    public function test_a_relative_ca_certificate_path_is_read_from_the_project_root(): void
+    {
+        if (! extension_loaded('ldap')) {
+            $this->markTestSkipped('The PHP ldap extension is not enabled.');
+        }
+
+        config([
+            'ldap.url' => 'ldaps://directory.invalid:636',
+            'ldap.bind_dn' => 'CN=Reader,DC=example,DC=com',
+            'ldap.ca_cert' => 'certs/missing-ca.pem',
+        ]);
+
+        $this->expectException(DirectoryUnavailableException::class);
+        $this->expectExceptionMessage('The LDAP_CA_CERT file ['.base_path('certs/missing-ca.pem').'] cannot be read.');
+
+        app(LdapAuthenticator::class)->authenticate('budi.santoso', 'network-password');
+    }
+
     public function test_unconfigured_directory_is_reported_as_unavailable_rather_than_as_a_wrong_password(): void
     {
         config(['ldap.url' => null, 'ldap.bind_dn' => null]);

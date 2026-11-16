@@ -103,12 +103,14 @@ class LdapAuthenticator
         // TLS options must be set globally before connecting: on a connection handle they are silently ignored.
         ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, config('ldap.tls_verify') ? LDAP_OPT_X_TLS_DEMAND : LDAP_OPT_X_TLS_NEVER);
 
-        if (filled($caCertificate = config('ldap.ca_cert'))) {
-            if (! is_readable((string) $caCertificate)) {
+        if (filled(config('ldap.ca_cert'))) {
+            $caCertificate = $this->fromProjectRoot((string) config('ldap.ca_cert'));
+
+            if (! is_readable($caCertificate)) {
                 throw new DirectoryUnavailableException("The LDAP_CA_CERT file [{$caCertificate}] cannot be read.");
             }
 
-            ldap_set_option(null, LDAP_OPT_X_TLS_CACERTFILE, (string) $caCertificate);
+            ldap_set_option(null, LDAP_OPT_X_TLS_CACERTFILE, $caCertificate);
         }
 
         $connection = @ldap_connect((string) config('ldap.url'));
@@ -171,6 +173,15 @@ class LdapAuthenticator
         }
 
         return $count === 1 ? $entries[0] : null;
+    }
+
+    /**
+     * An absolute path as it is (/var/…, C:\…, C:/…); a relative one, such as
+     * "certs/ca.pem", from the project root.
+     */
+    protected function fromProjectRoot(string $path): string
+    {
+        return preg_match('#^([A-Za-z]:)?[\\\\/]#', $path) === 1 ? $path : base_path($path);
     }
 
     /**
