@@ -14,6 +14,7 @@ final readonly class LdapIdentity
      * @param  string  $distinguishedName  For the logs only, never shown to users.
      * @param  string|null  $email  Company email (mail, else userPrincipalName), lower case.
      * @param  string|null  $jobTitle  Job title (title), which decides the roles.
+     * @param  string|null  $employeeId  Employee ID (employeeID), e.g. "MTI240001".
      */
     public function __construct(
         public string $username,
@@ -21,5 +22,6 @@ final readonly class LdapIdentity
         public ?string $email,
         public ?string $name,
         public ?string $jobTitle = null,
+        public ?string $employeeId = null,
     ) {}
 }

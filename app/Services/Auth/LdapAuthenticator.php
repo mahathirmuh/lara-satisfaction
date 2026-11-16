@@ -82,6 +82,7 @@ class LdapAuthenticator
                 email: $email !== null ? Str::lower($email) : null,
                 name: $this->attribute($entry, (string) config('ldap.attributes.name', 'displayname')),
                 jobTitle: $this->attribute($entry, (string) config('ldap.attributes.job_title', 'title')),
+                employeeId: $this->attribute($entry, (string) config('ldap.attributes.employee_id', 'employeeid')),
             );
         } finally {
             @ldap_unbind($connection);

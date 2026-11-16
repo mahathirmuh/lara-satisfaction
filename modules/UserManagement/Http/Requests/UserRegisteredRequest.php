@@ -50,7 +50,7 @@ class UserRegisteredRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email:rfc', 'max:255', Rule::unique('users', 'email')->ignore($target)->withoutTrashed()],
-            'employee_id' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'employee_id')->ignore($target)->withoutTrashed()],
+            'employee_id' => ['nullable', 'string', 'max:'.User::EMPLOYEE_ID_MAX_LENGTH, 'regex:'.User::EMPLOYEE_ID_PATTERN, Rule::unique('users', 'employee_id')->ignore($target)->withoutTrashed()],
             'job_title' => ['nullable', 'string', 'max:255'],
             'company_id' => ['required', 'integer', Rule::exists('companies', 'id')],
             'is_active' => ['required', 'boolean'],

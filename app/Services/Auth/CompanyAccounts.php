@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Helpers\JobTitles;
 use App\Models\UserManagement\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -15,8 +16,9 @@ use Illuminate\Support\Str;
  * A person is matched on their company email. Someone without an account is
  * registered as an Employee on their first sign-in when automatic
  * registration is on (SSO_AUTO_REGISTER) and the email belongs to one of the
- * allowed domains (SSO_ALLOWED_DOMAINS). The job title the directory gives at
- * sign-in is recorded and decides the roles (see JobTitleRoles).
+ * allowed domains (SSO_ALLOWED_DOMAINS). The job title and employee ID the
+ * directory gives at sign-in are recorded; the job title decides the roles
+ * (see JobTitleRoles).
  */
 class CompanyAccounts
 {
@@ -38,6 +40,43 @@ class CompanyAccounts
         }
 
         $this->roles->sync($user);
+    }
+
+    /**
+     * Record the employee ID from the directory. An empty one keeps the ID
+     * entered by hand. An ID held by a deleted account is freed for this
+     * user, as when it is entered by hand; one held by another account is
+     * left out (and logged) rather than failing the sign-in.
+     */
+    public function applyEmployeeId(User $user, ?string $employeeId): void
+    {
+        $employeeId = trim((string) $employeeId);
+
+        if ($employeeId === '' || $employeeId === $user->employee_id) {
+            return;
+        }
+
+        if (Str::length($employeeId) > User::EMPLOYEE_ID_MAX_LENGTH || preg_match(User::EMPLOYEE_ID_PATTERN, $employeeId) !== 1) {
+            Log::warning('The employee ID from the directory is not a valid employee ID; it was not recorded.', ['user_id' => $user->id]);
+
+            return;
+        }
+
+        $holder = User::withTrashed()->where('employee_id', $employeeId)->whereKeyNot($user->getKey())->first();
+
+        if ($holder !== null && ! $holder->trashed()) {
+            Log::warning('The employee ID from the directory already belongs to another account; it was not recorded.', [
+                'user_id' => $user->id,
+                'holder_id' => $holder->id,
+            ]);
+
+            return;
+        }
+
+        DB::transaction(function () use ($user, $holder, $employeeId): void {
+            $holder?->forceFill(['employee_id' => null])->saveQuietly();
+            $user->forceFill(['employee_id' => $employeeId])->saveQuietly();
+        });
     }
 
     /**

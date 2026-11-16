@@ -39,6 +39,17 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     /**
+     * Characters an employee ID may contain (letters, numbers, dots, dashes
+     * and underscores), e.g. "MTI240001".
+     */
+    public const EMPLOYEE_ID_PATTERN = '/^[A-Za-z0-9._-]+$/';
+
+    /**
+     * Longest employee ID the users table holds.
+     */
+    public const EMPLOYEE_ID_MAX_LENGTH = 50;
+
+    /**
      * Menu ids granted to the user's roles, cached for this instance.
      *
      * @var array<int, int>|null

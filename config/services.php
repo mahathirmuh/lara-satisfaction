@@ -65,6 +65,9 @@ return [
         'redirect' => env('MS_SSO_REDIRECT_URI', env('AZURE_REDIRECT_URI', '/auth/microsoft/callback')),
         'tenant' => env('MS_SSO_TENANT_ID', env('MS_GRAPH_TENANT_ID', env('AZURE_TENANT_ID', 'common'))),
         'proxy' => env('AZURE_PROXY'),
+        // Graph leaves employeeId out of the default profile, so the profile
+        // fields used at sign-in are asked for by name (User.Read covers them).
+        'graph_url' => 'https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName,jobTitle,employeeId',
     ],
 
 ];

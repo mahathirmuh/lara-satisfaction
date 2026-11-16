@@ -128,6 +128,8 @@ class SsoController extends Controller
             $this->accounts->applyJobTitle($user, $jobTitle);
         }
 
+        $this->accounts->applyEmployeeId($user, $this->rawProfileValue($socialUser, 'employeeId'));
+
         if (! $user->is_active) {
             Alert::warning('Account inactive', 'Your account has been deactivated. Please contact the IT Helpdesk.');
 
@@ -180,9 +182,18 @@ class SsoController extends Controller
      */
     protected function jobTitleOf(SocialiteUser $socialUser): ?string
     {
-        $raw = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : [];
-        $jobTitle = trim((string) ($raw['jobTitle'] ?? ''));
+        return $this->rawProfileValue($socialUser, 'jobTitle');
+    }
 
-        return $jobTitle !== '' ? $jobTitle : null;
+    /**
+     * A filled value of the provider profile (Microsoft Graph user fields
+     * such as jobTitle or employeeId); null when missing or empty.
+     */
+    protected function rawProfileValue(SocialiteUser $socialUser, string $field): ?string
+    {
+        $raw = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : [];
+        $value = trim((string) ($raw[$field] ?? ''));
+
+        return $value !== '' ? $value : null;
     }
 }

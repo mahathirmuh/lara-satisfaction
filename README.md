@@ -55,6 +55,9 @@ at once. A manager sees the departments whose *Manager Job Titles* (Master Data 
 match their job title. After upgrading an existing install, run
 `php artisan migrate --force` then `php artisan db:seed --class=RoleSeeder --force`.
 
+The employee ID is recorded the same way (LDAP `employeeID`, Microsoft `employeeId`) whenever
+the directory has one; an empty directory value keeps the ID entered in User Management.
+
 ### Docker
 
 ```bash

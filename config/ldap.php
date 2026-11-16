@@ -68,9 +68,11 @@ return [
     'ca_cert' => env('LDAP_CA_CERT'),
 
     /*
-    | Directory attributes holding the username, email, display name and job
-    | title (which decides the roles). The email falls back to
-    | userPrincipalName when the mail attribute is empty.
+    | Directory attributes holding the username, email, display name, job
+    | title (which decides the roles) and employee ID. The email falls back
+    | to userPrincipalName when the mail attribute is empty. In the mbma.com
+    | directory the employee ID is in employeeID (e.g. "MTI240001");
+    | employeeNumber is empty there.
     */
 
     'attributes' => [
@@ -78,6 +80,7 @@ return [
         'mail' => env('LDAP_ATTR_MAIL', 'mail'),
         'name' => env('LDAP_ATTR_NAME', 'displayname'),
         'job_title' => env('LDAP_ATTR_JOB_TITLE', 'title'),
+        'employee_id' => env('LDAP_ATTR_EMPLOYEE_ID', 'employeeid'),
     ],
 
 ];

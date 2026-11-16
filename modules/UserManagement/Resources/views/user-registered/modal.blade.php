@@ -32,7 +32,11 @@
                                 <label for="userEmployeeId" class="col-md-3 col-form-label">Employee ID</label>
                                 <div class="col-md-5">
                                     <input type="text" id="userEmployeeId" class="form-control" maxlength="50"
-                                        placeholder="NIK / employee number">
+                                        placeholder="e.g. MTI240001">
+                                </div>
+                                <div class="col-md-9 offset-md-3">
+                                    <small class="form-hint">Filled from the directory (Active Directory / Microsoft) at
+                                        every sign-in; enter it here only for someone who has not signed in yet.</small>
                                 </div>
                             </div>
                         </div>

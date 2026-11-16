@@ -3,6 +3,11 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\UserManagement\User;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
@@ -148,6 +153,43 @@ class SsoTest extends TestCase
         $this->assertSame(['Manager'], $manager->roles->pluck('name')->all());
     }
 
+    public function test_microsoft_employee_id_is_recorded(): void
+    {
+        $employee = $this->employee(['email' => 'budi@merdekabattery.com']);
+        $this->fakeMicrosoftUser('budi@merdekabattery.com', employeeId: 'MTI240001');
+
+        $this->get(route('sso.callback', 'microsoft'))->assertRedirect(route('survey-form.index'));
+
+        $this->assertAuthenticatedAs($employee);
+        $this->assertSame('MTI240001', $employee->fresh()->employee_id);
+    }
+
+    public function test_microsoft_profile_is_asked_for_the_job_title_and_employee_id(): void
+    {
+        $requests = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new GuzzleResponse(200, ['Content-Type' => 'application/json'], (string) json_encode([
+                'id' => 'azure-object-id',
+                'displayName' => 'Budi Santoso',
+                'mail' => 'budi@merdekabattery.com',
+                'userPrincipalName' => 'budi@merdekabattery.com',
+                'jobTitle' => 'OHS Manager',
+                'employeeId' => 'MTI240001',
+            ])),
+        ]));
+        $handler->push(Middleware::history($requests));
+
+        $socialUser = Socialite::driver('azure')
+            ->setHttpClient(new Client(['handler' => $handler]))
+            ->userFromToken('access-token');
+
+        parse_str((string) parse_url((string) $requests[0]['request']->getUri(), PHP_URL_QUERY), $query);
+        $this->assertContains('employeeId', explode(',', $query['$select']));
+        $this->assertContains('jobTitle', explode(',', $query['$select']));
+        $this->assertSame('budi@merdekabattery.com', $socialUser->getEmail());
+        $this->assertSame('MTI240001', $socialUser->getRaw()['employeeId']);
+    }
+
     public function test_inactive_user_is_not_signed_in(): void
     {
         $this->employee(['email' => 'left@merdekabattery.com', 'is_active' => false]);
@@ -163,9 +205,9 @@ class SsoTest extends TestCase
     /**
      * Make the Microsoft provider return the given account.
      */
-    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso', ?string $jobTitle = null): void
+    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null): void
     {
-        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email, 'jobTitle' => $jobTitle])->map([
+        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email, 'jobTitle' => $jobTitle, 'employeeId' => $employeeId])->map([
             'id' => 'azure-object-id',
             'name' => $name,
             'email' => $email,

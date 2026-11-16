@@ -106,6 +106,65 @@ class LoginTest extends TestCase
         $this->assertSame($roles, $user->roles->sortBy('id')->pluck('name')->values()->all());
     }
 
+    /**
+     * Employee ID entered by hand, employee ID from the directory => the one kept.
+     *
+     * @return array<string, array{0: string|null, 1: string|null, 2: string|null}>
+     */
+    public static function directoryEmployeeIds(): array
+    {
+        return [
+            'recorded from the directory' => [null, ' MTI240001 ', 'MTI240001'],
+            'directory replaces the one entered by hand' => ['MBM-1001', 'MTI240001', 'MTI240001'],
+            'empty in the directory keeps the one entered by hand' => ['MBM-1001', null, 'MBM-1001'],
+            'invalid in the directory is not recorded' => ['MBM-1001', 'MTI 240001', 'MBM-1001'],
+        ];
+    }
+
+    #[DataProvider('directoryEmployeeIds')]
+    public function test_employee_id_from_the_directory_is_recorded_at_sign_in(?string $known, ?string $fromDirectory, ?string $kept): void
+    {
+        $user = $this->employee(['email' => 'budi.santoso@merdekabattery.com', 'employee_id' => $known]);
+        $this->directory()->shouldReceive('authenticate')->once()
+            ->andReturn($this->identity('budi.santoso@merdekabattery.com', employeeId: $fromDirectory));
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password'])
+            ->assertRedirect(route('survey-form.index'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame($kept, $user->fresh()->employee_id);
+    }
+
+    public function test_employee_id_of_another_account_is_not_taken_over_at_sign_in(): void
+    {
+        $holder = $this->employee(['employee_id' => 'MTI240001']);
+        $user = $this->employee(['email' => 'budi.santoso@merdekabattery.com', 'employee_id' => 'MBM-1001']);
+        $this->directory()->shouldReceive('authenticate')->once()
+            ->andReturn($this->identity('budi.santoso@merdekabattery.com', employeeId: 'MTI240001'));
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password'])
+            ->assertRedirect(route('survey-form.index'));
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame('MBM-1001', $user->fresh()->employee_id);
+        $this->assertSame('MTI240001', $holder->fresh()->employee_id);
+    }
+
+    public function test_employee_id_held_by_a_deleted_account_is_freed_at_sign_in(): void
+    {
+        $deleted = $this->employee(['employee_id' => 'MTI240001']);
+        $deleted->delete();
+        $user = $this->employee(['email' => 'budi.santoso@merdekabattery.com']);
+        $this->directory()->shouldReceive('authenticate')->once()
+            ->andReturn($this->identity('budi.santoso@merdekabattery.com', employeeId: 'MTI240001'));
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password'])
+            ->assertRedirect(route('survey-form.index'));
+
+        $this->assertSame('MTI240001', $user->fresh()->employee_id);
+        $this->assertNull($deleted->fresh()->employee_id);
+    }
+
     public function test_a_changed_job_title_changes_the_roles_but_keeps_the_it_admin_role(): void
     {
         $manager = $this->manager(['email' => 'budi.santoso@merdekabattery.com', 'job_title' => 'Finance Manager']);
@@ -293,7 +352,7 @@ class LoginTest extends TestCase
     /**
      * A person verified by the directory.
      */
-    protected function identity(?string $email, ?string $name = 'Budi Santoso', ?string $jobTitle = null): LdapIdentity
+    protected function identity(?string $email, ?string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null): LdapIdentity
     {
         return new LdapIdentity(
             username: 'budi.santoso',
@@ -301,6 +360,7 @@ class LoginTest extends TestCase
             email: $email,
             name: $name,
             jobTitle: $jobTitle,
+            employeeId: $employeeId,
         );
     }
 
