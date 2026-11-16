@@ -1,0 +1,40 @@
+# Secrets and local data: the .env is mounted at runtime, never built in.
+.env
+.env.*
+!.env.example
+database/*.sqlite*
+**/*.xlsx
+
+# Installed or generated inside the image.
+vendor
+node_modules
+bootstrap/cache/*.php
+public/storage
+public/hot
+
+# Local uploads, sessions, compiled views and logs.
+storage/app/public/*
+!storage/app/public/.gitignore
+storage/app/private/*
+!storage/app/private/.gitignore
+storage/framework/cache/data
+storage/framework/sessions/*
+storage/framework/testing
+storage/framework/views/*
+storage/logs/*
+storage/pail
+
+# Development only.
+.git
+.claude
+.codex
+.cursor
+.idea
+.vscode
+.phpunit.cache
+.phpunit.result.cache
+tests
+phpunit.xml
+Dockerfile
+docker-compose.yml
+.dockerignore

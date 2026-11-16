@@ -110,8 +110,9 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            // Unset: the ODBC driver default (Driver 18 encrypts and checks the server certificate).
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
             // Return int columns and counts as PHP ints instead of strings, as the other drivers do
             // (bigint ids and foreign keys still arrive as strings; the models cast them).
             'options' => extension_loaded('pdo_sqlsrv') ? [

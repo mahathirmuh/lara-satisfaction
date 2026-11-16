@@ -15,7 +15,7 @@ analyse the results per department, section, question and company.
 
 ## Requirements
 
-- PHP 8.3+ (tested on 8.4) with `pdo_sqlite` / `pdo_mysql` / `pdo_pgsql`, `mbstring`, `openssl`, `intl`
+- PHP 8.3+ (tested on 8.4) with `pdo_sqlsrv` / `pdo_sqlite` / `pdo_mysql` / `pdo_pgsql`, `gd` (WebP), `mbstring`, `openssl`, `intl`
 - Composer 2
 - No Node.js build step: the Merdeka theme and vendor libraries are served from `public/assets`
 
@@ -36,6 +36,19 @@ employees and anonymous responses, then run `php artisan migrate:fresh --seed`.
 Built-in roles: **Super Admin** (everything), **Survey Administrator** (survey management,
 reports, user registration, master data) and **Employee** (dashboard
 and *My Survey*; default role of SSO auto-registered users).
+
+### Docker
+
+```bash
+docker compose up -d --build                                  # http://<host>:26113 (APP_PORT)
+docker compose exec app php artisan migrate --seed --force    # first install only
+```
+
+The image (PHP 8.4 + Apache, Microsoft ODBC Driver 18 for SQL Server) reads the project `.env`
+and always runs in production mode. `app` serves the site and `scheduler` runs the deadline
+reminders and draft pruning. Uploaded images are kept in the `storage-app` volume. Set `APP_URL`
+to the address users open, and `DB_TRUST_SERVER_CERTIFICATE=true` when SQL Server uses its own
+(self-signed) certificate. After changing `.env`, run `docker compose up -d --force-recreate`.
 
 ## Configuration
 

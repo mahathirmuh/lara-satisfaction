@@ -1,0 +1,45 @@
+# Employee Satisfaction Survey on http://<host>:26113 (APP_PORT in .env).
+#
+#   docker compose up -d --build
+#   docker compose exec app php artisan migrate --seed --force   (first install)
+#
+# The application reads the project .env (database, mail, SSO). The containers
+# always run in production mode; set APP_URL in .env to the address users open.
+name: lara-satisfaction
+
+x-app: &app
+  build: .
+  image: lara-satisfaction:latest
+  restart: unless-stopped
+  environment:
+    APP_ENV: production
+    APP_DEBUG: "false"
+  volumes:
+    - ./.env:/var/www/html/.env:ro
+    - storage-app:/var/www/html/storage/app
+    - storage-logs:/var/www/html/storage/logs
+
+services:
+  app:
+    <<: *app
+    ports:
+      - "${APP_PORT:-26113}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8080/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Deadline reminders (daily at 08:00) and pruning of stale survey drafts.
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  # Uploaded images (department, section and landing pictures).
+  storage-app:
+  storage-logs:
