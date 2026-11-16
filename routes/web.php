@@ -6,6 +6,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserPhotoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,6 +45,9 @@ Route::middleware('auth')->group(function () {
 
     /** The signed-in user's own profile */
     Route::get('profile', ProfileController::class)->name('profile.show');
+
+    /** Employee photos (own, or everyone's for user management and survey progress) */
+    Route::get('users/{user}/photo', UserPhotoController::class)->whereNumber('user')->name('users.photo');
 
     /** In-app notifications (own notifications only) */
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');

@@ -120,6 +120,25 @@ return [
             ] : [],
         ],
 
+        /*
+        | The access card system (employee photos, read only): the CardDB table
+        | of DataDBEnt on the same SQL Server by default, with the same account.
+        | Empty CARD_DB_DATABASE: no photos are imported.
+        */
+        'card' => [
+            'driver' => 'sqlsrv',
+            'host' => env('CARD_DB_HOST', env('DB_HOST', 'localhost')),
+            'port' => env('CARD_DB_PORT', env('DB_PORT', '1433')),
+            'database' => env('CARD_DB_DATABASE'),
+            'username' => env('CARD_DB_USERNAME', env('DB_USERNAME')),
+            'password' => env('CARD_DB_PASSWORD', env('DB_PASSWORD')),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE'),
+        ],
+
     ],
 
     /*

@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-body text-center py-4">
                     <span class="avatar avatar-xl rounded-circle mb-3"
-                        style="background-image: url({{ asset('assets/img/avatar/1.png') }})"></span>
+                        style="background-image: url({{ $user->photoUrl() ?? asset('assets/img/avatar/1.png') }})"></span>
                     <h3 class="mb-1">{{ $user->name }}</h3>
                     <div class="text-secondary text-break">{{ $user->email }}</div>
                     @if ($user->job_title)

@@ -10,6 +10,7 @@ use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\EmployeeDirectorySync;
+use App\Services\Auth\EmployeePhotoSync;
 use App\Services\Auth\JobTitleRoles;
 use App\Services\Auth\LdapAuthenticator;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,6 +22,7 @@ use Illuminate\View\View;
 use Modules\UserManagement\Http\Requests\UserRegisteredRequest;
 use Modules\UserManagement\Repositories\UserRegisteredInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 /**
  * Registered users. Roles given by job title follow the user's job title;
@@ -62,7 +64,7 @@ class UserRegisteredController extends Controller
      * Import the employees of the assessed departments from the directory now
      * (the same import runs every day).
      */
-    public function syncDirectory(EmployeeDirectorySync $sync): JsonResponse
+    public function syncDirectory(EmployeeDirectorySync $sync, EmployeePhotoSync $photos): JsonResponse
     {
         try {
             $result = $sync->sync();
@@ -74,16 +76,24 @@ class UserRegisteredController extends Controller
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        return response()->json([
-            'message' => __(':employees employees imported from the directory: :created new, :updated updated, :deactivated deactivated, :left no longer in an assessed department.', [
-                'employees' => $result['employees'],
-                'created' => $result['created'],
-                'updated' => $result['updated'],
-                'deactivated' => $result['deactivated'],
-                'left' => $result['left'],
-            ]),
-            'data' => $result,
+        $message = __(':employees employees imported from the directory: :created new, :updated updated, :deactivated deactivated, :left no longer in an assessed department.', [
+            'employees' => $result['employees'],
+            'created' => $result['created'],
+            'updated' => $result['updated'],
+            'deactivated' => $result['deactivated'],
+            'left' => $result['left'],
         ]);
+
+        if ($photos->isConfigured()) {
+            try {
+                $message .= ' '.__(':count photos updated.', ['count' => $photos->sync()['updated']]);
+            } catch (Throwable $exception) {
+                // The employees are imported; the photos wait for the next run.
+                report($exception);
+            }
+        }
+
+        return response()->json(['message' => $message, 'data' => $result]);
     }
 
     /**
@@ -105,6 +115,8 @@ class UserRegisteredController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'photo_url' => $user->photoUrl(),
+            'initials' => $user->initials(),
             'employee_id' => $user->employee_id,
             'job_title' => $user->job_title,
             'company' => $user->company?->name,

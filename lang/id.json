@@ -7,6 +7,7 @@
     ":count Key Department|:count Key Departments": ":count Departemen Utama",
     ":count left out": ":count dilewati",
     ":count min": ":count mnt",
+    ":count photos updated.": ":count foto diperbarui.",
     ":count quality ratings": ":count penilaian kualitas",
     ":count questions": ":count pertanyaan",
     ":count ratings · criticality :criticality": ":count penilaian · tingkat kekritisan :criticality",

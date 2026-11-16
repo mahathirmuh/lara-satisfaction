@@ -81,7 +81,29 @@ class User extends Authenticatable implements HasLocalePreference
             'company_id' => 'integer',
             'department_id' => 'integer',
             'directory_synced_at' => 'datetime',
+            'photo_updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Address of the user's photo (signed-in users only), or null without
+     * one. The version changes with the photo so browsers refresh it.
+     */
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path === null
+            ? null
+            : route('users.photo', ['user' => $this, 'v' => $this->photo_updated_at?->timestamp]);
+    }
+
+    /**
+     * Up to two initials of the name, without a "[MTI]"-like company tag.
+     */
+    public function initials(): string
+    {
+        $words = preg_split('/\s+/', trim((string) preg_replace('/\[[^\]]*\]/', '', (string) $this->name))) ?: [];
+
+        return Str::upper(collect($words)->filter()->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode(''));
     }
 
     /**

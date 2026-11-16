@@ -26,7 +26,7 @@
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                     aria-label="{{ __('Open user menu') }}">
                     <span class="avatar avatar-sm rounded-circle"
-                        style="background-image: url({{ asset('assets/img/avatar/1.png') }})"></span>
+                        style="background-image: url({{ Auth::user()->photoUrl() ?? asset('assets/img/avatar/1.png') }})"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <span class="dropdown-header">{{ Auth::user()->name }}</span>

@@ -71,6 +71,13 @@ here are not restored. The AD `company` maps to the companies (`MBMA` = MBM, emp
 `config/ldap.php`). The department is also refreshed at sign-in. Reminders, Survey Progress and
 the participation rate count these respondents only.
 
+After the import, their photos are taken from the access card system (`CARD_DB_DATABASE`, e.g.
+`DataDBEnt`, table `CardDB`, as in employee-central-hub): the card whose `StaffNo` is the
+employee ID, not deleted and last updated. Only `StaffNo`, `Photo`, `Del_State` and `LastUpdate`
+are read. Each photo is kept as a 160 px WebP thumbnail on the private disk
+(`storage/app/private/user-photos`) and taken again only when its card changes; it is served by
+`users.photo` to the person and to whoever manages users or follows the survey progress.
+
 ### Docker
 
 ```bash

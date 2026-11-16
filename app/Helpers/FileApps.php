@@ -101,6 +101,43 @@ class FileApps
     }
 
     /**
+     * A square WebP thumbnail of an image (e.g. a JPEG from the card system),
+     * cut from the upper middle where a portrait has the face; null when the
+     * bytes are not an image GD can read.
+     */
+    public static function thumbnail(string $binary, int $size): ?string
+    {
+        $dimensions = @getimagesizefromstring($binary);
+
+        if ($dimensions === false || ! function_exists('imagewebp') || ! static::fitsInMemory($dimensions[0], $dimensions[1])) {
+            return null;
+        }
+
+        $image = @imagecreatefromstring($binary);
+
+        if ($image === false) {
+            return null;
+        }
+
+        imagepalettetotruecolor($image);
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $side = min($width, $height);
+
+        $thumbnail = imagecreatetruecolor($size, $size);
+        imagecopyresampled(
+            $thumbnail, $image, 0, 0,
+            intdiv($width - $side, 2), (int) round(($height - $side) * 0.2),
+            $size, $size, $side, $side,
+        );
+
+        ob_start();
+        imagewebp($thumbnail, null, 80);
+
+        return (string) ob_get_clean();
+    }
+
+    /**
      * Shrink an image so its longest side is at most the given size.
      */
     protected static function downscale(GdImage $image, int $maxDimension): GdImage

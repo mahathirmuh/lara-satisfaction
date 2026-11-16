@@ -27,7 +27,7 @@
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                     aria-label="{{ __('Open user menu') }}">
                     <span class="avatar avatar-sm rounded-circle position-relative"
-                        style="background-image: url({{ asset('assets/img/avatar/1.png') }})">
+                        style="background-image: url({{ Auth::user()->photoUrl() ?? asset('assets/img/avatar/1.png') }})">
                         <span class="status-dot status-dot-animated bg-green position-absolute bottom-0 end-0 d-block"></span>
                     </span>
                     <div class="d-none d-xl-block ps-2">

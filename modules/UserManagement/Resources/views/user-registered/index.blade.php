@@ -105,7 +105,12 @@
             {
                 key: 'name',
                 sortable: true,
-                render: (item) => `<div class="fw-medium">${escapeHtml(item.name)}</div><div class="text-secondary small">${escapeHtml(item.email)}</div>`,
+                render: (item) => `<div class="d-flex align-items-center gap-2">
+                    ${item.photo_url
+                        ? `<span class="avatar avatar-md rounded-circle flex-shrink-0" style="background-image: url('${escapeHtml(item.photo_url)}')"></span>`
+                        : `<span class="avatar avatar-md rounded-circle flex-shrink-0 bg-blue-lt">${escapeHtml(item.initials)}</span>`}
+                    <div><div class="fw-medium">${escapeHtml(item.name)}</div><div class="text-secondary small">${escapeHtml(item.email)}</div></div>
+                </div>`,
             },
             {
                 key: 'employee_id',

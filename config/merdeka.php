@@ -123,4 +123,24 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Employee Photos
+    |--------------------------------------------------------------------------
+    |
+    | Photos of the imported employees, taken from the access card system
+    | (database connection "card", table CardDB: StaffNo = employee ID, the
+    | card not deleted and last updated wins) during the daily directory
+    | import, as in employee-central-hub. Only StaffNo, Photo, Del_State and
+    | LastUpdate are read. Stored as small square WebP thumbnails on the
+    | private disk and only served to signed-in users (see UserPhotoController).
+    |
+    */
+
+    'employee_photos' => [
+        'connection' => env('EMPLOYEE_PHOTO_CONNECTION', 'card'),
+        'table' => env('EMPLOYEE_PHOTO_TABLE', 'CardDB'),
+        'size' => (int) env('EMPLOYEE_PHOTO_SIZE', 160),
+    ],
+
 ];
