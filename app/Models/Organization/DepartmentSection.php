@@ -128,4 +128,24 @@ class DepartmentSection extends Model
     {
         return FileApps::url($this->work_summary_path);
     }
+
+    /**
+     * The section as the audit trail records it, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Department' => $this->department?->name,
+            'Name' => $this->name,
+            'Description' => $this->description,
+            'Team picture' => $this->team_photo_path,
+            'Team caption' => $this->team_caption,
+            'Work summary' => $this->work_summary_path,
+            'Work summary caption' => $this->work_summary_caption,
+            'Order' => $this->sort_order,
+            'Active' => (bool) $this->is_active,
+        ];
+    }
 }

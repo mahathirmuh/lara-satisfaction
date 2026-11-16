@@ -145,4 +145,25 @@ class Department extends Model
     {
         return FileApps::url($this->image_path);
     }
+
+    /**
+     * The department as the audit trail records it, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Code' => $this->code,
+            'Name' => $this->name,
+            'Description' => $this->description,
+            'Icon' => $this->icon,
+            'Color' => $this->color,
+            'Image' => $this->image_path,
+            'Manager job titles' => implode(', ', $this->manager_job_titles ?? []),
+            'Directory department names' => implode(', ', $this->directory_names ?? []),
+            'Order' => $this->sort_order,
+            'Active' => (bool) $this->is_active,
+        ];
+    }
 }

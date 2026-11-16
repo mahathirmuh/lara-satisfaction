@@ -8,6 +8,7 @@ use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Models\Survey\SurveyReminder;
 use App\Models\UserManagement\User;
+use App\Services\Audit\AuditLogger;
 use App\Services\Survey\SurveyReminders;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -98,9 +99,16 @@ class ReminderController extends Controller
     /**
      * Send the reminder.
      */
-    public function store(SendReminderRequest $request): JsonResponse
+    public function store(SendReminderRequest $request, AuditLogger $audit): JsonResponse
     {
-        $send = $this->reminders->sendManually($request->survey(), $request->user(), $request->recipientIds());
+        $survey = $request->survey();
+        $send = $this->reminders->sendManually($survey, $request->user(), $request->recipientIds());
+        $audit->log(AuditLogger::REMINDER_SENT, $send, new: [
+            'Survey' => $survey->title,
+            'Recipients' => $send->audience === SurveyManualReminder::AUDIENCE_ALL ? 'Everyone who has not completed it' : 'Chosen people',
+            'Reminded' => $send->recipients,
+            'Left out' => $send->skipped,
+        ], label: $survey->title);
 
         $message = __('Reminder sent to :count people.', ['count' => $send->recipients]);
 

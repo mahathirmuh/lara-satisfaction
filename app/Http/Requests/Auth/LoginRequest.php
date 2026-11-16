@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\CompanyAccounts;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\LdapAuthenticator;
@@ -77,6 +78,7 @@ class LoginRequest extends FormRequest
 
         if ($identity === null) {
             RateLimiter::hit($this->throttleKey());
+            $this->refused('Wrong username or password, or the directory account is disabled');
 
             throw ValidationException::withMessages([
                 'username' => trans('auth.failed'),
@@ -88,6 +90,8 @@ class LoginRequest extends FormRequest
         $user = $identity->email !== null ? $accounts->resolve($identity->email, $identity->name) : null;
 
         if ($user === null) {
+            $this->refused('Not registered in this application', $identity->email);
+
             throw ValidationException::withMessages([
                 'username' => __('Your network account is not registered in this application. Please contact HR or the IT Helpdesk.'),
             ]);
@@ -98,12 +102,30 @@ class LoginRequest extends FormRequest
         $accounts->applyDepartment($user, $identity->department);
 
         if (! $user->is_active) {
+            $this->refused('Account inactive', $user->email);
+
             throw ValidationException::withMessages([
                 'username' => __('Your account is inactive. Please contact the IT Helpdesk.'),
             ]);
         }
 
         Auth::guard('web')->login($user, $this->boolean('remember'));
+    }
+
+    /**
+     * A refused sign-in, for the audit trail: what was typed into the form (never the password), the address of the
+     * directory account when it is known, and why it was refused. What the screen says does not change: the reason is
+     * for whoever reads the trail.
+     */
+    protected function refused(string $reason, ?string $email = null): void
+    {
+        $typed = mb_substr($this->string('username')->trim()->toString(), 0, 255);
+
+        app(AuditLogger::class)->log(AuditLogger::LOGIN_FAILED, new: array_filter([
+            'Account' => $typed,
+            'Email' => $email !== null && strcasecmp($typed, $email) !== 0 ? $email : null,
+            'Reason' => $reason,
+        ], fn (?string $value): bool => filled($value)), via: AuditLogger::VIA_LDAP);
     }
 
     /**

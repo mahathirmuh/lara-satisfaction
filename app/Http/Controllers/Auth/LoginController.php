@@ -6,6 +6,7 @@ use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\SetLocale;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\CompanyAccounts;
 use App\Services\Auth\LdapAuthenticator;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +30,7 @@ class LoginController extends Controller
     /**
      * Handle a network account (LDAP) sign in.
      */
-    public function store(LoginRequest $request, LdapAuthenticator $directory, CompanyAccounts $accounts): RedirectResponse
+    public function store(LoginRequest $request, LdapAuthenticator $directory, CompanyAccounts $accounts, AuditLogger $audit): RedirectResponse
     {
         $request->authenticate($directory, $accounts);
 
@@ -37,6 +38,7 @@ class LoginController extends Controller
 
         $user = $request->user();
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
+        $audit->log(AuditLogger::LOGIN, user: $user, via: AuditLogger::VIA_LDAP);
 
         Alert::success(__('Welcome!'), __('Signed in as :name.', ['name' => $user->name]));
 
@@ -46,10 +48,11 @@ class LoginController extends Controller
     /**
      * Sign the user out.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, AuditLogger $audit): RedirectResponse
     {
         $locale = app()->getLocale();
 
+        $audit->log(AuditLogger::LOGOUT);
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

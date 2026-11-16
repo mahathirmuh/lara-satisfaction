@@ -14,6 +14,27 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.10.0] - 2026-11-16
+
+### Ditambahkan
+
+- Menu **Audit Log** (bagian Settings, untuk IT Admin; role lain bisa diberi lewat Role & Permission), seperti di MTI
+  Radio Management: siapa yang masuk (dan lewat apa: Microsoft SSO, Google SSO, LDAP), siapa yang gagal masuk dan
+  kenapa (yang diketik tercatat, password tidak pernah), siapa yang keluar, dan setiap perubahan di administrasi:
+  akun, role, periode survei dan statusnya, pertanyaan, pengingat yang dikirim manual, departemen, seksi, halaman awal,
+  serta impor karyawan dari direktori. Setiap perubahan hanya mencatat field yang berubah, nilai sebelum dan sesudahnya.
+  Tampil sebagai tabel atau **Log activity** (satu kalimat per kejadian), dengan filter pengguna, aksi, entitas dan
+  rentang tanggal (termasuk kalender untuk rentang sendiri), dan panel detail per kejadian (waktu, IP, browser).
+  Catatan audit tidak bisa diubah atau dihapus dari aplikasi.
+
+### Keamanan
+
+- Jawaban dan draft survei tidak pernah masuk Audit Log, jadi tetap anonim. Nilai yang namanya mengandung password,
+  secret, token dan sejenisnya selalu disamarkan.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force` dan
+`docker compose exec app php artisan db:seed --class=MenuSeeder --force`.
+
 ## [0.9.0] - 2026-11-16
 
 ### Ditambahkan

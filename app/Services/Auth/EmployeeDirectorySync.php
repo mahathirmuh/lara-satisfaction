@@ -258,4 +258,31 @@ class EmployeeDirectorySync
 
         return (string) preg_replace('/\s+/', ' ', trim($name));
     }
+
+    /**
+     * The result of a sync as the audit trail records it.
+     *
+     * @param  array<string, int>  $result  as sync() returns it
+     * @return array<string, int>
+     */
+    public static function auditValues(array $result): array
+    {
+        return [
+            'Employees' => $result['employees'] ?? 0,
+            'Created' => $result['created'] ?? 0,
+            'Updated' => $result['updated'] ?? 0,
+            'Deactivated' => $result['deactivated'] ?? 0,
+            'No longer in an assessed department' => $result['left'] ?? 0,
+        ];
+    }
+
+    /**
+     * Whether a sync changed any account.
+     *
+     * @param  array<string, int>  $result  as sync() returns it
+     */
+    public static function changedAnything(array $result): bool
+    {
+        return ($result['created'] ?? 0) + ($result['updated'] ?? 0) + ($result['deactivated'] ?? 0) + ($result['left'] ?? 0) > 0;
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\SurveyStatus;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Survey\Survey;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -84,9 +85,10 @@ class SurveyController extends Controller
     /**
      * Create a survey period.
      */
-    public function store(SurveyRequest $request): JsonResponse
+    public function store(SurveyRequest $request, AuditLogger $audit): JsonResponse
     {
         $survey = $this->surveys->create($request->validated(), $request->user());
+        $audit->log(AuditLogger::SURVEY_CREATED, $survey, new: $survey->refresh()->auditValues(), label: $survey->title);
 
         return response()->json([
             'message' => __('Survey created successfully.'),
@@ -97,9 +99,11 @@ class SurveyController extends Controller
     /**
      * Update a survey period.
      */
-    public function update(SurveyRequest $request, Survey $survey): JsonResponse
+    public function update(SurveyRequest $request, Survey $survey, AuditLogger $audit): JsonResponse
     {
+        $before = $survey->auditValues();
         $this->surveys->update($survey, $request->validated());
+        $audit->logChanges(AuditLogger::SURVEY_UPDATED, $survey, $before, $survey->refresh()->auditValues(), $survey->title);
 
         return response()->json(['message' => __('Survey updated successfully.')]);
     }
@@ -107,7 +111,7 @@ class SurveyController extends Controller
     /**
      * Publish, close or move back to draft.
      */
-    public function updateStatus(Request $request, Survey $survey): JsonResponse
+    public function updateStatus(Request $request, Survey $survey, AuditLogger $audit): JsonResponse
     {
         $validated = $request->validate([
             'status' => ['required', Rule::enum(SurveyStatus::class)],
@@ -121,7 +125,9 @@ class SurveyController extends Controller
             ]);
         }
 
+        $before = $survey->status?->name;
         $this->surveys->changeStatus($survey, $status);
+        $audit->logChanges(AuditLogger::SURVEY_STATUS_CHANGED, $survey, ['Status' => $before], ['Status' => $status->name], $survey->title);
 
         return response()->json(['message' => __('Survey status changed to :status.', ['status' => $status->label()])]);
     }
@@ -129,9 +135,10 @@ class SurveyController extends Controller
     /**
      * Copy a survey and its questions into a new draft.
      */
-    public function duplicate(Request $request, Survey $survey): JsonResponse
+    public function duplicate(Request $request, Survey $survey, AuditLogger $audit): JsonResponse
     {
         $copy = $this->surveys->duplicate($survey, $request->user());
+        $audit->log(AuditLogger::SURVEY_DUPLICATED, $copy, new: ['Copy of' => $survey->title, 'Questions' => $copy->questions()->count()], label: $copy->title);
 
         return response()->json([
             'message' => __('Survey duplicated as draft ":title".', ['title' => $copy->title]),
@@ -142,7 +149,7 @@ class SurveyController extends Controller
     /**
      * Delete a survey without responses.
      */
-    public function destroy(Survey $survey): JsonResponse
+    public function destroy(Survey $survey, AuditLogger $audit): JsonResponse
     {
         if ($survey->hasResponses()) {
             return response()->json([
@@ -150,7 +157,9 @@ class SurveyController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $survey->auditValues();
         $this->surveys->delete($survey);
+        $audit->log(AuditLogger::SURVEY_DELETED, $survey, old: $before, label: $survey->title);
 
         return response()->json(['message' => __('Survey deleted successfully.')]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\EmployeeDirectorySync;
 use App\Services\Auth\EmployeePhotoSync;
@@ -22,7 +23,7 @@ class SyncDirectoryEmployees extends Command
     /**
      * Execute the console command.
      */
-    public function handle(EmployeeDirectorySync $sync, EmployeePhotoSync $photos): int
+    public function handle(EmployeeDirectorySync $sync, EmployeePhotoSync $photos, AuditLogger $audit): int
     {
         $dryRun = (bool) $this->option('dry-run');
 
@@ -33,6 +34,11 @@ class SyncDirectoryEmployees extends Command
             $this->error($exception->getMessage());
 
             return self::FAILURE;
+        }
+
+        // The daily run is recorded in the audit trail when it changed an account (as "System").
+        if (! $dryRun && EmployeeDirectorySync::changedAnything($result)) {
+            $audit->log(AuditLogger::USERS_SYNCED, new: EmployeeDirectorySync::auditValues($result));
         }
 
         $this->info(($dryRun ? 'Dry run, nothing saved. ' : '').sprintf(

@@ -9,6 +9,7 @@ use App\Models\Organization\Department;
 use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyQuestion;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,9 +94,10 @@ class QuestionController extends Controller
     /**
      * Create a question.
      */
-    public function store(QuestionRequest $request): JsonResponse
+    public function store(QuestionRequest $request, AuditLogger $audit): JsonResponse
     {
         $question = $this->questions->create($request->validated());
+        $audit->log(AuditLogger::QUESTION_CREATED, $question, new: $question->refresh()->auditValues(), label: $question->auditLabel());
 
         return response()->json([
             'message' => __('Question created successfully.'),
@@ -106,9 +108,11 @@ class QuestionController extends Controller
     /**
      * Update a question.
      */
-    public function update(QuestionRequest $request, SurveyQuestion $question): JsonResponse
+    public function update(QuestionRequest $request, SurveyQuestion $question, AuditLogger $audit): JsonResponse
     {
+        $before = $question->auditValues();
         $this->questions->update($question, $request->validated());
+        $audit->logChanges(AuditLogger::QUESTION_UPDATED, $question, $before, $question->refresh()->auditValues(), $question->auditLabel());
 
         return response()->json(['message' => __('Question updated successfully.')]);
     }
@@ -116,7 +120,7 @@ class QuestionController extends Controller
     /**
      * Delete a question of a survey without responses.
      */
-    public function destroy(SurveyQuestion $question): JsonResponse
+    public function destroy(SurveyQuestion $question, AuditLogger $audit): JsonResponse
     {
         if ($question->survey()->whereHas('responses')->exists()) {
             return response()->json([
@@ -124,7 +128,9 @@ class QuestionController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $question->auditValues();
         $this->questions->delete($question);
+        $audit->log(AuditLogger::QUESTION_DELETED, $question, old: $before, label: $question->auditLabel());
 
         return response()->json(['message' => __('Question deleted successfully.')]);
     }

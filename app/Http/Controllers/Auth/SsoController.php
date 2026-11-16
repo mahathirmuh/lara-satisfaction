@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\CompanyAccounts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class SsoController extends Controller
     /**
      * Create a new controller instance.
      */
-    public function __construct(protected CompanyAccounts $accounts) {}
+    public function __construct(protected CompanyAccounts $accounts, protected AuditLogger $audit) {}
 
     /**
      * Socialite driver per provider slug used in the URL.
@@ -95,6 +96,7 @@ class SsoController extends Controller
             $socialUser = Socialite::driver(self::DRIVERS[$provider])->user();
         } catch (Throwable $exception) {
             report($exception);
+            $this->refused($provider, null, 'The provider could not verify the account');
             Alert::error(__('Sign in failed'), __('We could not verify your :provider account. Please try again.', ['provider' => Str::headline($provider)]));
 
             return redirect()->route('login');
@@ -103,6 +105,7 @@ class SsoController extends Controller
         $email = $this->emailOf($socialUser);
 
         if ($email === null) {
+            $this->refused($provider, null, 'The provider sent no email address');
             Alert::warning(__('Sign in failed'), __('Your :provider account did not share an email address.', ['provider' => Str::headline($provider)]));
 
             return redirect()->route('login');
@@ -111,6 +114,7 @@ class SsoController extends Controller
         $domain = Str::after($email, '@');
 
         if (in_array($domain, config('merdeka.sso.blocked_domains', []), true)) {
+            $this->refused($provider, $email, 'Public email address');
             Alert::warning(__('Public email is not allowed'), __('Please sign in with your company account. Email used: :email', ['email' => $email]));
 
             return redirect()->route('login');
@@ -119,6 +123,7 @@ class SsoController extends Controller
         $user = $this->accounts->resolve($email, $socialUser->getName());
 
         if ($user === null) {
+            $this->refused($provider, $email, 'Not registered in this application');
             Alert::warning(__('Account not registered'), __('The account :email is not registered in this application. Please contact HR or the IT Helpdesk.', ['email' => $email]));
 
             return redirect()->route('login');
@@ -135,6 +140,7 @@ class SsoController extends Controller
         }
 
         if (! $user->is_active) {
+            $this->refused($provider, $email, 'Account inactive');
             Alert::warning(__('Account inactive'), __('Your account has been deactivated. Please contact the IT Helpdesk.'));
 
             return redirect()->route('login');
@@ -144,6 +150,7 @@ class SsoController extends Controller
         $request->session()->regenerate();
 
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
+        $this->audit->log(AuditLogger::LOGIN, user: $user, via: self::via($provider));
 
         Alert::success(__('Welcome!'), __('Signed in as :name.', ['name' => $user->name]));
 
@@ -199,5 +206,25 @@ class SsoController extends Controller
         $value = trim((string) ($raw[$field] ?? ''));
 
         return $value !== '' ? $value : null;
+    }
+
+    /**
+     * How a sign-in came in, for the audit trail: "Microsoft SSO", "Google SSO".
+     */
+    public static function via(string $provider): string
+    {
+        return Str::headline($provider).' SSO';
+    }
+
+    /**
+     * A refused sign-in, for the audit trail: the address the provider sent (when it sent one) and why it was refused.
+     * What the screen says does not change: the reason is for whoever reads the trail.
+     */
+    protected function refused(string $provider, ?string $email, string $reason): void
+    {
+        $this->audit->log(AuditLogger::LOGIN_FAILED, new: array_filter([
+            'Account' => $email,
+            'Reason' => $reason,
+        ], fn (?string $value): bool => filled($value)), via: self::via($provider));
     }
 }

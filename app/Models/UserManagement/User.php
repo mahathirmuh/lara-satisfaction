@@ -370,4 +370,23 @@ class User extends Authenticatable implements HasLocalePreference
         $this->grantedMenuPermissions = null;
         $this->unsetRelation('roles');
     }
+
+    /**
+     * The account as the audit trail records it, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Name' => $this->name,
+            'Email' => $this->email,
+            'Employee ID' => $this->employee_id,
+            'Job title' => $this->job_title,
+            'Company' => $this->company()->value('name'),
+            'Department' => $this->department()->value('name'),
+            'Roles' => $this->roles()->orderBy('name')->pluck('name')->implode(', '),
+            'Active' => (bool) $this->is_active,
+        ];
+    }
 }

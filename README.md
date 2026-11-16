@@ -43,7 +43,7 @@ Set `SEED_DEMO_DATA=true` (never in production) to seed demo employees and anony
 
 | Role | Given | Access |
 | --- | --- | --- |
-| **IT Admin** | By hand only (User Management) | Everything, including Role & Permission and System Log |
+| **IT Admin** | By hand only (User Management) | Everything, including Role & Permission, Audit Log and System Log |
 | **Super Admin** | Job title *Support Services Deputy General Manager* | Survey management, master data, users, every result |
 | **Manager** | Job titles `*Manager`, `Deputy GM` (not `Assistant of *`) | *My Survey*, the results of the departments they manage |
 | **Employee** | Any other job title (default role) | Dashboard and *My Survey* |
@@ -214,6 +214,9 @@ modules/{Module}/    Http/Controllers, Http/Requests, Repositories (Interface + 
   SurveyManagement   Survey periods, questions (department + optional section) and reminders
   SurveyReport       Aggregated results per department/section, comments, CSV export
   UserManagement     Registered users, roles & menu/CRUD permission matrix
+  AuditLog           Audit trail (as in MTI Radio Management): sign-ins, refused sign-ins and
+                     sign-outs, every change in the administration with its values before and
+                     after; table or Log activity, filters, details. Read only
   SystemLog          Activity log and error log viewers
 resources/views/     main/ (layout, sidebar, navbar), auth/, components/global/ (x-global.*)
 public/assets/css/   merdeka-ui.css: the design layer taken from MTI Radio Management (sidebar
@@ -228,8 +231,13 @@ public/assets/css/   merdeka-ui.css: the design layer taken from MTI Radio Manag
   in Blade.
 - **Anonymity**: `survey_participations` stores *who* completed a survey; `survey_responses` /
   `survey_answers` store *what* was answered without user, timestamps or ordered ids (random
-  UUIDv4). Survey payloads are never written to the activity log and results are hidden for
+  UUIDv4). Survey payloads are never written to the activity log nor to the audit trail, and results are hidden for
   groups below the threshold.
+- **Audit trail**: a new administrative change is recorded with `App\Services\Audit\AuditLogger` after it is made:
+  `log()` for something made or deleted, `logChanges()` with the model's `auditValues()` before and after (only the
+  fields that moved are kept). Give a new action its words in `Modules\AuditLog\Services\AuditVocabulary`. Secrets are
+  redacted by field name, entries cannot be changed or deleted, and nothing is written before the `audit_logs`
+  migration has run.
 - **Languages**: the interface is in English, Bahasa Indonesia and Simplified Chinese
   (`config('app.available_locales')`, switcher `x-global.locale-switcher`). The choice is kept in
   the session and on the user (`users.locale`, also used for their notifications); otherwise the

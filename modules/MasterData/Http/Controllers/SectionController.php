@@ -6,6 +6,7 @@ use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Organization\Department;
 use App\Models\Organization\DepartmentSection;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -83,9 +84,10 @@ class SectionController extends Controller
     /**
      * Create a section.
      */
-    public function store(SectionRequest $request): JsonResponse
+    public function store(SectionRequest $request, AuditLogger $audit): JsonResponse
     {
         $section = $this->sections->create($request->sectionAttributes(), $request->imageUploads());
+        $audit->log(AuditLogger::MASTER_CREATED, $section, new: $section->refresh()->auditValues(), label: $section->name);
 
         return response()->json([
             'message' => __('Section created successfully.'),
@@ -96,9 +98,11 @@ class SectionController extends Controller
     /**
      * Update a section.
      */
-    public function update(SectionRequest $request, DepartmentSection $section): JsonResponse
+    public function update(SectionRequest $request, DepartmentSection $section, AuditLogger $audit): JsonResponse
     {
+        $before = $section->auditValues();
         $this->sections->update($section, $request->sectionAttributes(), $request->imageUploads(), $request->imageRemovals());
+        $audit->logChanges(AuditLogger::MASTER_UPDATED, $section, $before, $section->refresh()->auditValues(), $section->name);
 
         return response()->json(['message' => __('Section updated successfully.')]);
     }
@@ -106,7 +110,7 @@ class SectionController extends Controller
     /**
      * Delete a section that no survey asks about or has evaluated.
      */
-    public function destroy(DepartmentSection $section): JsonResponse
+    public function destroy(DepartmentSection $section, AuditLogger $audit): JsonResponse
     {
         if ($section->isUsedInSurveys()) {
             return response()->json([
@@ -114,7 +118,9 @@ class SectionController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $section->auditValues();
         $this->sections->delete($section);
+        $audit->log(AuditLogger::MASTER_DELETED, $section, old: $before, label: $section->name);
 
         return response()->json(['message' => __('Section deleted successfully.')]);
     }

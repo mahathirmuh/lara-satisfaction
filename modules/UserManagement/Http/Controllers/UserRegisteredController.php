@@ -8,6 +8,7 @@ use App\Models\Organization\Company;
 use App\Models\Organization\Department;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\EmployeeDirectorySync;
 use App\Services\Auth\EmployeePhotoSync;
@@ -64,7 +65,7 @@ class UserRegisteredController extends Controller
      * Import the employees of the assessed departments from the directory now
      * (the same import runs every day).
      */
-    public function syncDirectory(EmployeeDirectorySync $sync, EmployeePhotoSync $photos): JsonResponse
+    public function syncDirectory(EmployeeDirectorySync $sync, EmployeePhotoSync $photos, AuditLogger $audit): JsonResponse
     {
         try {
             $result = $sync->sync();
@@ -75,6 +76,8 @@ class UserRegisteredController extends Controller
                 'message' => __('The directory cannot be reached right now. Please try again shortly.'),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
+
+        $audit->log(AuditLogger::USERS_SYNCED, new: EmployeeDirectorySync::auditValues($result));
 
         $message = __(':employees employees imported from the directory: :created new, :updated updated, :deactivated deactivated, :left no longer in an assessed department.', [
             'employees' => $result['employees'],
@@ -153,12 +156,13 @@ class UserRegisteredController extends Controller
     /**
      * Register a user.
      */
-    public function store(UserRegisteredRequest $request): JsonResponse
+    public function store(UserRegisteredRequest $request, AuditLogger $audit): JsonResponse
     {
         $user = $this->users->create(
             $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'department_id', 'is_active']),
             $request->validated('role_id') ?? [],
         );
+        $audit->log(AuditLogger::USER_CREATED, $user, new: $user->auditValues(), label: $user->email);
 
         return response()->json([
             'message' => __('User registered successfully.'),
@@ -169,15 +173,17 @@ class UserRegisteredController extends Controller
     /**
      * Update a user.
      */
-    public function update(UserRegisteredRequest $request, User $user): JsonResponse
+    public function update(UserRegisteredRequest $request, User $user, AuditLogger $audit): JsonResponse
     {
         $this->ensureManageable($request->user(), $user);
 
+        $before = $user->auditValues();
         $this->users->update(
             $user,
             $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'department_id', 'is_active']),
             $request->validated('role_id') ?? [],
         );
+        $audit->logChanges(AuditLogger::USER_UPDATED, $user, $before, $user->refresh()->auditValues(), $user->email);
 
         return response()->json(['message' => __('User updated successfully.')]);
     }
@@ -185,7 +191,7 @@ class UserRegisteredController extends Controller
     /**
      * Remove a user's access.
      */
-    public function destroy(Request $request, User $user): JsonResponse
+    public function destroy(Request $request, User $user, AuditLogger $audit): JsonResponse
     {
         $actor = $request->user();
         $this->ensureManageable($actor, $user);
@@ -194,7 +200,9 @@ class UserRegisteredController extends Controller
             return response()->json(['message' => __('You cannot delete your own account.')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $user->auditValues();
         $this->users->delete($user);
+        $audit->log(AuditLogger::USER_DELETED, $user, old: $before, label: $user->email);
 
         return response()->json(['message' => __('User deleted successfully.')]);
     }

@@ -6,6 +6,7 @@ use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Organization\Department;
 use App\Models\Organization\DepartmentSection;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -81,9 +82,10 @@ class DepartmentController extends Controller
     /**
      * Create a department.
      */
-    public function store(DepartmentRequest $request): JsonResponse
+    public function store(DepartmentRequest $request, AuditLogger $audit): JsonResponse
     {
         $department = $this->departments->create($request->departmentAttributes(), $request->file('image'));
+        $audit->log(AuditLogger::MASTER_CREATED, $department, new: $department->refresh()->auditValues(), label: $department->name);
 
         return response()->json([
             'message' => __('Department created successfully.'),
@@ -94,14 +96,16 @@ class DepartmentController extends Controller
     /**
      * Update a department.
      */
-    public function update(DepartmentRequest $request, Department $department): JsonResponse
+    public function update(DepartmentRequest $request, Department $department, AuditLogger $audit): JsonResponse
     {
+        $before = $department->auditValues();
         $this->departments->update(
             $department,
             $request->departmentAttributes(),
             $request->file('image'),
             $request->boolean('remove_image'),
         );
+        $audit->logChanges(AuditLogger::MASTER_UPDATED, $department, $before, $department->refresh()->auditValues(), $department->name);
 
         return response()->json(['message' => __('Department updated successfully.')]);
     }
@@ -109,7 +113,7 @@ class DepartmentController extends Controller
     /**
      * Delete a department that is not used by any question.
      */
-    public function destroy(Department $department): JsonResponse
+    public function destroy(Department $department, AuditLogger $audit): JsonResponse
     {
         if ($department->questions()->exists()) {
             return response()->json([
@@ -117,7 +121,9 @@ class DepartmentController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $department->auditValues();
         $this->departments->delete($department);
+        $audit->log(AuditLogger::MASTER_DELETED, $department, old: $before, label: $department->name);
 
         return response()->json(['message' => __('Department deleted successfully.')]);
     }

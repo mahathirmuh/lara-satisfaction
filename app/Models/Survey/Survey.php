@@ -205,4 +205,21 @@ class Survey extends Model
     {
         return $this->start_date->translatedFormat(__('d M Y')).' - '.$this->end_date->translatedFormat(__('d M Y'));
     }
+
+    /**
+     * The survey as the audit trail records it, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Title' => $this->title,
+            'Description' => $this->description,
+            'Start date' => $this->start_date?->format('Y-m-d'),
+            'End date' => $this->end_date?->format('Y-m-d'),
+            'Estimated minutes' => $this->estimated_minutes,
+            'Status' => $this->status?->name,
+        ];
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Models\UserManagement;
 
 use App\Enums\DepartmentScope;
+use App\Enums\PermissionAction;
 use App\Helpers\JobTitles;
 use Database\Factories\UserManagement\RoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -92,5 +93,32 @@ class Role extends Model
     public function matchesJobTitle(?string $jobTitle): bool
     {
         return $this->isGivenByJobTitle() && JobTitles::matches($this->job_titles, $jobTitle);
+    }
+
+    /**
+     * The role as the audit trail records it: its form, and what it may do on each menu it is given ("Menu Survey
+     * Report" => "Read"; a group without permissions of its own is "Access only").
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        $permissions = $this->menuPermissions()->get(['menu_id', 'permission_id'])->groupBy('menu_id');
+        $values = [
+            'Name' => $this->name,
+            'Home page' => $this->homeMenu()->value('title'),
+            'Job titles' => implode(', ', $this->job_titles ?? []),
+            'Results of' => $this->department_scope?->name,
+        ];
+
+        foreach ($this->menus()->orderBy('title')->get(['menu.id', 'menu.title']) as $menu) {
+            $actions = collect(PermissionAction::cases())
+                ->filter(fn (PermissionAction $action): bool => ($permissions[$menu->id] ?? collect())->contains('permission_id', $action->value))
+                ->map(fn (PermissionAction $action): string => $action->name);
+
+            $values['Menu '.$menu->title] = $actions->isEmpty() ? 'Access only' : $actions->implode(', ');
+        }
+
+        return $values;
     }
 }

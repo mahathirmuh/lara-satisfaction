@@ -4,6 +4,24 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.10.0] - 2026-11-16
+
+### Added
+
+- An **Audit Log** menu (Settings section, for IT Admin; other roles can be given it in Role & Permission), as in MTI
+  Radio Management: who signed in (and how: Microsoft SSO, Google SSO, LDAP), who failed to sign in and why (what was
+  typed is kept, never the password), who signed out, and every change in the administration: accounts, roles, survey
+  periods and their status, questions, reminders sent by hand, departments, sections, the landing page, and the
+  employee import from the directory. A change keeps only the fields that moved, with their values before and after.
+  It shows as a table or as **Log activity** (one sentence per event), with filters by user, action, entity and date
+  range (with a calendar for a range of your own), and a details panel per event (time, IP, browser). Audit entries
+  cannot be changed or deleted from the application.
+
+### Security
+
+- Survey answers and drafts never reach the Audit Log, so they stay anonymous. Values whose names contain password,
+  secret, token and the like are always redacted.
+
 ## [0.9.0] - 2026-11-16
 
 ### Added

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\Permission;
 use App\Models\UserManagement\Role;
+use App\Services\Audit\AuditLogger;
 use App\Services\Auth\JobTitleRoles;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -98,13 +99,14 @@ class RolePermissionController extends Controller
     /**
      * Create a role.
      */
-    public function store(RolePermissionRequest $request): JsonResponse
+    public function store(RolePermissionRequest $request, AuditLogger $audit): JsonResponse
     {
         $role = $this->roles->create(
             $request->roleAttributes(),
             $request->validated('menu_list') ?? [],
             $request->validated('menu_permission') ?? [],
         );
+        $audit->log(AuditLogger::ROLE_CREATED, $role, new: $role->auditValues(), label: $role->name);
 
         if ($role->isGivenByJobTitle()) {
             $this->jobTitleRoles->syncAll();
@@ -119,9 +121,10 @@ class RolePermissionController extends Controller
     /**
      * Update a role.
      */
-    public function update(RolePermissionRequest $request, Role $role): JsonResponse
+    public function update(RolePermissionRequest $request, Role $role, AuditLogger $audit): JsonResponse
     {
         $previousJobTitles = $role->job_titles;
+        $before = $role->auditValues();
 
         $this->roles->update(
             $role,
@@ -129,6 +132,7 @@ class RolePermissionController extends Controller
             $request->validated('menu_list') ?? [],
             $request->validated('menu_permission') ?? [],
         );
+        $audit->logChanges(AuditLogger::ROLE_UPDATED, $role, $before, $role->refresh()->auditValues(), $role->name);
 
         if ($role->job_titles !== $previousJobTitles) {
             $this->jobTitleRoles->syncAll();
@@ -140,7 +144,7 @@ class RolePermissionController extends Controller
     /**
      * Delete a role that is not protected and has no users.
      */
-    public function destroy(Role $role): JsonResponse
+    public function destroy(Role $role, AuditLogger $audit): JsonResponse
     {
         if ($role->isItAdmin() || $role->id === (int) config('merdeka.default_role_id')) {
             return response()->json(['message' => __('This built-in role cannot be deleted.')], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -150,7 +154,9 @@ class RolePermissionController extends Controller
             return response()->json(['message' => __('This role is still assigned to users.')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $before = $role->auditValues();
         $this->roles->delete($role);
+        $audit->log(AuditLogger::ROLE_DELETED, $role, old: $before, label: $role->name);
 
         return response()->json(['message' => __('Role deleted successfully.')]);
     }

@@ -5,6 +5,7 @@ namespace Modules\MasterData\Http\Controllers;
 use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
 use App\Models\Content\LandingContent;
+use App\Services\Audit\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,14 +37,16 @@ class LandingContentController extends Controller
     /**
      * Save the landing page content.
      */
-    public function update(LandingContentRequest $request): RedirectResponse
+    public function update(LandingContentRequest $request, AuditLogger $audit): RedirectResponse
     {
-        $this->landingContent->update(
+        $before = $this->landingContent->current()->auditValues();
+        $content = $this->landingContent->update(
             $request->contentAttributes(),
             $request->file('hero_image'),
             $request->boolean('remove_hero_image'),
             $request->user(),
         );
+        $audit->logChanges(AuditLogger::MASTER_UPDATED, $content, $before, $content->refresh()->auditValues(), 'Landing Page');
 
         Alert::success(__('Landing page updated'), __('The public landing page now shows the new content.'));
 

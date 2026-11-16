@@ -51,6 +51,8 @@ class MenuSeeder extends Seeder
                 ['title' => 'Landing Page', 'route' => 'master-data.landing-content.index'],
             ],
         ],
+        // Who signed in and who changed what (IT Admin: every menu; other roles get it in Role & Permission).
+        ['title' => 'Audit Log', 'route' => 'audit-log.index', 'icon' => 'shield-search', 'section' => 'Settings'],
         [
             'title' => 'System Log',
             'icon' => 'history',

@@ -98,4 +98,24 @@ class LandingContent extends Model
 
         return new HtmlString(implode($title, array_map(fn (string $part): string => e($part), $parts)));
     }
+
+    /**
+     * The landing page texts as the audit trail records them, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Hero title' => $this->hero_title,
+            'Hero intro' => $this->hero_intro,
+            'Hero image' => $this->hero_image_path,
+            'Hero image alt' => $this->hero_image_alt,
+            'Feedback title' => $this->feedback_title,
+            'Feedback body' => $this->feedback_body,
+            'Feedback note' => $this->feedback_note,
+            'Closing title' => $this->closing_title,
+            'Closing note' => $this->closing_note,
+        ];
+    }
 }

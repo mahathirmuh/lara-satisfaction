@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 /**
  * Question of a survey. A department question is asked about the section
@@ -172,5 +173,32 @@ class SurveyQuestion extends Model
         return collect([$this->department?->name ?? __('General'), $this->section?->name])
             ->filter()
             ->implode(' / ');
+    }
+
+    /**
+     * The question as the audit trail records it, by the names of its form.
+     *
+     * @return array<string, mixed>
+     */
+    public function auditValues(): array
+    {
+        return [
+            'Survey' => $this->survey?->title,
+            'Department' => $this->department?->name,
+            'Section' => $this->section?->name,
+            'Type' => $this->type?->name,
+            'Question' => $this->question,
+            'Help text' => $this->help_text,
+            'Required' => (bool) $this->is_required,
+            'Order' => $this->sort_order,
+        ];
+    }
+
+    /**
+     * What the audit trail calls the question: its text, cut short.
+     */
+    public function auditLabel(): string
+    {
+        return Str::limit((string) $this->question, 120);
     }
 }
