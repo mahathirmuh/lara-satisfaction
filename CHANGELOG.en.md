@@ -4,7 +4,7 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
-## [1.8.0] - 2026-11-16
+## [0.9.0] - 2026-11-16
 
 ### Added
 
@@ -22,7 +22,7 @@ only in CHANGELOG.md.
   Copper Gold, Merdeka Tsingshan Indonesia and Merdeka Battery Materials logos, the SSO buttons, the network account
   form and the language at the right. The access guide is a small dialog with a box for each way in.
 
-## [1.7.0] - 2026-11-16
+## [0.8.0] - 2026-11-16
 
 ### Added
 
@@ -33,7 +33,7 @@ only in CHANGELOG.md.
 - Employee photos from the access card system (CardDB), kept as small thumbnails and taken again only when the card
   changes. Photos show in User Registered, the top bar and My Profile; people without one show their initials.
 
-## [1.6.0] - 2026-11-16
+## [0.7.0] - 2026-11-16
 
 ### Added
 
@@ -45,7 +45,7 @@ only in CHANGELOG.md.
   of the survey form.
 - A path to the page at the top of every page.
 
-## [1.5.0] - 2026-11-16
+## [0.6.0] - 2026-11-16
 
 ### Added
 
@@ -55,7 +55,7 @@ only in CHANGELOG.md.
 - Ready for production at `https://survey.merdekabattery.com`: every link uses `APP_URL` over HTTPS and the proxy in
   `TRUSTED_PROXIES` is trusted. A `queue` container delivers the queued reminders.
 
-## [1.4.0] - 2026-11-16
+## [0.5.0] - 2026-11-16
 
 ### Added
 
@@ -65,7 +65,7 @@ only in CHANGELOG.md.
 - A **My Profile** page in the user menu: what the company directory says about you, your roles, the departments whose
   results you can see, your last sign-in, the surveys you completed, and the language.
 
-## [1.3.0] - 2026-11-16
+## [0.4.0] - 2026-11-16
 
 ### Added
 
@@ -81,7 +81,7 @@ only in CHANGELOG.md.
   any more.
 - The company Data Scope of roles: every role covers every company.
 
-## [1.2.0] - 2026-11-16
+## [0.3.0] - 2026-11-16
 
 ### Added
 
@@ -89,7 +89,7 @@ only in CHANGELOG.md.
 - Docker Compose on port 26113: `app` serves the site and `scheduler` runs the deadline reminders and the draft
   clean-up. `php artisan serve` uses the same port, so the Microsoft redirect URI is the same for both.
 
-## [1.1.0] - 2026-11-16
+## [0.2.0] - 2026-11-16
 
 ### Changed
 
@@ -98,7 +98,7 @@ only in CHANGELOG.md.
 - Departments and sections are kept in Master Data: running the seeders again never overwrites what was changed there,
   and a section that was evaluated cannot be deleted or moved (deactivate it instead).
 
-## [1.0.0] - 2026-11-14
+## [0.1.0] - 2026-11-14
 
 ### Added
 

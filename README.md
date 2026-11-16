@@ -159,29 +159,43 @@ Survey drafts ("Save as Draft") are the only answers stored with a user: they ar
 
 ## Versions
 
-The version follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`, e.g. `1.8.0`) and is kept in
-one place, the file `VERSION` at the project root: `config('merdeka.app_version')` reads it, and the footer of every
+The version follows [Semantic Versioning 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`, e.g. `0.9.0`. It is kept
+in one place, the file `VERSION` at the project root: `config('merdeka.app_version')` reads it, and the footer of every
 page shows it. What changed in each version, and what to do on the server (migrations, seeders, new settings), is in
 [CHANGELOG.md](CHANGELOG.md) (Indonesian, [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), as in MTI Radio
 Management). The version in the footer opens **Version history** for everyone signed in: a timeline of CHANGELOG.md
-without its **Deploy** lines, newest first, each series (`1.8`, `1.7`, …) a node with its patches branching below it,
+without its **Deploy** lines, newest first, each series (`0.9`, `0.8`, …) a node with its patches branching below it,
 each version coloured by its kind of change. The headings are one of the six of Keep a Changelog: `Ditambahkan`,
 `Diubah`, `Diperbaiki`, `Dihapus`, `Keamanan`, `Ditinggalkan` (another heading shows grey); the legend and the labels
 stay in English (Minor release, Added, Changed, …). In English and Chinese the notes come from
 [CHANGELOG.en.md](CHANGELOG.en.md) (headings `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Deprecated`, no
 Deploy lines).
 
+The public API of this application, what others rely on and can break without knowing it, is:
+
+1. the `.env` settings (their names and meaning) and the Docker setup (services, port, volumes, mounted files);
+2. the CSV export of Survey Report (its columns);
+3. the Artisan commands meant to be run by hand or by a scheduler (`users:sync-directory` and its options).
+
+The screens are not part of it.
+
 | Bump | When |
 | --- | --- |
-| MAJOR (`2.0.0`) | Something others rely on breaks unless they adapt: a `.env` setting renamed without the old one still being read, the Docker setup changed incompatibly |
-| MINOR (`1.x.0`) | A new feature that breaks nothing: a new menu or page, a new optional setting, a new migration |
-| PATCH (`1.x.y`) | A bug fix, no new feature |
+| MAJOR (`x.0.0`) | An incompatible change of the public API: a setting renamed or removed without the old one still being read, a CSV column renamed or removed, a command or option removed, the Docker setup changed so that the old way no longer runs |
+| MINOR (`x.y.0`) | Functionality added in a backward compatible manner: a new menu or page, a new optional setting, a new migration, a new CSV column at the end |
+| PATCH (`x.y.z`) | Backward compatible bug fixes, no new functionality |
+
+Major version zero (`0.y.z`) is the initial development: until the application is used in production anything may
+change at any time, and a MINOR bump also covers incompatible changes. Version `1.0.0` is released when the
+application goes into production at `https://survey.merdekabattery.com`; from then on the public API only changes
+incompatibly with a new MAJOR version. Pre-release labels (`1.0.0-rc.1`) and build metadata (`+abc1234`) are not used.
 
 Changes that only touch the README or tests do not bump the version. Releasing a version is one commit that raises
-`VERSION` and adds its part on top of `CHANGELOG.md` and, in English, `CHANGELOG.en.md`. `VersionTest` checks that
-`VERSION` and CHANGELOG.md agree; `ChangelogDialogTest` checks the headings and that CHANGELOG.en.md has every version
-with the same kinds of change. There is no "Unreleased" part: every change pushed to `main` is a version. Versions
-1.0.0 to 1.7.0 were numbered afterwards, when numbering started at 1.8.0.
+`VERSION` and adds its part on top of `CHANGELOG.md` and, in English, `CHANGELOG.en.md`; a released version is never
+changed afterwards, a correction is a new version. `VersionTest` checks that `VERSION` is a Semantic Version and that
+CHANGELOG.md starts with it, with every version once and newest first; `ChangelogDialogTest` checks the headings and
+that CHANGELOG.en.md has every version with the same kinds of change. There is no "Unreleased" part: every change
+pushed to `main` is a version. Versions 0.1.0 to 0.8.0 were numbered afterwards, when numbering started at 0.9.0.
 
 ## Architecture
 

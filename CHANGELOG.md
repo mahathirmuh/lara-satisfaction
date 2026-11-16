@@ -1,8 +1,11 @@
 # Changelog
 
 Semua perubahan penting pada Employee Satisfaction Survey, yang terbaru di atas. Formatnya mengikuti
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), nomor versinya [Semantic Versioning](https://semver.org/):
-kapan MAJOR, MINOR atau PATCH naik ada di README bagian [Versions](README.md#versions).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), nomor versinya [Semantic Versioning 2.0.0](https://semver.org/):
+MAJOR naik untuk perubahan API publik yang tidak kompatibel, MINOR untuk fungsi baru yang tetap kompatibel, PATCH untuk
+perbaikan bug yang tetap kompatibel. Apa yang termasuk API publik ada di README bagian [Versions](README.md#versions).
+Selama versi 0.y.z (pengembangan awal, sebelum dipakai di production) apa pun boleh berubah; 1.0.0 dirilis saat
+aplikasi mulai dipakai di production.
 
 Setiap versi ditutup baris **Deploy**: yang perlu dilakukan di server setelah memperbarui kodenya. Dengan Docker:
 `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force` bila versi itu
@@ -11,7 +14,7 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
-## [1.8.0] - 2026-11-16
+## [0.9.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -32,7 +35,7 @@ sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 **Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi. Nomor versi sekarang dibaca dari file
 `VERSION`; setting `MERDEKA_APP_VERSION` di `.env` tidak dipakai lagi dan boleh dihapus.
 
-## [1.7.0] - 2026-11-16
+## [0.8.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -47,7 +50,7 @@ sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 Setting baru `CARD_DB_*` untuk foto (lihat README). Jalankan `docker compose exec app php artisan users:sync-directory`
 sekali agar daftar karyawan langsung terisi.
 
-## [1.6.0] - 2026-11-16
+## [0.7.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -62,7 +65,7 @@ sekali agar daftar karyawan langsung terisi.
 `docker compose exec app php artisan db:seed --class=MenuSeeder --force` dan
 `docker compose exec app php artisan db:seed --class=RoleSeeder --force`.
 
-## [1.5.0] - 2026-11-16
+## [0.6.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -76,7 +79,7 @@ sekali agar daftar karyawan langsung terisi.
 `docker compose exec app php artisan db:seed --class=MenuSeeder --force` dan
 `docker compose exec app php artisan db:seed --class=RoleSeeder --force`. Setting baru: `TRUSTED_PROXIES`.
 
-## [1.4.0] - 2026-11-16
+## [0.5.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -88,7 +91,7 @@ sekali agar daftar karyawan langsung terisi.
 
 **Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`.
 
-## [1.3.0] - 2026-11-16
+## [0.4.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -107,7 +110,7 @@ sekali agar daftar karyawan langsung terisi.
 **Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force` dan
 `docker compose exec app php artisan db:seed --class=RoleSeeder --force`. Setting baru: `LDAP_*`, `MS_SSO_*`.
 
-## [1.2.0] - 2026-11-16
+## [0.3.0] - 2026-11-16
 
 ### Ditambahkan
 
@@ -118,7 +121,7 @@ sekali agar daftar karyawan langsung terisi.
 **Deploy:** instalasi Docker pertama: `docker compose up -d --build`, lalu
 `docker compose exec app php artisan migrate --seed --force`.
 
-## [1.1.0] - 2026-11-16
+## [0.2.0] - 2026-11-16
 
 ### Diubah
 
@@ -129,7 +132,7 @@ sekali agar daftar karyawan langsung terisi.
 
 **Deploy:** `git pull`, lalu `php artisan migrate --force`.
 
-## [1.0.0] - 2026-11-14
+## [0.1.0] - 2026-11-14
 
 ### Ditambahkan
 
