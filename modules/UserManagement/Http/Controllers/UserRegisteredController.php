@@ -93,7 +93,7 @@ class UserRegisteredController extends Controller
     public function store(UserRegisteredRequest $request): JsonResponse
     {
         $user = $this->users->create(
-            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'password', 'is_active']),
+            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'is_active']),
             $request->validated('role_id'),
         );
 
@@ -112,7 +112,7 @@ class UserRegisteredController extends Controller
 
         $this->users->update(
             $user,
-            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'password', 'is_active']),
+            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'is_active']),
             $request->validated('role_id'),
         );
 

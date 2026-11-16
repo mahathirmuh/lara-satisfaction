@@ -21,8 +21,10 @@ use Modules\SurveyForm\Services\SurveySubmissionService;
 
 /**
  * Local demo data: section pictures, employees and anonymous responses for
- * the current and the previous operational audit, so the survey, dashboards
- * and reports have content. Never runs in production (see DatabaseSeeder).
+ * the current and the previous operational audit, so the dashboards and
+ * reports have content. The demo employees cannot sign in (there are no local
+ * passwords); try the survey with your own SSO / network account. Never runs
+ * in production (see DatabaseSeeder).
  */
 class DemoSeeder extends Seeder
 {
@@ -149,7 +151,6 @@ class DemoSeeder extends Seeder
         }
 
         $this->spreadSubmissionDates($current);
-        $this->createTryOutEmployee();
     }
 
     /**
@@ -324,28 +325,5 @@ class DemoSeeder extends Seeder
                 'submitted_at' => $survey->start_date->copy()->addDays(random_int(0, $days))->setTime(random_int(7, 17), random_int(0, 59)),
             ]);
         });
-    }
-
-    /**
-     * An employee who has not answered yet, to try the survey flow.
-     */
-    protected function createTryOutEmployee(): void
-    {
-        $password = (string) (config('merdeka.seed.admin_password') ?: Str::password(16, symbols: false));
-
-        $employee = User::create([
-            'name' => 'Demo Employee',
-            'email' => 'employee@'.self::DEMO_DOMAIN,
-            'employee_id' => 'DEMO9999',
-            'company_id' => Company::query()->where('code', 'MBM')->value('id'),
-            'password' => $password,
-            'is_active' => true,
-        ]);
-
-        $employee->roles()->attach((int) config('merdeka.default_role_id'));
-
-        $this->command?->warn('Demo employee account created (has not answered the survey yet):');
-        $this->command?->line('  Email    : employee@'.self::DEMO_DOMAIN.' (or Employee ID DEMO9999)');
-        $this->command?->line(config('merdeka.seed.admin_password') ? '  Password : (from SEED_ADMIN_PASSWORD)' : "  Password : {$password}");
     }
 }

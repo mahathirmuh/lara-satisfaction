@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Models\UserManagement\User;
+use App\Services\Auth\CompanyAccounts;
+use App\Services\Auth\DirectoryUnavailableException;
+use App\Services\Auth\LdapAuthenticator;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -11,12 +13,14 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Local sign in with an email address or Employee ID.
+ * Sign in with the network account (LDAP / Active Directory). There is no
+ * local password: the directory checks it, and the account here is found by
+ * the person's company email (see CompanyAccounts).
  */
 class LoginRequest extends FormRequest
 {
     /**
-     * Failed attempts allowed per minute for a login + IP combination.
+     * Failed attempts allowed per minute for a username + IP combination.
      */
     public const MAX_ATTEMPTS = 5;
 
@@ -36,7 +40,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'login' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'max:255'],
             'remember' => ['nullable', 'boolean'],
         ];
@@ -45,40 +49,57 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * Unknown accounts and wrong passwords share one message to avoid account
-     * enumeration; the inactive message is only shown after a valid password.
+     * A wrong password, an unknown or disabled directory account share one
+     * message. A directory that cannot answer is reported as an outage and is
+     * not counted as a failed attempt.
      *
      * @throws ValidationException
      */
-    public function authenticate(): void
+    public function authenticate(LdapAuthenticator $directory, CompanyAccounts $accounts): void
     {
         $this->ensureIsNotRateLimited();
 
-        $credentials = [
-            $this->loginField() => $this->normalizedLogin(),
-            'password' => $this->string('password')->toString(),
-        ];
-
-        if (! Auth::guard('web')->validate($credentials)) {
-            RateLimiter::hit($this->throttleKey());
-
+        if (! $directory->isConfigured()) {
             throw ValidationException::withMessages([
-                'login' => trans('auth.failed'),
+                'username' => 'Network sign-in is not configured yet. Please sign in with Microsoft or contact the IT Helpdesk.',
             ]);
         }
 
-        /** @var User $user */
-        $user = Auth::guard('web')->getLastAttempted();
+        try {
+            $identity = $directory->authenticate($this->directoryUsername(), $this->string('password')->toString());
+        } catch (DirectoryUnavailableException $exception) {
+            report($exception);
+
+            throw ValidationException::withMessages([
+                'username' => 'The network sign-in service cannot be reached right now. Please try again shortly.',
+            ]);
+        }
+
+        if ($identity === null) {
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'username' => trans('auth.failed'),
+            ]);
+        }
+
+        RateLimiter::clear($this->throttleKey());
+
+        $user = $identity->email !== null ? $accounts->resolve($identity->email, $identity->name) : null;
+
+        if ($user === null) {
+            throw ValidationException::withMessages([
+                'username' => 'Your network account is not registered in this application. Please contact HR or the IT Helpdesk.',
+            ]);
+        }
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'login' => 'Your account is inactive. Please contact the IT Helpdesk.',
+                'username' => 'Your account is inactive. Please contact the IT Helpdesk.',
             ]);
         }
 
         Auth::guard('web')->login($user, $this->boolean('remember'));
-
-        RateLimiter::clear($this->throttleKey());
     }
 
     /**
@@ -97,7 +118,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'login' => trans('auth.throttle', [
+            'username' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -105,21 +126,12 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Column used to look the account up: email when the login contains "@".
+     * The directory username: what was typed, without an "@domain" part, so
+     * "budi.santoso@merdekabattery.com" signs in as "budi.santoso".
      */
-    public function loginField(): string
+    public function directoryUsername(): string
     {
-        return str_contains($this->normalizedLogin(), '@') ? 'email' : 'employee_id';
-    }
-
-    /**
-     * Trimmed login; emails are compared in lower case.
-     */
-    public function normalizedLogin(): string
-    {
-        $login = $this->string('login')->trim()->toString();
-
-        return str_contains($login, '@') ? Str::lower($login) : $login;
+        return Str::before($this->string('username')->trim()->toString(), '@');
     }
 
     /**
@@ -127,6 +139,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->normalizedLogin()).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->directoryUsername()).'|'.$this->ip());
     }
 }

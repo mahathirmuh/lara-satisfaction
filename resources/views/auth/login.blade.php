@@ -69,21 +69,26 @@
                                     @endif
 
                                     <div class="text-center">
-                                        <span class="text-muted" style="font-size: 15px">Sign in with Merdeka Account</span>
+                                        <span class="text-muted" style="font-size: 15px">Sign in with Network Account (LDAP)</span>
+                                        @unless ($isNetworkSignInConfigured)
+                                            <span class="badge bg-yellow-lt ms-1" style="font-size: .7rem">Coming soon</span>
+                                        @endunless
                                     </div>
                                     <form id="loginForm" class="p-3 rounded" method="POST"
                                         action="{{ route('login.store') }}" novalidate>
                                         @csrf
+                                        <fieldset @disabled(! $isNetworkSignInConfigured)>
                                         <div class="row g-3">
                                             <div class="col-12">
-                                                <label for="login" class="form-label required">Email or Employee ID</label>
-                                                <input type="text" class="form-control @error('login') is-invalid @enderror"
-                                                    id="login" name="login" value="{{ old('login') }}"
-                                                    placeholder="name@merdekabattery.com" autocomplete="username" required
+                                                <label for="username" class="form-label required">Username</label>
+                                                <input type="text" class="form-control @error('username') is-invalid @enderror"
+                                                    id="username" name="username" value="{{ old('username') }}"
+                                                    placeholder="firstname.lastname" autocomplete="username" required
                                                     autofocus>
-                                                @error('login')
+                                                @error('username')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
+                                                <small class="form-hint">Your network (Windows) username and password.</small>
                                             </div>
                                             <div class="col-12">
                                                 <label for="password" class="form-label required">Password</label>
@@ -116,6 +121,7 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        </fieldset>
                                     </form>
                                     <div class="text-center">
                                         Access Login Guide :
@@ -190,11 +196,14 @@
                         </div>
                         <div class="{{ $guideColumn }}">
                             <div class="px-3 py-5 w-100 border rounded d-flex flex-column gap-3">
-                                <h3 class="text-center mb-0">Login by Merdeka Account</h3>
+                                <h3 class="text-center mb-0">Login by Network Account (LDAP)</h3>
                                 <div class="text-center">
-                                    Employees without a company mailbox sign in with their registered email or
-                                    Employee ID and the password provided by the administrator. Ask the HR Site Admin
-                                    if you do not know your registered account.
+                                    Sign in with the username and password of your company network (Windows)
+                                    account. This application has no passwords of its own: please contact the IT
+                                    Helpdesk if you do not have a network or Microsoft account.
+                                    @unless ($isNetworkSignInConfigured)
+                                        <br><span class="badge bg-yellow-lt mt-1">Coming soon</span>
+                                    @endunless
                                 </div>
                             </div>
                         </div>

@@ -40,12 +40,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Single Sign-On
+    | Single Sign-On and Network Accounts
     |--------------------------------------------------------------------------
     |
-    | Public mailbox domains are always rejected for SSO. When auto register
-    | is enabled, unknown users from an allowed domain are created with the
-    | default role instead of being rejected.
+    | Users sign in with SSO (Microsoft / Google) or their network account
+    | (LDAP, see config/ldap.php) only; there are no local passwords. Accounts
+    | are matched on the company email. When auto register is enabled, unknown
+    | users from an allowed domain are created with the default role on their
+    | first sign-in instead of being rejected. Public mailbox domains are
+    | always rejected for SSO.
     |
     */
 
@@ -86,15 +89,14 @@ return [
     | Database Seeding
     |--------------------------------------------------------------------------
     |
-    | Initial super admin account. When no password is configured a random one
-    | is generated and printed once by the seeder. Demo data (employees and
-    | anonymous responses) is only seeded when enabled, never in production.
+    | Initial super admin: the company email of a real person, who signs in
+    | with SSO or their network account. Demo data (employees and anonymous
+    | responses) is only seeded when enabled, never in production.
     |
     */
 
     'seed' => [
-        'admin_email' => env('SEED_ADMIN_EMAIL', 'superadmin@merdekabattery.com'),
-        'admin_password' => env('SEED_ADMIN_PASSWORD'),
+        'admin_email' => env('SEED_ADMIN_EMAIL'),
         'demo_data' => (bool) env('SEED_DEMO_DATA', false),
     ],
 

@@ -5,11 +5,11 @@ namespace Modules\UserManagement\Http\Requests;
 use App\Models\UserManagement\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 /**
  * Register / update a user. Companies and roles are limited to what the
- * signed-in administrator may assign.
+ * signed-in administrator may assign. There is no password: the user signs in
+ * with SSO or the network account (LDAP) that has this email.
  */
 class UserRegisteredRequest extends FormRequest
 {
@@ -56,7 +56,6 @@ class UserRegisteredRequest extends FormRequest
             'email' => ['required', 'string', 'email:rfc', 'max:255', Rule::unique('users', 'email')->ignore($target)->withoutTrashed()],
             'employee_id' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'employee_id')->ignore($target)->withoutTrashed()],
             'company_id' => ['required', 'integer', $companyRule],
-            'password' => ['nullable', 'string', 'max:255', Password::defaults()],
             'is_active' => ['required', 'boolean'],
             'role_id' => ['required', 'array', 'min:1'],
             'role_id.*' => [

@@ -87,6 +87,7 @@ class SsoTest extends TestCase
     public function test_unregistered_user_is_rejected_when_auto_registration_is_disabled(): void
     {
         $this->seedAccessControl();
+        config(['merdeka.sso.auto_register' => false]);
         $this->fakeMicrosoftUser('new.hire@merdekabattery.com');
 
         $this->get(route('sso.callback', 'microsoft'))

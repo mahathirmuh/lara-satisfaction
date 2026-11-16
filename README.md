@@ -2,7 +2,8 @@
 
 Rebuild of the *satisfaction* application on **Laravel 13** following the architecture and
 style of **Base-Apps-Merdeka** (modular `modules/` structure, menu-based RBAC, Tabler/Merdeka UI,
-SweetAlert dialogs, activity & error logging, Microsoft/Google SSO).
+SweetAlert dialogs, activity & error logging). Sign in is Microsoft/Google SSO or the network
+account (LDAP / Active Directory) only: the application has no passwords of its own.
 
 Employees rate the services of the support service departments (the departments under the Support
 Services Deputy General Manager in the MTI organization chart 2026: Supply Chain, Occupational Health
@@ -15,7 +16,7 @@ analyse the results per department, section, question and company.
 
 ## Requirements
 
-- PHP 8.3+ (tested on 8.4) with `pdo_sqlsrv` / `pdo_sqlite` / `pdo_mysql` / `pdo_pgsql`, `gd` (WebP), `mbstring`, `openssl`, `intl`
+- PHP 8.3+ (tested on 8.4) with `pdo_sqlsrv` / `pdo_sqlite` / `pdo_mysql` / `pdo_pgsql`, `gd` (WebP), `ldap`, `mbstring`, `openssl`, `intl`
 - Composer 2
 - No Node.js build step: the Merdeka theme and vendor libraries are served from `public/assets`
 
@@ -29,13 +30,15 @@ php artisan serve       # or: composer dev
 Uploaded images (department illustrations, landing page hero image) are re-encoded to WebP and
 stored on the `public` disk, so `php artisan storage:link` is required on every server.
 
-The seeder prints the super admin credentials (`SEED_ADMIN_EMAIL`, random password unless
-`SEED_ADMIN_PASSWORD` is set). Set `SEED_DEMO_DATA=true` (never in production) to seed demo
-employees and anonymous responses, then run `php artisan migrate:fresh --seed`.
+The first super admin is the company email in `SEED_ADMIN_EMAIL`: that person signs in with
+Microsoft SSO or their network account. Running `php artisan db:seed --class=UserSeeder` again
+also grants the role to an existing account, e.g. after its owner signed in once as Employee.
+Set `SEED_DEMO_DATA=true` (never in production) to seed demo employees and anonymous responses
+(they cannot sign in), then run `php artisan migrate:fresh --seed`.
 
 Built-in roles: **Super Admin** (everything), **Survey Administrator** (survey management,
 reports, user registration, master data) and **Employee** (dashboard
-and *My Survey*; default role of SSO auto-registered users).
+and *My Survey*; default role of auto-registered SSO / LDAP users).
 
 ### Docker
 
@@ -44,19 +47,22 @@ docker compose up -d --build                                  # http://<host>:26
 docker compose exec app php artisan migrate --seed --force    # first install only
 ```
 
-The image (PHP 8.4 + Apache, Microsoft ODBC Driver 18 for SQL Server) reads the project `.env`
-and always runs in production mode. `app` serves the site and `scheduler` runs the deadline
-reminders and draft pruning. Uploaded images are kept in the `storage-app` volume. Set `APP_URL`
-to the address users open, and `DB_TRUST_SERVER_CERTIFICATE=true` when SQL Server uses its own
-(self-signed) certificate. After changing `.env`, run `docker compose up -d --force-recreate`.
+The image (PHP 8.4 + Apache, Microsoft ODBC Driver 18 for SQL Server, LDAP) reads the project
+`.env` and `certs/` (mounted read-only) and always runs in production mode. `app` serves the site
+and `scheduler` runs the deadline reminders and draft pruning. Uploaded images are kept in the
+`storage-app` volume. Set `APP_URL` to the address users open, and
+`DB_TRUST_SERVER_CERTIFICATE=true` when SQL Server uses its own (self-signed) certificate. After
+changing `.env`, run `docker compose up -d --force-recreate`.
 
 ## Configuration
 
 | Variable | Purpose |
 | --- | --- |
-| `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID` | Microsoft SSO (button always shown, "Coming soon" until set) |
+| `MS_SSO_*` / `MS_GRAPH_*` or `AZURE_*` | Microsoft SSO (button always shown, "Coming soon" until set) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google SSO (button hidden while empty) |
-| `SSO_AUTO_REGISTER`, `SSO_ALLOWED_DOMAINS` | Create unknown SSO users of allowed domains as Employee |
+| `LDAP_*` | Network account sign-in (form shown as "Coming soon" until `LDAP_URL` and `LDAP_BIND_DN` are set) |
+| `SSO_AUTO_REGISTER`, `SSO_ALLOWED_DOMAINS` | Register unknown SSO / LDAP users of allowed domains as Employee on their first sign-in |
+| `SEED_ADMIN_EMAIL` | Company email of the first super admin |
 | `SURVEY_MIN_GROUP_SIZE` | Anonymity threshold for showing results (default 5) |
 | `SURVEY_REMINDER_DAYS` | Deadline reminder days before the end date (default `14`, e.g. `14,7,1`) |
 | `MAIL_*`, `APP_URL` | SMTP for reminder emails; `APP_URL` is used for the links in emails |
@@ -75,12 +81,23 @@ Survey drafts ("Save as Draft") are the only answers stored with a user: they ar
 
 ### Activating Microsoft SSO
 
-1. In Microsoft Entra ID, create an app registration with the **Web** redirect URI
+1. In Microsoft Entra ID, use an app registration with the **Web** redirect URI
    `https://<host>/auth/microsoft/callback` and the delegated Microsoft Graph permission `User.Read`.
-2. Create a client secret, then set `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` and `AZURE_TENANT_ID`
-   (directory id) in `.env` and run `php artisan config:cache` in production.
+2. Set its client id, secret and tenant id in `.env`: `MS_SSO_*` (else `MS_GRAPH_*`, as in
+   trilingual-docon) or `AZURE_*`, and `MS_SSO_REDIRECT_URI` to the exact registered redirect URI.
+   Run `php artisan config:cache` in production.
 3. Users sign in with the account whose email matches their registered account; with
    `SSO_AUTO_REGISTER=true`, unknown users of `SSO_ALLOWED_DOMAINS` are created as Employee.
+
+### Activating network sign-in (LDAP)
+
+1. Set `LDAP_URL` (`ldaps://<domain controller>:636`), `LDAP_BASE_DN`, the read-only service
+   account `LDAP_BIND_DN` / `LDAP_BIND_PASSWORD` and `LDAP_USER_SEARCH_BASE`, the narrowest unit
+   holding everyone who may sign in. Same settings as trilingual-docon.
+2. Keep `LDAP_TLS_VERIFY=true` and put the internal CA certificate (PEM) at `certs/ca.pem`, with
+   `LDAP_CA_CERT=/var/www/html/certs/ca.pem` in Docker. The `certs/` folder is not committed.
+3. People type their network username (an email works too: the part before "@" is used). Their
+   account here is found by the directory email (`mail`, else `userPrincipalName`).
 
 ## Architecture
 

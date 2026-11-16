@@ -22,6 +22,8 @@
                                 <div class="col-md-9">
                                     <input type="email" id="userEmail" class="form-control" maxlength="255"
                                         placeholder="name@merdekabattery.com" required>
+                                    <small class="form-hint">The email of their Microsoft / network account: it is
+                                        how the user signs in (there are no passwords in this application).</small>
                                 </div>
                             </div>
                         </div>
@@ -44,17 +46,6 @@
                                             <option value="{{ $company->id }}">{{ $company->code }} - {{ $company->name }}</option>
                                         @endforeach
                                     </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="row">
-                                <label for="userPassword" class="col-md-3 col-form-label">Password</label>
-                                <div class="col-md-9">
-                                    <input type="password" id="userPassword" class="form-control" maxlength="255"
-                                        autocomplete="new-password" placeholder="Leave empty to keep / generate a random password">
-                                    <small class="form-hint">Only needed for employees without SSO. Minimum 8 characters
-                                        with letters and numbers.</small>
                                 </div>
                             </div>
                         </div>
@@ -189,7 +180,6 @@
                 email: $('#userEmail').val().trim(),
                 employee_id: $('#userEmployeeId').val().trim(),
                 company_id: $('#companySelect').val(),
-                password: $('#userPassword').val(),
                 is_active: $('#userActive').is(':checked') ? 1 : 0,
                 role_id: $('.user-role-checkbox:checked').map((_, element) => element.value).get(),
             };

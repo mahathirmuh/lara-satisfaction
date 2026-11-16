@@ -8,8 +8,10 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * Initial super admin account. No password is hard-coded: it comes from
- * SEED_ADMIN_PASSWORD or is generated and printed once.
+ * The first super admin: the company email of a real person (SEED_ADMIN_EMAIL),
+ * who signs in with Microsoft SSO or their network account (LDAP) as there are
+ * no local passwords. Running it again grants the role to that email's
+ * account, e.g. after its owner signed in once and was registered as Employee.
  */
 class UserSeeder extends Seeder
 {
@@ -18,29 +20,32 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = (string) config('merdeka.seed.admin_email');
+        $email = Str::lower(trim((string) config('merdeka.seed.admin_email')));
 
-        if (User::withTrashed()->where('email', Str::lower($email))->exists()) {
-            $this->command?->info("Super admin [{$email}] already exists; password unchanged.");
+        if ($email === '') {
+            $this->command?->warn('No super admin seeded: set SEED_ADMIN_EMAIL to the company email (Microsoft / network account) of the first administrator.');
 
             return;
         }
 
-        $password = (string) (config('merdeka.seed.admin_password') ?: Str::password(16, symbols: false));
+        $admin = User::withTrashed()->where('email', $email)->first();
 
-        $admin = User::create([
-            'name' => 'Super Admin',
+        if ($admin?->trashed()) {
+            $this->command?->warn("Super admin [{$email}] is a deleted account: restore it in User Management or set another SEED_ADMIN_EMAIL.");
+
+            return;
+        }
+
+        $admin ??= User::create([
+            'name' => Str::of(Str::before($email, '@'))->replace(['.', '_', '-'], ' ')->title()->toString(),
             'email' => $email,
-            'password' => $password,
+            'password' => Str::password(32),
             'company_id' => Company::query()->where('code', 'MBM')->value('id'),
             'is_active' => true,
         ]);
 
-        $admin->roles()->sync([(int) config('merdeka.super_admin_role_id')]);
+        $admin->roles()->syncWithoutDetaching([(int) config('merdeka.super_admin_role_id')]);
 
-        $this->command?->warn('Super admin account created:');
-        $this->command?->line("  Email    : {$email}");
-        $this->command?->line(config('merdeka.seed.admin_password') ? '  Password : (from SEED_ADMIN_PASSWORD)' : "  Password : {$password}");
-        $this->command?->line('  Change it after the first sign in (Account > Change Password).');
+        $this->command?->info("Super admin: {$email} (signs in with Microsoft SSO or the network account that has this email).");
     }
 }

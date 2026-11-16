@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\Rules\Password;
 use SocialiteProviders\Azure\Provider as AzureProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
@@ -49,14 +48,13 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Password policy and destructive command guard. Login attempts are
-     * throttled by App\Http\Requests\Auth\LoginRequest.
+     * Destructive command guard. There are no local passwords (SSO and the
+     * network account only); network sign-in attempts are throttled by
+     * App\Http\Requests\Auth\LoginRequest.
      */
     protected function configureSecurity(): void
     {
         DB::prohibitDestructiveCommands($this->app->isProduction());
-
-        Password::defaults(fn (): Password => Password::min(8)->letters()->numbers());
     }
 
     /**

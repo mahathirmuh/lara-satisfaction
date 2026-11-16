@@ -23,7 +23,7 @@ class UserRegisteredTest extends TestCase
         $this->company = Company::factory()->create();
     }
 
-    public function test_admin_registers_an_employee_with_a_random_password_when_none_is_given(): void
+    public function test_admin_registers_an_employee_without_a_usable_password(): void
     {
         $this->actingAs($this->surveyAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload())
@@ -37,23 +37,20 @@ class UserRegisteredTest extends TestCase
         $this->assertFalse(Hash::check('password', $user->password));
     }
 
-    public function test_admin_can_set_an_initial_password(): void
+    public function test_a_submitted_password_is_ignored_as_users_only_sign_in_with_sso_or_ldap(): void
     {
         $this->actingAs($this->surveyAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload(['password' => 'Merdeka2026']))
             ->assertCreated();
 
-        $this->post(route('logout'));
-        $this->post(route('login.store'), ['login' => 'MBM-1001', 'password' => 'Merdeka2026'])
-            ->assertRedirect(route('survey-form.index'));
-    }
+        $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
+        $this->assertFalse(Hash::check('Merdeka2026', $user->password));
 
-    public function test_weak_passwords_are_rejected(): void
-    {
         $this->actingAs($this->surveyAdmin())
-            ->postJson(route('user-management.user-registered.store'), $this->payload(['password' => 'short']))
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['password']);
+            ->putJson(route('user-management.user-registered.update', $user), $this->payload(['password' => 'Merdeka2027']))
+            ->assertOk();
+
+        $this->assertFalse(Hash::check('Merdeka2027', $user->fresh()->password));
     }
 
     public function test_registering_the_email_of_a_deleted_account_restores_it(): void

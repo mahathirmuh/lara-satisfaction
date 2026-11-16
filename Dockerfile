@@ -1,16 +1,17 @@
 # syntax=docker/dockerfile:1
 
 # Employee Satisfaction Survey: PHP 8.4 + Apache, with the Microsoft ODBC
-# driver for SQL Server. Runs as www-data on port 8080; the configuration
-# comes from the .env file mounted by docker-compose.yml.
+# driver for SQL Server and LDAP for network sign-in. Runs as www-data on port
+# 8080; the configuration comes from the .env file mounted by docker-compose.yml.
 FROM php:8.4-apache-bookworm
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # gd (with WebP) re-encodes uploaded images; pdo_sqlsrv also installs the
-# Microsoft ODBC Driver 18 for SQL Server; intl backs Laravel's Number helper.
-RUN install-php-extensions gd intl pdo_sqlsrv opcache \
+# Microsoft ODBC Driver 18 for SQL Server; intl backs Laravel's Number helper;
+# ldap checks network account passwords against Active Directory.
+RUN install-php-extensions gd intl ldap pdo_sqlsrv opcache \
     && apt-get update \
     && apt-get install -y --no-install-recommends unzip \
     && rm -rf /var/lib/apt/lists/* \

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\Auth\CompanyAccounts;
+use App\Services\Auth\LdapAuthenticator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,21 +15,22 @@ use Illuminate\View\View;
 class LoginController extends Controller
 {
     /**
-     * Show the Merdeka sign in page (SSO + Merdeka account).
+     * Show the Merdeka sign in page: SSO and the network account (LDAP) only.
      */
-    public function create(): View
+    public function create(LdapAuthenticator $directory): View
     {
         return view('auth.login', [
             'ssoProviders' => SsoController::loginProviders(),
+            'isNetworkSignInConfigured' => $directory->isConfigured(),
         ]);
     }
 
     /**
-     * Handle a local (email / Employee ID) sign in.
+     * Handle a network account (LDAP) sign in.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, LdapAuthenticator $directory, CompanyAccounts $accounts): RedirectResponse
     {
-        $request->authenticate();
+        $request->authenticate($directory, $accounts);
 
         $request->session()->regenerate();
 

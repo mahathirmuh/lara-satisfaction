@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Account\PasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\LandingController;
@@ -12,7 +11,9 @@ use Illuminate\Support\Facades\Route;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Application-wide routes (landing page, authentication and account).
+| Application-wide routes (landing page, authentication, notifications).
+| Sign in is SSO or the network account (LDAP) only: there are no local
+| passwords, so there is no password page either.
 | Module routes live in modules/{Module}/Routes/web and are loaded by each
 | module's service provider.
 |
@@ -35,10 +36,6 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
-
-    /** Account */
-    Route::get('account/password', [PasswordController::class, 'edit'])->name('account.password.edit');
-    Route::put('account/password', [PasswordController::class, 'update'])->name('account.password.update');
 
     /** In-app notifications (own notifications only) */
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');

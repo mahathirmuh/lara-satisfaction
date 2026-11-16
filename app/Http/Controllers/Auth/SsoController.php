@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
-use App\Models\UserManagement\User;
+use App\Services\Auth\CompanyAccounts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
@@ -17,10 +16,16 @@ use Throwable;
 
 /**
  * Single sign-on with Google (Merdeka Copper Gold) and Microsoft Entra ID
- * (Merdeka Battery Materials).
+ * (Merdeka Battery Materials). With the network account (LDAP) these are the
+ * only ways in; there are no local passwords.
  */
 class SsoController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct(protected CompanyAccounts $accounts) {}
+
     /**
      * Socialite driver per provider slug used in the URL.
      */
@@ -111,7 +116,7 @@ class SsoController extends Controller
             return redirect()->route('login');
         }
 
-        $user = User::query()->where('email', $email)->first() ?? $this->autoRegister($socialUser, $email, $domain);
+        $user = $this->accounts->resolve($email, $socialUser->getName());
 
         if ($user === null) {
             Alert::warning('Account not registered', "The account {$email} is not registered in this application. Please contact HR or the IT Helpdesk.");
@@ -147,7 +152,7 @@ class SsoController extends Controller
 
         Alert::warning(
             Str::headline($provider).' sign-in is not active yet',
-            'Single sign-on with '.Str::headline($provider).' will be available soon. Please sign in with your Merdeka account (email or Employee ID and password) for now.',
+            'Single sign-on with '.Str::headline($provider).' will be available soon. Please sign in with your network account (username and password) for now.',
         );
 
         return redirect()->route('login');
@@ -162,33 +167,5 @@ class SsoController extends Controller
         $email = Str::lower(trim((string) (($raw['mail'] ?? null) ?: $socialUser->getEmail())));
 
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
-    }
-
-    /**
-     * Create an Employee account for an unknown user of an allowed domain when
-     * SSO auto registration is enabled.
-     */
-    protected function autoRegister(SocialiteUser $socialUser, string $email, string $domain): ?User
-    {
-        if (! config('merdeka.sso.auto_register') || ! in_array($domain, config('merdeka.sso.allowed_domains', []), true)) {
-            return null;
-        }
-
-        if (User::withTrashed()->where('email', $email)->exists()) {
-            return null;
-        }
-
-        return DB::transaction(function () use ($socialUser, $email): User {
-            $user = User::create([
-                'name' => Str::limit(trim((string) $socialUser->getName()) ?: Str::before($email, '@'), 255, ''),
-                'email' => $email,
-                'password' => Str::password(32),
-                'is_active' => true,
-            ]);
-
-            $user->roles()->attach((int) config('merdeka.default_role_id'));
-
-            return $user;
-        });
     }
 }

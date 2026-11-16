@@ -49,7 +49,8 @@ class UserRegisteredRepository implements UserRegisteredInterface
     public function create(array $data, array $roleIds): User
     {
         return DB::transaction(function () use ($data, $roleIds): User {
-            $data['password'] = filled($data['password'] ?? null) ? $data['password'] : Str::password(32);
+            // Never used: users sign in with SSO or their network account only.
+            $data['password'] = Str::password(32);
 
             $this->releaseEmployeeId($data['employee_id'] ?? null, null);
 
@@ -74,10 +75,6 @@ class UserRegisteredRepository implements UserRegisteredInterface
     public function update(User $user, array $data, array $roleIds): User
     {
         return DB::transaction(function () use ($user, $data, $roleIds): User {
-            if (blank($data['password'] ?? null)) {
-                unset($data['password']);
-            }
-
             $this->releaseEmployeeId($data['employee_id'] ?? null, $user->getKey());
 
             $user->update($data);

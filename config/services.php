@@ -53,11 +53,17 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    /*
+    | Microsoft Entra ID, with the same settings as the trilingual-docon
+    | application: MS_SSO_*, else the MS_GRAPH_* app registration, else the
+    | AZURE_* names. The redirect must match a redirect URI registered in
+    | Entra exactly (scheme, host and port).
+    */
     'azure' => [
-        'client_id' => env('AZURE_CLIENT_ID'),
-        'client_secret' => env('AZURE_CLIENT_SECRET'),
-        'redirect' => env('AZURE_REDIRECT_URI', '/auth/microsoft/callback'),
-        'tenant' => env('AZURE_TENANT_ID', 'common'),
+        'client_id' => env('MS_SSO_CLIENT_ID', env('MS_GRAPH_CLIENT_ID', env('AZURE_CLIENT_ID'))),
+        'client_secret' => env('MS_SSO_CLIENT_SECRET', env('MS_GRAPH_CLIENT_SECRET', env('AZURE_CLIENT_SECRET'))),
+        'redirect' => env('MS_SSO_REDIRECT_URI', env('AZURE_REDIRECT_URI', '/auth/microsoft/callback')),
+        'tenant' => env('MS_SSO_TENANT_ID', env('MS_GRAPH_TENANT_ID', env('AZURE_TENANT_ID', 'common'))),
         'proxy' => env('AZURE_PROXY'),
     ],
 

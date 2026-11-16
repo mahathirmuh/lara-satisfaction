@@ -1,7 +1,8 @@
-# Secrets and local data: the .env is mounted at runtime, never built in.
+# Secrets and local data: the .env and certs/ are mounted at runtime, never built in.
 .env
 .env.*
 !.env.example
+certs
 database/*.sqlite*
 **/*.xlsx
 

@@ -34,10 +34,6 @@
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <a href="{{ route('account.password.edit') }}" class="dropdown-item">
-                        <i class="ti ti-key me-2"></i> Change Password
-                    </a>
-                    <div class="dropdown-divider"></div>
                     <a href="{{ route('logout') }}" class="dropdown-item text-danger" onclick="logout(event)">
                         <i class="ti ti-logout me-2"></i> Logout
                     </a>
