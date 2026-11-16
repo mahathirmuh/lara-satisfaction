@@ -24,8 +24,11 @@ analyse the results per department, section, question and company.
 
 ```bash
 composer setup          # install, .env, app key, storage link, migrate + seed
-php artisan serve       # or: composer dev
+php artisan serve       # http://localhost:26113 (SERVER_PORT); or: composer dev
 ```
+
+`php artisan serve` and Docker use the same port (26113), so the Microsoft redirect URI is the
+same for both: run one of them at a time, and open the app at `http://localhost:26113`.
 
 Uploaded images (department illustrations, landing page hero image) are re-encoded to WebP and
 stored on the `public` disk, so `php artisan storage:link` is required on every server.
