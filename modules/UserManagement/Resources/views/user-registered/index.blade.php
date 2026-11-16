@@ -37,10 +37,26 @@
                                 </x-global.btn-detail>
                             </div>
                             @if ($can['create'])
-                                <x-global.btn-detail :label="__('Add User')" color="blue" size="sm"
-                                    onclick="toggleUserModal('add')">
-                                    <x-slot:icon><i class="ti ti-plus"></i></x-slot:icon>
-                                </x-global.btn-detail>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    @if ($canSyncDirectory)
+                                        <span class="text-secondary small" id="lastDirectorySync">
+                                            @if ($lastSync)
+                                                {{ __('Last import: :at (:count employees)', ['at' => $lastSync['at'], 'count' => $lastSync['employees']]) }}
+                                            @else
+                                                {{ __('Not imported from the directory yet') }}
+                                            @endif
+                                        </span>
+                                        <x-global.btn-detail :label="__('Sync from Directory')" color="azure" size="sm" outline="true"
+                                            id="syncDirectoryButton" data-bs-toggle="tooltip"
+                                            data-bs-title="{{ __('Import the employees of the assessed departments from Active Directory (also done every day at 06:00)') }}">
+                                            <x-slot:icon><i class="ti ti-refresh"></i></x-slot:icon>
+                                        </x-global.btn-detail>
+                                    @endif
+                                    <x-global.btn-detail :label="__('Add User')" color="blue" size="sm"
+                                        onclick="toggleUserModal('add')">
+                                        <x-slot:icon><i class="ti ti-plus"></i></x-slot:icon>
+                                    </x-global.btn-detail>
+                                </div>
                             @endif
                         </div>
 
@@ -55,6 +71,7 @@
                                                 <th class="text-capitalize fs-5 py-3" data-key="employee_id">{{ __('Employee ID') }}</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="job_title">{{ __('Job Title') }}</th>
                                                 <th class="text-capitalize fs-5 py-3">{{ __('Company') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Department') }}</th>
                                                 <th class="text-capitalize fs-5 py-3">{{ __('Role') }}</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="is_active">{{ __('Status') }}</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="last_login_at">{{ __('Last Login') }}</th>
@@ -103,6 +120,10 @@
             {
                 key: 'company',
                 render: (item) => escapeHtml(item.company || '-'),
+            },
+            {
+                key: 'department',
+                render: (item) => escapeHtml(item.department || '-'),
             },
             {
                 key: 'role',
@@ -159,6 +180,15 @@
         $(function() {
             userTable.reload();
             $('#toggleFilterButton').on('click', () => $('#userFilterCard').slideToggle(300));
+
+            $('#syncDirectoryButton').on('click', function() {
+                saveRecord({
+                    url: @json(route('user-management.user-registered.sync')),
+                    method: 'POST',
+                    confirmText: @json(__('The employees of the assessed departments will be imported from Active Directory now.')),
+                    onSuccess: () => setTimeout(() => window.location.reload(), 2000),
+                });
+            });
         });
 
         function deleteUser(id) {

@@ -37,7 +37,7 @@
 
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Employees')" :value="$summary['eligible']" icon="users" color="blue"
-                    :subtitle="__('Accounts that fill in surveys')" />
+                    :subtitle="__('Employees of the assessed departments')" />
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Not Started')" :value="$summary['not_started']" icon="circle-dashed"
@@ -65,6 +65,12 @@
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endforeach
                                 </select>
+                                <select id="progressDepartmentFilter" class="form-select w-auto" aria-label="{{ __('Department') }}">
+                                    <option value="">{{ __('All departments') }}</option>
+                                    @foreach ($departments as $department)
+                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    @endforeach
+                                </select>
                                 <select id="progressCompanyFilter" class="form-select w-auto" aria-label="{{ __('Company') }}">
                                     <option value="">{{ __('All companies') }}</option>
                                     @foreach ($companies as $company)
@@ -86,6 +92,7 @@
                                                     <th class="text-capitalize fs-5 py-3" data-key="name">{{ __('Name') }}</th>
                                                     <th class="text-capitalize fs-5 py-3" data-key="employee_id">{{ __('Employee ID') }}</th>
                                                     <th class="text-capitalize fs-5 py-3" data-key="job_title">{{ __('Job Title') }}</th>
+                                                    <th class="text-capitalize fs-5 py-3">{{ __('Department') }}</th>
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Company') }}</th>
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Status') }}</th>
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Last Update') }}</th>
@@ -99,7 +106,7 @@
                             </div>
                             <div class="col-12 text-secondary small">
                                 <i class="ti ti-shield-lock me-1"></i>
-                                {{ __('Only the filling status is shown: answers stay anonymous and are never linked to a person. Only people with an account in this application are listed (created at their first sign-in or in User Management).') }}
+                                {{ __('Only the filling status is shown: answers stay anonymous and are never linked to a person. The list holds the employees of the assessed departments, imported every day from Active Directory.') }}
                             </div>
                         </div>
                     </div>
@@ -138,6 +145,10 @@
                         render: (item) => escapeHtml(item.job_title || '-'),
                     },
                     {
+                        key: 'department',
+                        render: (item) => escapeHtml(item.department || '-'),
+                    },
+                    {
                         key: 'company',
                         render: (item) => escapeHtml(item.company || '-'),
                     },
@@ -156,16 +167,18 @@
                 filters: () => ({
                     survey_id: progressSurveyId,
                     status: $('#progressStatusFilter').val(),
+                    department: $('#progressDepartmentFilter').val() ? [$('#progressDepartmentFilter').val()] : [],
                     company: $('#progressCompanyFilter').val() ? [$('#progressCompanyFilter').val()] : [],
                 }),
                 onReset: () => {
                     $('#progressStatusFilter').val('');
+                    $('#progressDepartmentFilter').val('');
                     $('#progressCompanyFilter').val('');
                 },
             });
 
             $(function() {
-                $('#progressStatusFilter, #progressCompanyFilter').on('change', () => progressTable.applyFilters());
+                $('#progressStatusFilter, #progressDepartmentFilter, #progressCompanyFilter').on('change', () => progressTable.applyFilters());
                 progressTable.reload();
             });
         </script>

@@ -82,6 +82,31 @@ return [
         'name' => env('LDAP_ATTR_NAME', 'displayname'),
         'job_title' => env('LDAP_ATTR_JOB_TITLE', 'title'),
         'employee_id' => env('LDAP_ATTR_EMPLOYEE_ID', 'employeeid'),
+        'department' => env('LDAP_ATTR_DEPARTMENT', 'department'),
+        'company' => env('LDAP_ATTR_COMPANY', 'company'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Employee import (php artisan users:sync-directory, daily)
+    |--------------------------------------------------------------------------
+    |
+    | The employees of the assessed departments (their directory department is
+    | a department name or one of its "Directory Department Names" in Master
+    | Data) are imported before they ever sign in: enabled accounts with a
+    | company e-mail and an employee ID. Their company comes from the
+    | directory "company" attribute, matched on the company name or code
+    | ("PT. Merdeka Tsingshan Indonesia" = MTI), an alias below, else the
+    | default company (the search base is the MTI unit).
+    |
+    */
+
+    'sync' => [
+        'default_company' => env('LDAP_SYNC_DEFAULT_COMPANY', 'MTI'),
+
+        'company_aliases' => [
+            'MBMA' => 'MBM',
+        ],
     ],
 
 ];

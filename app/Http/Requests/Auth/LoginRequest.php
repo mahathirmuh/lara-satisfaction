@@ -95,6 +95,7 @@ class LoginRequest extends FormRequest
 
         $accounts->applyJobTitle($user, $identity->jobTitle);
         $accounts->applyEmployeeId($user, $identity->employeeId);
+        $accounts->applyDepartment($user, $identity->department);
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([

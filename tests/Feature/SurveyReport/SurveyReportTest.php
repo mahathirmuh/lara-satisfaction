@@ -6,6 +6,7 @@ use App\Models\Organization\Company;
 use App\Models\Organization\Department;
 use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\Survey;
+use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyQuestion;
 use App\Models\UserManagement\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -160,17 +161,20 @@ class SurveyReportTest extends TestCase
         $this->assertSame(['4', '2'], array_slice($rows[1], 2, 2));
     }
 
-    public function test_participation_rate_compares_completions_with_active_employees(): void
+    public function test_participation_rate_compares_completions_with_the_department_employees(): void
     {
         $this->seedResponses();
-        User::factory()->count(2)->create(['company_id' => $this->mainCompany->id]);
-        User::factory()->inactive()->create(['company_id' => $this->mainCompany->id]);
+        $this->departmentEmployee(['company_id' => $this->mainCompany->id]);
+        $this->departmentEmployee(['company_id' => $this->mainCompany->id]);
+        $this->departmentEmployee(['company_id' => $this->mainCompany->id, 'is_active' => false]);
+        $outsider = $this->employee(['company_id' => $this->mainCompany->id]);
+        SurveyParticipation::create(['survey_id' => $this->survey->id, 'user_id' => $outsider->id, 'submitted_at' => now()]);
 
         $this->actingAs($admin = $this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertViewHas('summary', fn (array $summary): bool => $summary['participants'] === 8
-                && $summary['eligible'] === 11
-                && $summary['participation_rate'] === round(8 / 11 * 100, 1));
+                && $summary['eligible'] === 10
+                && $summary['participation_rate'] === 80.0);
 
         $this->assertTrue($admin->is_active);
     }
@@ -384,6 +388,6 @@ class SurveyReportTest extends TestCase
 
     protected function respondent(Company $company): User
     {
-        return User::factory()->create(['company_id' => $company->id]);
+        return $this->departmentEmployee(['company_id' => $company->id]);
     }
 }

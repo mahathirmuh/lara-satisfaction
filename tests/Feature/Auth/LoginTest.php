@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Helpers\LogApps;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Log\LogActivity;
+use App\Models\Organization\Department;
 use App\Models\UserManagement\User;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\LdapAuthenticator;
@@ -133,6 +134,23 @@ class LoginTest extends TestCase
 
         $this->assertAuthenticatedAs($user);
         $this->assertSame($kept, $user->fresh()->employee_id);
+    }
+
+    public function test_the_directory_department_decides_whether_the_employee_is_a_respondent(): void
+    {
+        $finance = Department::factory()->create(['name' => 'Finance']);
+        $user = $this->employee(['email' => 'budi.santoso@merdekabattery.com']);
+        $this->directory()->shouldReceive('authenticate')->twice()->andReturn(
+            $this->identity('budi.santoso@merdekabattery.com', department: 'Finance'),
+            $this->identity('budi.santoso@merdekabattery.com', department: 'Maintenance'),
+        );
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password']);
+        $this->assertSame($finance->id, $user->fresh()->department_id);
+
+        $this->post(route('logout'));
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password']);
+        $this->assertNull($user->fresh()->department_id);
     }
 
     public function test_employee_id_of_another_account_is_not_taken_over_at_sign_in(): void
@@ -352,7 +370,7 @@ class LoginTest extends TestCase
     /**
      * A person verified by the directory.
      */
-    protected function identity(?string $email, ?string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null): LdapIdentity
+    protected function identity(?string $email, ?string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null, ?string $department = null): LdapIdentity
     {
         return new LdapIdentity(
             username: 'budi.santoso',
@@ -361,6 +379,7 @@ class LoginTest extends TestCase
             name: $name,
             jobTitle: $jobTitle,
             employeeId: $employeeId,
+            department: $department,
         );
     }
 

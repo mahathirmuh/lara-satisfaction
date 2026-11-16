@@ -63,6 +63,20 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
+                                <label for="userDepartment" class="col-md-3 col-form-label">{{ __('Department') }}</label>
+                                <div class="col-md-9">
+                                    <select id="userDepartment" class="form-select">
+                                        <option value="">{{ __('None (not a survey respondent)') }}</option>
+                                        @foreach ($departments as $department)
+                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-hint">{{ __('Filled from the directory every day for the employees of the assessed departments: they are the survey respondents.') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
                                 <label class="col-md-3 col-form-label">{{ __('Status') }}</label>
                                 <div class="col-md-9 d-flex align-items-center">
                                     <label class="form-check form-switch mb-0">
@@ -153,6 +167,7 @@
             const form = $('#userForm');
             form[0].reset();
             form.find('#companySelect').val(null).trigger('change');
+            form.find('#userDepartment').val('');
             form.find('.user-role-checkbox, #selectAllRoles').prop('checked', false);
             form.find('#userActive').prop('checked', true);
         }
@@ -182,6 +197,7 @@
                     modal.find('#userEmployeeId').val(data.employee_id);
                     modal.find('#userJobTitle').val(data.job_title);
                     modal.find('#companySelect').val(data.company_id).trigger('change');
+                    modal.find('#userDepartment').val(data.department_id ?? '');
                     modal.find('#userActive').prop('checked', !!data.is_active);
                     (data.role_id || []).forEach((roleId) => {
                         modal.find(`.user-role-checkbox[value="${parseInt(roleId, 10)}"]`).prop('checked', true);
@@ -200,6 +216,7 @@
                 employee_id: $('#userEmployeeId').val().trim(),
                 job_title: $('#userJobTitle').val().trim(),
                 company_id: $('#companySelect').val(),
+                department_id: $('#userDepartment').val() || '',
                 is_active: $('#userActive').is(':checked') ? 1 : 0,
                 role_id: $('.user-role-checkbox:checked:not(:disabled)').map((_, element) => element.value).get(),
             };

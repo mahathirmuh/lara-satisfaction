@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Organization\Department;
 use App\Models\UserManagement\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -153,6 +154,20 @@ class SsoTest extends TestCase
         $this->assertSame(['Manager'], $manager->roles->pluck('name')->all());
     }
 
+    public function test_microsoft_department_is_recorded_when_it_is_shared(): void
+    {
+        $finance = Department::factory()->create(['name' => 'Finance']);
+        $employee = $this->employee(['email' => 'budi@merdekabattery.com']);
+        $this->fakeMicrosoftUser('budi@merdekabattery.com', department: 'Finance');
+
+        $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
+        $this->assertSame($finance->id, $employee->fresh()->department_id);
+
+        $this->fakeMicrosoftUser('budi@merdekabattery.com');
+        $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
+        $this->assertSame($finance->id, $employee->fresh()->department_id, 'A profile without a department keeps the known one.');
+    }
+
     public function test_microsoft_employee_id_is_recorded(): void
     {
         $employee = $this->employee(['email' => 'budi@merdekabattery.com']);
@@ -185,6 +200,7 @@ class SsoTest extends TestCase
 
         parse_str((string) parse_url((string) $requests[0]['request']->getUri(), PHP_URL_QUERY), $query);
         $this->assertContains('employeeId', explode(',', $query['$select']));
+        $this->assertContains('department', explode(',', $query['$select']));
         $this->assertContains('jobTitle', explode(',', $query['$select']));
         $this->assertSame('budi@merdekabattery.com', $socialUser->getEmail());
         $this->assertSame('MTI240001', $socialUser->getRaw()['employeeId']);
@@ -205,9 +221,9 @@ class SsoTest extends TestCase
     /**
      * Make the Microsoft provider return the given account.
      */
-    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null): void
+    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso', ?string $jobTitle = null, ?string $employeeId = null, ?string $department = null): void
     {
-        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email, 'jobTitle' => $jobTitle, 'employeeId' => $employeeId])->map([
+        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email, 'jobTitle' => $jobTitle, 'employeeId' => $employeeId, 'department' => $department])->map([
             'id' => 'azure-object-id',
             'name' => $name,
             'email' => $email,

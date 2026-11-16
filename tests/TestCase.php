@@ -16,6 +16,11 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase
 {
     /**
+     * The assessed department of the employees made by departmentEmployee().
+     */
+    protected ?Department $respondentDepartment = null;
+
+    /**
      * Seed permissions, menus and the built-in roles with their RBAC matrix.
      */
     protected function seedAccessControl(): void
@@ -75,6 +80,25 @@ abstract class TestCase extends BaseTestCase
     protected function employee(array $attributes = []): User
     {
         return $this->userWithRole('Employee', $attributes);
+    }
+
+    /**
+     * An employee of an assessed department: a survey respondent (reminded,
+     * listed in Survey Progress and counted in the participation rate).
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function departmentEmployee(array $attributes = []): User
+    {
+        return $this->employee(['department_id' => $this->respondentDepartment()->id, ...$attributes]);
+    }
+
+    /**
+     * The assessed department the employees of departmentEmployee() work in.
+     */
+    protected function respondentDepartment(): Department
+    {
+        return $this->respondentDepartment ??= Department::factory()->create();
     }
 
     /**

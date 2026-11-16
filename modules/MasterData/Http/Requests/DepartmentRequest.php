@@ -52,12 +52,14 @@ class DepartmentRequest extends FormRequest
             'image' => FileApps::imageRules(),
             'remove_image' => ['boolean'],
             'manager_job_titles' => ['nullable', 'string', 'max:1000'],
+            'directory_names' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
     /**
      * Department attributes ready to persist (without the image fields), with
-     * the manager job titles as rules (one per line).
+     * the manager job titles as rules and the directory department names as a
+     * list (one per line each).
      *
      * @return array<string, mixed>
      */
@@ -66,6 +68,12 @@ class DepartmentRequest extends FormRequest
         return [
             ...$this->safe()->except(['image', 'remove_image']),
             'manager_job_titles' => JobTitles::parse($this->validated('manager_job_titles')) ?: null,
+            'directory_names' => collect(preg_split('/\R/', (string) $this->validated('directory_names')))
+                ->map(fn (string $name): string => (string) preg_replace('/\s+/', ' ', trim($name)))
+                ->filter()
+                ->unique(fn (string $name): string => mb_strtolower($name))
+                ->values()
+                ->all() ?: null,
         ];
     }
 

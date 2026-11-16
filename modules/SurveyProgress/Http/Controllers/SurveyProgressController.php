@@ -6,6 +6,7 @@ use App\Enums\ParticipationStatus;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Organization\Company;
+use App\Models\Organization\Department;
 use App\Models\Survey\Survey;
 use App\Models\UserManagement\User;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +42,7 @@ class SurveyProgressController extends Controller
             'summary' => $survey === null ? null : $this->surveyProgress->summary($survey),
             'statuses' => ParticipationStatus::options(),
             'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
+            'departments' => Department::query()->ordered()->get(['id', 'name']),
             'canSendReminders' => $request->user()->canAccessMenu('survey-management.reminder'),
         ]);
     }
@@ -55,6 +57,8 @@ class SurveyProgressController extends Controller
             'status' => ['nullable', Rule::enum(ParticipationStatus::class)],
             'company' => ['nullable', 'array'],
             'company.*' => ['integer'],
+            'department' => ['nullable', 'array'],
+            'department.*' => ['integer'],
         ]);
 
         $survey = Survey::query()->findOrFail($filters['survey_id']);
@@ -73,6 +77,7 @@ class SurveyProgressController extends Controller
                     'employee_id' => $user->employee_id,
                     'job_title' => $user->job_title,
                     'company' => $user->company?->name,
+                    'department' => $user->department?->name,
                     'status' => $status->value,
                     'status_label' => $status->label(),
                     'status_color' => $status->color(),

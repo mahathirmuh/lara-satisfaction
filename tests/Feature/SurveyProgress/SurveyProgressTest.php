@@ -33,15 +33,16 @@ class SurveyProgressTest extends TestCase
         $this->admin = $this->superAdmin(['name' => 'Zara Admin']);
 
         $this->people = [
-            'not_started' => $this->employee(['name' => 'Ani Belum']),
-            'started' => $this->employee(['name' => 'Budi Buka']),
-            'draft' => $this->employee(['name' => 'Citra Draf']),
-            'completed' => $this->employee(['name' => 'Dedi Selesai']),
+            'not_started' => $this->departmentEmployee(['name' => 'Ani Belum']),
+            'started' => $this->departmentEmployee(['name' => 'Budi Buka']),
+            'draft' => $this->departmentEmployee(['name' => 'Citra Draf']),
+            'completed' => $this->departmentEmployee(['name' => 'Dedi Selesai']),
         ];
         SurveyStart::factory()->for($this->survey)->for($this->people['started'])->create();
         SurveyDraft::factory()->for($this->survey)->for($this->people['draft'])->create();
         SurveyParticipation::create(['survey_id' => $this->survey->id, 'user_id' => $this->people['completed']->id, 'submitted_at' => now()]);
-        $this->employee(['name' => 'Eko Nonaktif', 'is_active' => false]);
+        $this->departmentEmployee(['name' => 'Eko Nonaktif', 'is_active' => false]);
+        $this->employee(['name' => 'Fajar Operasional']);
     }
 
     public function test_the_summary_counts_people_by_status(): void
@@ -51,12 +52,12 @@ class SurveyProgressTest extends TestCase
             ->assertOk()
             ->assertViewHas('survey', fn (Survey $survey): bool => $survey->is($this->survey))
             ->assertViewHas('summary', [
-                'eligible' => 5,
-                'not_started' => 2,
+                'eligible' => 4,
+                'not_started' => 1,
                 'in_progress' => 2,
                 'saved_draft' => 1,
                 'completed' => 1,
-                'completion_rate' => 20.0,
+                'completion_rate' => 25.0,
             ]);
     }
 
@@ -73,10 +74,10 @@ class SurveyProgressTest extends TestCase
                 'Budi Buka' => ['in_progress', false],
                 'Citra Draf' => ['in_progress', true],
                 'Dedi Selesai' => ['completed', false],
-                'Zara Admin' => ['not_started', false],
             ],
             collect($rows)->mapWithKeys(fn (array $row): array => [$row['name'] => [$row['status'], $row['saved_draft']]])->all(),
         );
+        $this->assertSame([$this->respondentDepartment()->name], collect($rows)->pluck('department')->unique()->values()->all());
         $this->assertNull(collect($rows)->firstWhere('name', 'Ani Belum')['last_activity']);
         $this->assertNotNull(collect($rows)->firstWhere('name', 'Dedi Selesai')['last_activity']);
     }

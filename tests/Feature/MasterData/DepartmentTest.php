@@ -55,6 +55,35 @@ class DepartmentTest extends TestCase
             ->assertJsonPath('data.manager_job_titles', "OHS Manager\nOccupational Health & Safety Manager");
     }
 
+    public function test_directory_department_names_are_saved_one_per_line_without_duplicates(): void
+    {
+        $this->actingAs($this->admin)
+            ->postJson(route('master-data.department.store'), $this->payload([
+                'directory_names' => "Occupational Health and Safety\r\n  occupational health  and safety \n\nHSE Department",
+            ]))
+            ->assertCreated();
+
+        $department = Department::query()->where('code', 'HSE')->sole();
+        $this->assertSame(['Occupational Health and Safety', 'HSE Department'], $department->directory_names);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('master-data.department.show', $department))
+            ->assertOk()
+            ->assertJsonPath('data.directory_names', "Occupational Health and Safety\nHSE Department");
+    }
+
+    public function test_the_list_counts_the_active_employees_of_each_department(): void
+    {
+        $department = Department::factory()->create(['name' => 'Supply Chain']);
+        User::factory()->count(2)->create(['department_id' => $department->id]);
+        User::factory()->inactive()->create(['department_id' => $department->id]);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('master-data.department.list', ['search' => 'Supply']))
+            ->assertOk()
+            ->assertJsonPath('data.0.employees_count', 2);
+    }
+
     public function test_department_code_must_be_unique(): void
     {
         $existing = Department::factory()->create(['code' => 'HR']);

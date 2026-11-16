@@ -67,6 +67,10 @@
                             <div class="datagrid-content">{{ $user->company?->name ?? '-' }}</div>
                         </div>
                         <div class="datagrid-item">
+                            <div class="datagrid-title">{{ __('Department') }}</div>
+                            <div class="datagrid-content">{{ $user->department?->name ?? '-' }}</div>
+                        </div>
+                        <div class="datagrid-item">
                             <div class="datagrid-title">{{ __('Last Login') }}</div>
                             <div class="datagrid-content">
                                 {{ $user->last_login_at?->translatedFormat(__('d M Y H:i')) ?? __('Never') }}
@@ -79,7 +83,7 @@
                     </div>
                     <div class="alert alert-info mt-4 mb-0 py-2" role="alert">
                         <i class="ti ti-info-circle me-1"></i>
-                        {{ __('Your name, job title and employee ID come from the company directory (Active Directory / Microsoft) and are refreshed every time you sign in. Contact the IT Helpdesk if something is wrong.') }}
+                        {{ __('Your name, job title, department and employee ID come from the company directory (Active Directory / Microsoft) and are refreshed every day and every time you sign in. Contact the IT Helpdesk if something is wrong.') }}
                     </div>
                 </div>
             </div>

@@ -111,6 +111,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <label for="departmentDirectoryNames" class="col-md-3 col-form-label">{{ __('Directory Department Names') }}</label>
+                                <div class="col-md-9">
+                                    <textarea id="departmentDirectoryNames" class="form-control font-monospace" rows="2"
+                                        maxlength="1000" placeholder="Supply Chain Management"></textarea>
+                                    <small class="form-hint">{{ __('One name per line, as written in the "department" of the employees in Active Directory (the department name itself always counts). These employees are imported every day as the survey respondents.') }}</small>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-12 mt-3 d-flex justify-content-between align-items-center gap-2">
                             <span class="text-secondary small"><i class="ti ti-info-circle me-1"></i>{{ __('Sections are managed in Master Data › Sections.') }}</span>
                             <x-global.btn-detail :label="__('Save')" color="blue" size="sm" type="submit">
@@ -172,6 +182,7 @@
                     form.find('#departmentOrder').val(data.sort_order);
                     form.find('#departmentActive').prop('checked', !!data.is_active);
                     form.find('#departmentManagerJobTitles').val(data.manager_job_titles || '');
+                    form.find('#departmentDirectoryNames').val(data.directory_names || '');
 
                     if (data.image_url) {
                         form.find('#departmentImagePreview').attr('src', data.image_url).removeClass('d-none');
@@ -202,6 +213,7 @@
             data.append('sort_order', $('#departmentOrder').val());
             data.append('is_active', $('#departmentActive').is(':checked') ? 1 : 0);
             data.append('manager_job_titles', $('#departmentManagerJobTitles').val());
+            data.append('directory_names', $('#departmentDirectoryNames').val());
             data.append('remove_image', $('#departmentRemoveImage').is(':checked') ? 1 : 0);
 
             const image = $('#departmentImage')[0].files[0];

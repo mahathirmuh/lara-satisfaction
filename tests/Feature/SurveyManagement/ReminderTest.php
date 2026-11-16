@@ -33,10 +33,11 @@ class ReminderTest extends TestCase
 
     public function test_everyone_who_has_not_completed_the_survey_is_reminded(): void
     {
-        $pending = $this->employee();
+        $pending = [$this->departmentEmployee(), $this->departmentEmployee()];
         $completed = $this->completedEmployee();
-        $inactive = $this->employee(['is_active' => false]);
-        $withoutSurveyAccess = User::factory()->withRole(Role::factory()->create())->create();
+        $inactive = $this->departmentEmployee(['is_active' => false]);
+        $withoutSurveyAccess = User::factory()->withRole(Role::factory()->create())->create(['department_id' => $this->respondentDepartment()->id]);
+        $outsideTheAssessedDepartments = $this->employee();
         Notification::fake();
 
         $this->actingAs($this->admin)
@@ -45,12 +46,12 @@ class ReminderTest extends TestCase
             ->assertJsonPath('message', 'Reminder sent to 2 people.');
 
         Notification::assertSentTo(
-            [$pending, $this->admin],
+            $pending,
             SurveyDeadlineReminder::class,
             fn (SurveyDeadlineReminder $notification, array $channels): bool => $notification->survey->is($this->survey)
                 && $channels === ['database', 'mail'],
         );
-        Notification::assertNotSentTo([$completed, $inactive, $withoutSurveyAccess], SurveyDeadlineReminder::class);
+        Notification::assertNotSentTo([$completed, $inactive, $withoutSurveyAccess, $outsideTheAssessedDepartments, $this->admin], SurveyDeadlineReminder::class);
         $this->assertDatabaseHas('survey_manual_reminders', [
             'survey_id' => $this->survey->id,
             'sent_by' => $this->admin->id,
@@ -62,8 +63,8 @@ class ReminderTest extends TestCase
 
     public function test_only_the_chosen_people_who_can_be_reminded_are(): void
     {
-        $chosen = $this->employee();
-        $notChosen = $this->employee();
+        $chosen = $this->departmentEmployee();
+        $notChosen = $this->departmentEmployee();
         $completed = $this->completedEmployee();
         Notification::fake();
 
@@ -89,7 +90,7 @@ class ReminderTest extends TestCase
         return [
             'no one chosen' => ['open', ['audience' => 'custom'], 'user_ids'],
             'only people who completed it chosen' => ['open', ['audience' => 'custom', 'user_ids' => 'completed'], 'user_ids'],
-            'everyone completed it' => ['open', ['audience' => 'all', 'everyone_completed' => true], 'audience'],
+            'everyone completed it' => ['open', ['audience' => 'all'], 'audience'],
             'survey not open' => ['closed', ['audience' => 'all'], 'survey_id'],
             'unknown audience' => ['open', ['audience' => 'managers'], 'audience'],
         ];
@@ -103,11 +104,6 @@ class ReminderTest extends TestCase
     {
         $survey = $surveyState === 'closed' ? Survey::factory()->closed()->create() : $this->survey;
         $completed = $this->completedEmployee($survey);
-
-        if ($payload['everyone_completed'] ?? false) {
-            SurveyParticipation::create(['survey_id' => $survey->id, 'user_id' => $this->admin->id, 'submitted_at' => now()]);
-            unset($payload['everyone_completed']);
-        }
 
         if (($payload['user_ids'] ?? null) === 'completed') {
             $payload['user_ids'] = [$completed->id];
@@ -126,9 +122,9 @@ class ReminderTest extends TestCase
 
     public function test_the_people_search_shows_who_completed_the_survey_already(): void
     {
-        $pending = $this->employee(['name' => 'Budi Santoso', 'email' => 'budi.santoso@merdekabattery.com']);
+        $pending = $this->departmentEmployee(['name' => 'Budi Santoso', 'email' => 'budi.santoso@merdekabattery.com']);
         $completed = $this->completedEmployee(attributes: ['name' => 'Budi Hartono', 'email' => 'budi.hartono@merdekabattery.com']);
-        $this->employee(['name' => 'Budi Nonaktif', 'is_active' => false]);
+        $this->departmentEmployee(['name' => 'Budi Nonaktif', 'is_active' => false]);
 
         $this->actingAs($this->admin)
             ->getJson(route('survey-management.reminder.recipients', ['search' => 'budi', 'survey_id' => $this->survey->id]))
@@ -141,6 +137,7 @@ class ReminderTest extends TestCase
 
     public function test_the_history_lists_reminders_sent_by_hand_and_scheduled_ones(): void
     {
+        $this->departmentEmployee();
         SurveyManualReminder::factory()->for($this->survey)->custom(recipients: 1)->create(['sent_by' => $this->admin->id]);
         SurveyReminder::create(['survey_id' => $this->survey->id, 'days_before' => 14, 'recipients' => 120, 'sent_at' => now()->subDay()]);
 
@@ -153,7 +150,7 @@ class ReminderTest extends TestCase
 
     public function test_only_survey_administrators_can_send_reminders(): void
     {
-        $employee = $this->employee();
+        $employee = $this->departmentEmployee();
 
         $this->actingAs($employee)->get(route('survey-management.reminder.index'))->assertForbidden();
         $this->actingAs($this->manager())
@@ -168,7 +165,7 @@ class ReminderTest extends TestCase
      */
     protected function completedEmployee(?Survey $survey = null, array $attributes = []): User
     {
-        $employee = $this->employee($attributes);
+        $employee = $this->departmentEmployee($attributes);
         SurveyParticipation::create(['survey_id' => ($survey ?? $this->survey)->id, 'user_id' => $employee->id, 'submitted_at' => now()]);
 
         return $employee;

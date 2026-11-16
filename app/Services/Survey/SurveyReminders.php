@@ -13,17 +13,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 /**
- * Who is reminded about a survey, and the reminding itself: the active
- * people whose role may fill in surveys (Create on My Survey) and who have
- * not completed it yet. Used by the daily scheduled reminders and by the
- * reminders sent by hand from Survey Management > Reminders. Only people
- * with an account here can be reminded (created at their first sign-in or
- * in User Management).
+ * Who the survey respondents are, and the reminding: the active employees of
+ * the assessed departments (department_id, imported daily from the directory)
+ * whose role may fill in surveys (Create on My Survey). The same people are
+ * reminded, listed in Survey Progress and counted in the participation rate.
+ * Used by the daily scheduled reminders and by the reminders sent by hand
+ * from Survey Management > Reminders.
  */
 class SurveyReminders
 {
     /**
-     * Active users whose role may fill in surveys.
+     * The respondents: active employees of an assessed department whose role
+     * may fill in surveys.
      *
      * @return Builder<User>
      */
@@ -36,6 +37,7 @@ class SurveyReminders
 
         return User::query()
             ->active()
+            ->whereNotNull('department_id')
             ->whereHas('roles', fn (Builder $query) => $query->whereIn('roles.id', $rolesThatTakeSurveys));
     }
 

@@ -21,11 +21,12 @@ class SurveyDeadlineReminderTest extends TestCase
     public function test_employees_who_have_not_completed_an_open_survey_are_reminded_14_days_before_its_end(): void
     {
         $survey = $this->surveyEndingIn(14);
-        $pending = $this->employee();
-        $completed = $this->employee();
+        $pending = $this->departmentEmployee();
+        $completed = $this->departmentEmployee();
         SurveyParticipation::create(['survey_id' => $survey->id, 'user_id' => $completed->id, 'submitted_at' => now()]);
-        $inactive = $this->employee(['is_active' => false]);
-        $withoutSurveyAccess = User::factory()->withRole(Role::factory()->create())->create();
+        $inactive = $this->departmentEmployee(['is_active' => false]);
+        $withoutSurveyAccess = User::factory()->withRole(Role::factory()->create())->create(['department_id' => $this->respondentDepartment()->id]);
+        $outsideTheAssessedDepartments = $this->employee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders')->assertSuccessful();
@@ -37,14 +38,14 @@ class SurveyDeadlineReminderTest extends TestCase
                 && $notification->daysLeft === 14
                 && $channels === ['database', 'mail'],
         );
-        Notification::assertNotSentTo([$completed, $inactive, $withoutSurveyAccess], SurveyDeadlineReminder::class);
+        Notification::assertNotSentTo([$completed, $inactive, $withoutSurveyAccess, $outsideTheAssessedDepartments], SurveyDeadlineReminder::class);
         $this->assertDatabaseHas('survey_reminders', ['survey_id' => $survey->id, 'days_before' => 14, 'recipients' => 1]);
     }
 
     public function test_no_reminder_is_sent_before_the_reminder_period(): void
     {
         $this->surveyEndingIn(15);
-        $this->employee();
+        $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders')->assertSuccessful();
@@ -56,7 +57,7 @@ class SurveyDeadlineReminderTest extends TestCase
     public function test_a_reminder_is_only_sent_once(): void
     {
         $this->surveyEndingIn(14);
-        $employee = $this->employee();
+        $employee = $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders');
@@ -69,7 +70,7 @@ class SurveyDeadlineReminderTest extends TestCase
     public function test_survey_opened_inside_the_reminder_period_is_reminded_on_the_first_run(): void
     {
         $this->surveyEndingIn(5);
-        $employee = $this->employee();
+        $employee = $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders');
@@ -92,7 +93,7 @@ class SurveyDeadlineReminderTest extends TestCase
     public function test_surveys_that_are_not_open_are_not_reminded(SurveyStatus $status): void
     {
         $this->surveyEndingIn(7)->update(['status' => $status]);
-        $this->employee();
+        $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders');
@@ -104,7 +105,7 @@ class SurveyDeadlineReminderTest extends TestCase
     {
         config(['survey.reminder_days' => [14, 7]]);
         $this->surveyEndingIn(14);
-        $employee = $this->employee();
+        $employee = $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders');
@@ -120,7 +121,7 @@ class SurveyDeadlineReminderTest extends TestCase
     public function test_dry_run_only_reports_how_many_employees_would_be_reminded(): void
     {
         $this->surveyEndingIn(14);
-        $this->employee();
+        $this->departmentEmployee();
         Notification::fake();
 
         $this->artisan('survey:send-deadline-reminders', ['--dry-run' => true])

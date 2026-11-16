@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Helpers\JobTitles;
+use App\Models\Organization\Department;
 use App\Models\UserManagement\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +78,23 @@ class CompanyAccounts
             $holder?->forceFill(['employee_id' => null])->saveQuietly();
             $user->forceFill(['employee_id' => $employeeId])->saveQuietly();
         });
+    }
+
+    /**
+     * Record the assessed department the person works in from their directory
+     * department (a department name or one of its directory names, see
+     * Department::directoryNameMap()). Any other directory department clears
+     * it: the person is then no longer a survey respondent.
+     */
+    public function applyDepartment(User $user, ?string $directoryDepartment): void
+    {
+        $departmentId = filled($directoryDepartment)
+            ? (Department::directoryNameMap()[Department::normalizeDirectoryName((string) $directoryDepartment)] ?? null)
+            : null;
+
+        if ($user->department_id !== $departmentId) {
+            $user->forceFill(['department_id' => $departmentId])->saveQuietly();
+        }
     }
 
     /**

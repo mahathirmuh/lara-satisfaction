@@ -83,10 +83,97 @@ class LdapAuthenticator
                 name: $this->attribute($entry, (string) config('ldap.attributes.name', 'displayname')),
                 jobTitle: $this->attribute($entry, (string) config('ldap.attributes.job_title', 'title')),
                 employeeId: $this->attribute($entry, (string) config('ldap.attributes.employee_id', 'employeeid')),
+                department: $this->attribute($entry, (string) config('ldap.attributes.department', 'department')),
             );
         } finally {
             @ldap_unbind($connection);
         }
+    }
+
+    /**
+     * Every person account under the search base, disabled ones included,
+     * read with the service account in pages (Active Directory returns at
+     * most 1000 entries per request). No password is checked.
+     *
+     * @return array<int, DirectoryPerson>
+     *
+     * @throws DirectoryUnavailableException
+     */
+    public function people(): array
+    {
+        if (! $this->isConfigured()) {
+            throw new DirectoryUnavailableException('The directory is not configured: set LDAP_URL and LDAP_BIND_DN.');
+        }
+
+        $connection = $this->connect();
+        $people = [];
+        $cookie = '';
+
+        try {
+            do {
+                $search = @ldap_search(
+                    $connection,
+                    (string) config('ldap.user_search_base'),
+                    '(&(objectCategory=person)(objectClass=user))',
+                    $this->requestedAttributes(),
+                    0, 0, 0, LDAP_DEREF_NEVER,
+                    [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 500, 'cookie' => $cookie]]],
+                );
+
+                if ($search === false) {
+                    throw new DirectoryUnavailableException('The directory search failed: '.ldap_error($connection).'.');
+                }
+
+                $entries = ldap_get_entries($connection, $search);
+
+                for ($index = 0; $index < (int) ($entries['count'] ?? 0); $index++) {
+                    $people[] = $this->personFrom($entries[$index]);
+                }
+
+                ldap_parse_result($connection, $search, $errorCode, $matchedDn, $errorMessage, $referrals, $controls);
+                $cookie = (string) ($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'] ?? '');
+            } while ($cookie !== '');
+        } finally {
+            @ldap_unbind($connection);
+        }
+
+        return $people;
+    }
+
+    /**
+     * Attributes read for a person (lower case, as the entries hold them).
+     *
+     * @return array<int, string>
+     */
+    protected function requestedAttributes(): array
+    {
+        return array_values(array_unique(array_map('strtolower', [
+            ...array_values((array) config('ldap.attributes')),
+            'userprincipalname',
+            'useraccountcontrol',
+        ])));
+    }
+
+    /**
+     * A directory entry as a person.
+     *
+     * @param  array<string, mixed>  $entry
+     */
+    protected function personFrom(array $entry): DirectoryPerson
+    {
+        $email = $this->attribute($entry, (string) config('ldap.attributes.mail', 'mail'))
+            ?? $this->attribute($entry, 'userprincipalname');
+
+        return new DirectoryPerson(
+            username: (string) $this->attribute($entry, (string) config('ldap.attributes.username', 'samaccountname')),
+            email: $email !== null ? Str::lower(trim($email)) : null,
+            name: $this->attribute($entry, (string) config('ldap.attributes.name', 'displayname')),
+            jobTitle: $this->attribute($entry, (string) config('ldap.attributes.job_title', 'title')),
+            employeeId: $this->attribute($entry, (string) config('ldap.attributes.employee_id', 'employeeid')),
+            department: $this->attribute($entry, (string) config('ldap.attributes.department', 'department')),
+            company: $this->attribute($entry, (string) config('ldap.attributes.company', 'company')),
+            isEnabled: ! $this->isDisabled($entry),
+        );
     }
 
     /**
@@ -151,13 +238,7 @@ class LdapAuthenticator
             (string) config('ldap.user_search_filter'),
         );
 
-        $attributes = array_values(array_unique(array_map('strtolower', [
-            ...array_values((array) config('ldap.attributes')),
-            'userprincipalname',
-            'useraccountcontrol',
-        ])));
-
-        $search = @ldap_search($connection, (string) config('ldap.user_search_base'), $filter, $attributes, 0, 2);
+        $search = @ldap_search($connection, (string) config('ldap.user_search_base'), $filter, $this->requestedAttributes(), 0, 2);
 
         if ($search === false) {
             throw new DirectoryUnavailableException('The directory search failed: '.ldap_error($connection).'.');

@@ -19,7 +19,7 @@ class ProfileController extends Controller
      */
     public function __invoke(Request $request): View
     {
-        $user = $request->user()->loadMissing(['company:id,code,name', 'roles']);
+        $user = $request->user()->loadMissing(['company:id,code,name', 'department:id,name', 'roles']);
         $reportDepartmentIds = $user->reportDepartmentIds();
 
         return view('profile.show', [

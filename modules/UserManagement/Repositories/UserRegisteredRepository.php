@@ -26,12 +26,13 @@ class UserRegisteredRepository implements UserRegisteredInterface
         $isActive = $filters['is_active'] ?? null;
 
         return User::query()
-            ->with(['company:id,name,code', 'roles:id,name'])
+            ->with(['company:id,name,code', 'department:id,name', 'roles:id,name'])
             ->unless($includeItAdmins, fn (Builder $query) => $query->whereDoesntHave(
                 'roles',
                 fn (Builder $query) => $query->whereKey($itAdminRoleId)
             ))
             ->when($filters['company'] ?? [], fn (Builder $query, array $ids) => $query->whereIn('company_id', $ids))
+            ->when($filters['department'] ?? [], fn (Builder $query, array $ids) => $query->whereIn('department_id', $ids))
             ->when($filters['role'] ?? [], fn (Builder $query, array $ids) => $query->whereHas(
                 'roles',
                 fn (Builder $query) => $query->whereKey($ids)

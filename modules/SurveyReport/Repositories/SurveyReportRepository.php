@@ -14,6 +14,7 @@ use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyQuestion;
 use App\Models\Survey\SurveyResponse;
 use App\Models\UserManagement\User;
+use App\Services\Survey\SurveyReminders;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -90,18 +91,16 @@ class SurveyReportRepository implements SurveyReportInterface
             ->selectRaw('COUNT(*) as total, SUM(rating) as rating_sum')
             ->first();
 
+        // Participation among the respondents (SurveyReminders): the employees of the assessed departments.
+        $respondents = app(SurveyReminders::class)->surveyTakers()
+            ->when($scope->isRestricted(), fn (Builder $query) => $query->whereIn('company_id', $scope->companyIds));
+
         $participants = SurveyParticipation::query()
             ->whereBelongsTo($scope->survey)
-            ->when($scope->isRestricted(), fn (Builder $query) => $query->whereIn(
-                'user_id',
-                User::withTrashed()->whereIn('company_id', $scope->companyIds)->select('id')
-            ))
+            ->whereIn('user_id', (clone $respondents)->select('users.id'))
             ->count();
 
-        $eligible = User::query()
-            ->active()
-            ->when($scope->isRestricted(), fn (Builder $query) => $query->whereIn('company_id', $scope->companyIds))
-            ->count();
+        $eligible = $respondents->count();
 
         $isReportable = $responses >= $minGroupSize;
         $ratings = (int) ($ratingStats->total ?? 0);

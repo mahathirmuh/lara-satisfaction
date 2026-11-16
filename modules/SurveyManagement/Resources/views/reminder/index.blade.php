@@ -57,7 +57,7 @@
                                 {{ __('Each person gets a notification in the application and an e-mail, in their own language, with a link to the survey. People who completed the survey already are left out.') }}
                             </div>
                             <div class="text-secondary small mb-3">
-                                {{ __('Only people with an account in this application can be reminded: accounts are created at the first sign-in or in User Management.') }}
+                                {{ __('Reminders go to the employees of the assessed departments, imported every day from Active Directory.') }}
                             </div>
 
                             @if ($can['create'])

@@ -130,6 +130,10 @@ class SsoController extends Controller
 
         $this->accounts->applyEmployeeId($user, $this->rawProfileValue($socialUser, 'employeeId'));
 
+        if (($department = $this->rawProfileValue($socialUser, 'department')) !== null) {
+            $this->accounts->applyDepartment($user, $department);
+        }
+
         if (! $user->is_active) {
             Alert::warning(__('Account inactive'), __('Your account has been deactivated. Please contact the IT Helpdesk.'));
 

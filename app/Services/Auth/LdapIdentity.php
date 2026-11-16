@@ -15,6 +15,7 @@ final readonly class LdapIdentity
      * @param  string|null  $email  Company email (mail, else userPrincipalName), lower case.
      * @param  string|null  $jobTitle  Job title (title), which decides the roles.
      * @param  string|null  $employeeId  Employee ID (employeeID), e.g. "MTI240001".
+     * @param  string|null  $department  Directory department (department), e.g. "Supply Chain Management".
      */
     public function __construct(
         public string $username,
@@ -23,5 +24,6 @@ final readonly class LdapIdentity
         public ?string $name,
         public ?string $jobTitle = null,
         public ?string $employeeId = null,
+        public ?string $department = null,
     ) {}
 }

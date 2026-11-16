@@ -24,7 +24,7 @@ class DepartmentSeeder extends Seeder
      * Departments with the job titles of their managers (who see the
      * department's results) and their sections (section name => role overview).
      *
-     * @var array<int, array{code: string, name: string, description: string, icon: string, color: string, manager_job_titles: array<int, string>, sections: array<string, string>}>
+     * @var array<int, array{code: string, name: string, description: string, icon: string, color: string, manager_job_titles: array<int, string>, directory_names: array<int, string>, sections: array<string, string>}>
      */
     public const DEPARTMENTS = [
         [
@@ -34,6 +34,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'truck',
             'color' => 'orange',
             'manager_job_titles' => ['Supply Chain*Manager'],
+            'directory_names' => ['Supply Chain Management'],
             'sections' => [
                 'Logistic & Distribution' => 'Logistic & Distribution manages logistics administration and the distribution of materials, with warehouse and logistics assistants handling the goods on site.',
                 'Heavy Equipment' => 'Heavy Equipment operates the transport and lifting equipment, such as cranes and forklifts, used to move materials on site.',
@@ -47,6 +48,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'shield-check',
             'color' => 'red',
             'manager_job_titles' => ['OHS Manager', 'Occupational Health & Safety Manager'],
+            'directory_names' => ['Occupational Health and Safety'],
             'sections' => [
                 'Emergency Response' => 'Emergency Response prepares for and responds to emergencies in all plants.',
                 'Plant OHS' => 'Plant OHS supervises occupational health and safety in the Acid, Chloride, Copper Cathode and Pyrite plants.',
@@ -65,6 +67,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'leaf',
             'color' => 'green',
             'manager_job_titles' => ['Environmental Manager', 'Environment Manager'],
+            'directory_names' => ['Environment'],
             'sections' => [
                 'Environmental Monitoring' => 'Environmental Monitoring monitors the air and water quality around the operation.',
                 'Waste Management' => 'Waste Management handles the hazardous and non-hazardous waste.',
@@ -79,6 +82,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'speakerphone',
             'color' => 'blue',
             'manager_job_titles' => ['External Affair* Manager'],
+            'directory_names' => ['External Affair'],
             'sections' => [
                 'Community Relations' => 'Community Relations maintains the relations with the surrounding communities.',
                 'Compliance & Corporate Communications' => 'Compliance & Corporate Communications handles compliance matters and the corporate communications.',
@@ -92,6 +96,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'report-money',
             'color' => 'purple',
             'manager_job_titles' => ['Finance Manager'],
+            'directory_names' => ['Finance'],
             'sections' => [
                 'Sales Support' => 'Sales Support provides the administrative support for sales.',
                 'Cost Control' => 'Cost Control monitors and controls the costs against the budget.',
@@ -106,6 +111,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'arrows-exchange',
             'color' => 'yellow',
             'manager_job_titles' => ['Interface Manager'],
+            'directory_names' => ['Interface'],
             'sections' => [
                 'Interface Management' => 'Interface Management coordinates the interfaces between the parties involved in the operation.',
                 'Contract Management' => 'Contract Management administers the contracts and follows up their execution.',
@@ -118,6 +124,7 @@ class DepartmentSeeder extends Seeder
             'icon' => 'users',
             'color' => 'pink',
             'manager_job_titles' => ['HR Manager', 'Human Resource* Manager', 'HRGS & IT Manager'],
+            'directory_names' => ['Human Resources'],
             'sections' => [
                 'IT System & Support' => 'IT System & Support runs the business applications and helps users with their computers, accounts and applications.',
                 'IT Infrastructure & Security' => 'IT Infrastructure & Security runs the network, servers and communication systems and keeps them secure.',

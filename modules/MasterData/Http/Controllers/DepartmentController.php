@@ -59,6 +59,7 @@ class DepartmentController extends Controller
             'sort_order' => $department->sort_order,
             'is_active' => $department->is_active,
             'questions_count' => $department->questions_count,
+            'employees_count' => $department->employees_count,
         ]);
     }
 
@@ -71,6 +72,7 @@ class DepartmentController extends Controller
             'data' => [
                 ...$department->only(['id', 'code', 'name', 'description', 'icon', 'color', 'sort_order', 'is_active']),
                 'manager_job_titles' => implode("\n", $department->manager_job_titles ?? []),
+                'directory_names' => implode("\n", $department->directory_names ?? []),
                 'image_url' => $department->imageUrl(),
             ],
         ]);

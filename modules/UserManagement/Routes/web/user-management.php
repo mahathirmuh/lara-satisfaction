@@ -9,6 +9,7 @@ Route::middleware(['web', 'auth', 'permission'])->prefix('user-management')->nam
         Route::get('/', 'index')->name('index');
         Route::get('list', 'list')->name('list');
         Route::post('/', 'store')->name('store');
+        Route::post('sync', 'syncDirectory')->name('sync');
         Route::get('{user}', 'show')->whereNumber('user')->name('show');
         Route::put('{user}', 'update')->whereNumber('user')->name('update');
         Route::delete('{user}', 'destroy')->whereNumber('user')->name('destroy');

@@ -85,6 +85,7 @@
                                                 <th class="text-capitalize fs-5 py-3">{{ __('Sections') }}</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="sort_order">{{ __('Order') }}</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center">{{ __('Questions') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Employees') }}</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="is_active">{{ __('Status') }}</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center">{{ __('Action') }}</th>
                                             </tr>
@@ -147,6 +148,10 @@
             },
             {
                 key: 'questions_count',
+                className: 'text-center',
+            },
+            {
+                key: 'employees_count',
                 className: 'text-center',
             },
             {

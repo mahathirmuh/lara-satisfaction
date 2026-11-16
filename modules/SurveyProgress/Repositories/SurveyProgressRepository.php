@@ -70,7 +70,7 @@ class SurveyProgressRepository implements SurveyProgressInterface
         $status = ParticipationStatus::tryFrom((string) ($filters['status'] ?? ''));
 
         return ($status === null ? $this->reminders->surveyTakers() : $this->withStatus($survey, $status))
-            ->with('company:id,code,name')
+            ->with(['company:id,code,name', 'department:id,name'])
             ->addSelect([
                 'completed_at' => SurveyParticipation::query()->select('submitted_at')
                     ->whereColumn('user_id', 'users.id')->where('survey_id', $survey->id)->limit(1),
@@ -80,6 +80,7 @@ class SurveyProgressRepository implements SurveyProgressInterface
                     ->whereColumn('user_id', 'users.id')->where('survey_id', $survey->id)->limit(1),
             ])
             ->when($filters['company'] ?? [], fn (Builder $query, array $ids) => $query->whereIn('company_id', $ids))
+            ->when($filters['department'] ?? [], fn (Builder $query, array $ids) => $query->whereIn('department_id', $ids))
             ->when($params['search'], fn (Builder $query, string $search) => $query->where(
                 fn (Builder $query) => $query
                     ->where('name', 'like', Apps::likePattern($search))

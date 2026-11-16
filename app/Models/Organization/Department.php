@@ -4,6 +4,7 @@ namespace App\Models\Organization;
 
 use App\Helpers\FileApps;
 use App\Models\Survey\SurveyQuestion;
+use App\Models\UserManagement\User;
 use Database\Factories\Organization\DepartmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -17,9 +18,11 @@ use Illuminate\Support\Collection;
  * Department whose services are assessed by the satisfaction survey
  * (the support service departments, e.g. Supply Chain, Finance, Interface).
  * Each department is split into sections (focus areas). Managers whose job
- * title matches manager_job_titles see the department's survey results.
+ * title matches manager_job_titles see the department's survey results. The
+ * employees whose directory department is the department name or one of its
+ * directory_names work here and are the survey respondents.
  */
-#[Fillable(['code', 'name', 'description', 'icon', 'color', 'image_path', 'manager_job_titles', 'sort_order', 'is_active'])]
+#[Fillable(['code', 'name', 'description', 'icon', 'color', 'image_path', 'manager_job_titles', 'directory_names', 'sort_order', 'is_active'])]
 class Department extends Model
 {
     /** @use HasFactory<DepartmentFactory> */
@@ -46,7 +49,37 @@ class Department extends Model
             'sort_order' => 'integer',
             'is_active' => 'boolean',
             'manager_job_titles' => 'array',
+            'directory_names' => 'array',
         ];
+    }
+
+    /**
+     * Active department ids by normalised directory department name (the
+     * department name and its directory_names), to place employees.
+     *
+     * @return array<string, int>
+     */
+    public static function directoryNameMap(): array
+    {
+        $map = [];
+
+        foreach (static::query()->active()->ordered()->get(['id', 'name', 'directory_names']) as $department) {
+            foreach ([$department->name, ...($department->directory_names ?? [])] as $name) {
+                $map[static::normalizeDirectoryName($name)] ??= (int) $department->id;
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Comparable form of a directory department name: lower case, "&" as
+     * "and", single spaces ("Occupational Health & Safety" equals
+     * "occupational health and safety").
+     */
+    public static function normalizeDirectoryName(string $name): string
+    {
+        return (string) preg_replace('/\s+/', ' ', trim(str_replace('&', ' and ', mb_strtolower($name))));
     }
 
     /**
@@ -63,6 +96,17 @@ class Department extends Model
     public function questions(): HasMany
     {
         return $this->hasMany(SurveyQuestion::class);
+    }
+
+    /**
+     * The people who work in the department (imported from the directory):
+     * the survey respondents.
+     *
+     * @return HasMany<User, $this>
+     */
+    public function employees(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 
     /**

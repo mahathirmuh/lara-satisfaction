@@ -21,7 +21,7 @@ class DepartmentRepository implements DepartmentInterface
 
         return Department::query()
             ->with('sections')
-            ->withCount('questions')
+            ->withCount(['questions', 'employees' => fn (Builder $query) => $query->where('is_active', true)])
             ->when($params['search'], fn (Builder $query, string $search) => $query->where(
                 fn (Builder $query) => $query
                     ->where('name', 'like', Apps::likePattern($search))

@@ -53,6 +53,7 @@ class UserRegisteredRequest extends FormRequest
             'employee_id' => ['nullable', 'string', 'max:'.User::EMPLOYEE_ID_MAX_LENGTH, 'regex:'.User::EMPLOYEE_ID_PATTERN, Rule::unique('users', 'employee_id')->ignore($target)->withoutTrashed()],
             'job_title' => ['nullable', 'string', 'max:255'],
             'company_id' => ['required', 'integer', Rule::exists('companies', 'id')],
+            'department_id' => ['nullable', 'integer', Rule::exists('departments', 'id')],
             'is_active' => ['required', 'boolean'],
             'role_id' => ['nullable', 'array'],
             'role_id.*' => [
@@ -72,6 +73,7 @@ class UserRegisteredRequest extends FormRequest
     {
         return [
             'company_id' => __('company'),
+            'department_id' => __('department'),
             'role_id' => __('role'),
             'role_id.*' => __('role'),
             'employee_id' => __('employee ID'),

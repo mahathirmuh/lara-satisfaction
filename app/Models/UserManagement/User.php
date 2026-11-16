@@ -34,7 +34,7 @@ use Illuminate\Support\Str;
  * (menu_role) and CRUD permissions per menu (menu_role_permission). Roles
  * other than IT Admin follow the job title from the directory.
  */
-#[Fillable(['name', 'email', 'employee_id', 'job_title', 'company_id', 'password', 'is_active', 'last_login_at'])]
+#[Fillable(['name', 'email', 'employee_id', 'job_title', 'company_id', 'department_id', 'password', 'is_active', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference
 {
@@ -79,6 +79,8 @@ class User extends Authenticatable implements HasLocalePreference
             'password' => 'hashed',
             'is_active' => 'boolean',
             'company_id' => 'integer',
+            'department_id' => 'integer',
+            'directory_synced_at' => 'datetime',
         ];
     }
 
@@ -108,6 +110,17 @@ class User extends Authenticatable implements HasLocalePreference
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * The assessed department the person works in (from the directory); it
+     * makes them a survey respondent.
+     *
+     * @return BelongsTo<Department, $this>
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     /**

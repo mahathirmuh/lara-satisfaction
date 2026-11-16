@@ -67,7 +67,7 @@ return [
         'proxy' => env('AZURE_PROXY'),
         // Graph leaves employeeId out of the default profile, so the profile
         // fields used at sign-in are asked for by name (User.Read covers them).
-        'graph_url' => 'https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName,jobTitle,employeeId',
+        'graph_url' => 'https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName,jobTitle,employeeId,department',
     ],
 
 ];

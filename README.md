@@ -58,6 +58,19 @@ match their job title. After upgrading an existing install, run
 The employee ID is recorded the same way (LDAP `employeeID`, Microsoft `employeeId`) whenever
 the directory has one; an empty directory value keeps the ID entered in User Management.
 
+### Respondents (employee import)
+
+The survey respondents are the employees of the assessed departments, imported from Active
+Directory before they ever sign in: `php artisan users:sync-directory` (`--dry-run` to preview)
+runs every day at 06:00 and from **User Management > Sync from Directory**. It takes the enabled
+accounts with a company e-mail and an employee ID whose AD `department` is a department name or
+one of its *Directory Department Names* (Master Data > Departments), and creates or refreshes
+them (name, company, department, job title and roles, employee ID). Disabled AD accounts are
+deactivated; people who move to another department stop being respondents; accounts deleted
+here are not restored. The AD `company` maps to the companies (`MBMA` = MBM, empty = MTI; see
+`config/ldap.php`). The department is also refreshed at sign-in. Reminders, Survey Progress and
+the participation rate count these respondents only.
+
 ### Docker
 
 ```bash

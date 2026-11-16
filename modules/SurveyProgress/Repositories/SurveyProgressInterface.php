@@ -29,7 +29,7 @@ interface SurveyProgressInterface
      * draft (draft_saved_at) and completed (completed_at) the survey.
      *
      * @param  array{per_page: int, search: string|null, order_by: string, order_dir: string}  $params
-     * @param  array{status?: string|null, company?: array<int, int>}  $filters
+     * @param  array{status?: string|null, company?: array<int, int>, department?: array<int, int>}  $filters
      * @return LengthAwarePaginator<int, User>
      */
     public function paginate(Survey $survey, array $params, array $filters): LengthAwarePaginator;
