@@ -14,6 +14,12 @@ picture, work summary, role overview) and evaluate each one with the department'
 (criticality, service quality, feedback). Answers are anonymous by design and administrators
 analyse the results per department, section, question and company.
 
+Documents are in the `docs/` folder, in Bahasa Indonesia (`-ID`) and English (`-EN`), for the version written on their
+cover (as in MTI Radio Management):
+
+- **Panduan Pengguna / User Guide**, for the users of the application:
+  [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf)
+
 ## Requirements
 
 - PHP 8.3+ (tested on 8.4) with `pdo_sqlsrv` / `pdo_sqlite` / `pdo_mysql` / `pdo_pgsql`, `gd` (WebP), `ldap`, `mbstring`, `openssl`, `intl`

@@ -25,8 +25,9 @@ storage/framework/views/*
 storage/logs/*
 storage/pail
 
-# Development only.
+# Development only (and the documents in docs/, which the server does not serve).
 .git
+docs
 .claude
 .codex
 .cursor
