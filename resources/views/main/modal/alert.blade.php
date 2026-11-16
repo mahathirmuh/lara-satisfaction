@@ -15,7 +15,7 @@
                 timer: 3500,
                 timerProgressBar: true,
             } : {
-                confirmButtonText: 'OK',
+                confirmButtonText: @json(__('OK')),
             }, alert));
         })();
     </script>

@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Survey Report')
+@section('page-title', __('Survey Report'))
 
 @push('style')
     <link rel="stylesheet" href="{{ asset('assets/libs/apexcharts/apexcharts.css') }}?v=3.40.0" />
@@ -38,8 +38,8 @@
                         <form method="GET" action="{{ route('survey-report.show', $survey) }}"
                             class="d-flex flex-wrap align-items-center gap-2">
                             <select name="company_id" class="form-select" style="min-width: 240px"
-                                onchange="this.form.submit()" aria-label="Filter by company">
-                                <option value="">All companies</option>
+                                onchange="this.form.submit()" aria-label="{{ __('Filter by company') }}">
+                                <option value="">{{ __('All companies') }}</option>
                                 @foreach ($companies as $companyId => $companyName)
                                     <option value="{{ $companyId }}" @selected($selectedCompanyId === $companyId)>
                                         {{ $companyName }}
@@ -48,14 +48,14 @@
                             </select>
                             @if ($summary['is_reportable'])
                                 @permission('survey-report', 'Read')
-                                    <x-global.btn-detail label="Export CSV" color="green" size="sm"
+                                    <x-global.btn-detail :label="__('Export CSV')" color="green" size="sm"
                                         :href="route('survey-report.export', $exportParams)">
                                         <x-slot:icon><i class="ti ti-file-download"></i></x-slot:icon>
                                     </x-global.btn-detail>
                                 @endpermission
                             @endif
                             <x-global.btn-detail label="" color="blue" size="sm" outline="true"
-                                :href="route('survey-report.index')" data-bs-toggle="tooltip" data-bs-title="Back">
+                                :href="route('survey-report.index')" data-bs-toggle="tooltip" data-bs-title="{{ __('Back') }}">
                                 <x-slot:icon><i class="ti ti-arrow-left"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </form>
@@ -66,28 +66,34 @@
 
         {{-- Summary --}}
         <div class="col-sm-6 col-xl-3">
-            <x-global.summary-card title="Responses" :value="number_format($summary['responses'])" color="blue"
-                :subtitle="number_format($summary['comments']) . ' written comments'">
+            <x-global.summary-card :title="__('Responses')" :value="number_format($summary['responses'])" color="blue"
+                :subtitle="__(':count written comments', ['count' => number_format($summary['comments'])])">
                 <x-slot:icon><i class="ti ti-forms"></i></x-slot:icon>
             </x-global.summary-card>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <x-global.summary-card title="Participation Rate"
+            <x-global.summary-card :title="__('Participation Rate')"
                 :value="$summary['participation_rate'] === null ? '—' : $summary['participation_rate'] . '%'" color="purple"
-                :subtitle="number_format($summary['participants']) . ' of ' . number_format($summary['eligible']) . ' active employees'">
+                :subtitle="__(':participants of :eligible active employees', [
+                    'participants' => number_format($summary['participants']),
+                    'eligible' => number_format($summary['eligible']),
+                ])">
                 <x-slot:icon><i class="ti ti-users-group"></i></x-slot:icon>
             </x-global.summary-card>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <x-global.summary-card title="Service Quality"
+            <x-global.summary-card :title="__('Service Quality')"
                 :value="$summary['average'] === null ? '—' : number_format($summary['average'], 2) . ' / 5'" color="green"
-                :subtitle="number_format($summary['ratings']) . ' ratings · criticality ' . ($summary['criticality'] === null ? '—' : number_format($summary['criticality'], 2))">
+                :subtitle="__(':count ratings · criticality :criticality', [
+                    'count' => number_format($summary['ratings']),
+                    'criticality' => $summary['criticality'] === null ? '—' : number_format($summary['criticality'], 2),
+                ])">
                 <x-slot:icon><i class="ti ti-star"></i></x-slot:icon>
             </x-global.summary-card>
         </div>
         <div class="col-sm-6 col-xl-3">
             <x-global.summary-card title="CSAT" :value="$summary['csat'] === null ? '—' : $summary['csat'] . '%'"
-                color="orange" :subtitle="'Share of quality ratings ≥ ' . config('survey.satisfied_threshold')">
+                color="orange" :subtitle="__('Share of quality ratings ≥ :threshold', ['threshold' => config('survey.satisfied_threshold')])">
                 <x-slot:icon><i class="ti ti-mood-happy"></i></x-slot:icon>
             </x-global.summary-card>
         </div>
@@ -98,9 +104,11 @@
                     <div class="d-flex gap-2">
                         <i class="ti ti-shield-lock fs-2"></i>
                         <div>
-                            <strong>Results hidden to protect anonymity.</strong>
-                            Scores and comments are shown once this selection has at least
-                            {{ $summary['min_group_size'] }} responses (currently {{ $summary['responses'] }}).
+                            <strong>{{ __('Results hidden to protect anonymity.') }}</strong>
+                            {{ __('Scores and comments are shown once this selection has at least :min responses (currently :count).', [
+                                'min' => $summary['min_group_size'],
+                                'count' => $summary['responses'],
+                            ]) }}
                         </div>
                     </div>
                 </div>
@@ -111,7 +119,7 @@
             <div class="col-lg-7">
                 <div class="card h-100">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0">Service Quality by Department</h4>
+                        <h4 class="mb-0">{{ __('Service Quality by Department') }}</h4>
                     </div>
                     <div class="card-body">
                         <div id="chartDepartmentScores"></div>
@@ -121,7 +129,7 @@
             <div class="col-lg-5">
                 <div class="card h-100">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0">Service Quality Distribution</h4>
+                        <h4 class="mb-0">{{ __('Service Quality Distribution') }}</h4>
                     </div>
                     <div class="card-body">
                         <div id="chartRatingDistribution"></div>
@@ -133,7 +141,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header p-2 px-3">
-                    <h4 class="mb-0">Participation Trend</h4>
+                    <h4 class="mb-0">{{ __('Participation Trend') }}</h4>
                 </div>
                 <div class="card-body">
                     <div id="chartParticipation"></div>
@@ -146,18 +154,18 @@
             <div class="col-12">
                 <div class="card overflow-hidden">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0">Department &amp; Section Scores</h4>
+                        <h4 class="mb-0">{{ __('Department & Section Scores') }}</h4>
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table class="table table-vcenter mdka-border-gray-100 text-nowrap mb-0" id="departmentScoreTable">
                             <thead>
                                 <tr class="mdka-bg-gray-50">
-                                    <th class="text-capitalize fs-5 py-3">Department / Section</th>
-                                    <th class="text-capitalize fs-5 py-3 text-center">Evaluations</th>
-                                    <th class="text-capitalize fs-5 py-3 text-center">Criticality</th>
-                                    <th class="text-capitalize fs-5 py-3 text-center">Service Quality</th>
+                                    <th class="text-capitalize fs-5 py-3">{{ __('Department / Section') }}</th>
+                                    <th class="text-capitalize fs-5 py-3 text-center">{{ __('Evaluations') }}</th>
+                                    <th class="text-capitalize fs-5 py-3 text-center">{{ __('Criticality') }}</th>
+                                    <th class="text-capitalize fs-5 py-3 text-center">{{ __('Service Quality') }}</th>
                                     <th class="text-capitalize fs-5 py-3 text-center">CSAT</th>
-                                    <th class="text-capitalize fs-5 py-3" width="30%">Quality Distribution (1 &rarr; 5)</th>
+                                    <th class="text-capitalize fs-5 py-3" width="30%">{{ __('Quality Distribution') }} (1 &rarr; 5)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,7 +197,7 @@
                                             <td class="text-center text-secondary">{{ number_format($sectionRow['evaluations']) }}</td>
                                             @if ($sectionRow['is_hidden'])
                                                 <td colspan="4" class="text-secondary small">
-                                                    <i class="ti ti-shield-lock me-1"></i>{{ 'Hidden: fewer than ' . $summary['min_group_size'] . ' employees evaluated this section.' }}
+                                                    <i class="ti ti-shield-lock me-1"></i>{{ __('Hidden: fewer than :count employees evaluated this section.', ['count' => $summary['min_group_size']]) }}
                                                 </td>
                                             @else
                                                 <td class="text-center text-secondary">{{ $sectionRow['criticality'] === null ? '—' : number_format($sectionRow['criticality'], 2) }}</td>
@@ -212,18 +220,18 @@
             <div class="col-12">
                 <div class="card overflow-hidden">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0">Question Breakdown</h4>
+                        <h4 class="mb-0">{{ __('Question Breakdown') }}</h4>
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table class="table table-vcenter mdka-border-gray-100 mb-0">
                             <thead>
                                 <tr class="mdka-bg-gray-50">
                                     <th class="text-capitalize fs-5 py-3 text-center" width="40">#</th>
-                                    <th class="text-capitalize fs-5 py-3">Question</th>
-                                    <th class="text-capitalize fs-5 py-3">Department / Section</th>
-                                    <th class="text-capitalize fs-5 py-3 text-center">Answers</th>
-                                    <th class="text-capitalize fs-5 py-3 text-center">Average</th>
-                                    <th class="text-capitalize fs-5 py-3" width="25%">Distribution (1 &rarr; 5)</th>
+                                    <th class="text-capitalize fs-5 py-3">{{ __('Question') }}</th>
+                                    <th class="text-capitalize fs-5 py-3">{{ __('Department / Section') }}</th>
+                                    <th class="text-capitalize fs-5 py-3 text-center">{{ __('Answers') }}</th>
+                                    <th class="text-capitalize fs-5 py-3 text-center">{{ __('Average') }}</th>
+                                    <th class="text-capitalize fs-5 py-3" width="25%">{{ __('Distribution') }} (1 &rarr; 5)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -243,13 +251,13 @@
                                             <td class="text-center">{{ number_format($row['ratings']) }}</td>
                                             <td class="text-center">
                                                 <x-global.score-badge :value="$row['average']" />
-                                                <div class="text-secondary small mt-1">{{ $row['type'] === 'criticality' ? 'Criticality' : 'Quality' }}</div>
+                                                <div class="text-secondary small mt-1">{{ $row['type'] === 'criticality' ? __('Criticality') : __('Quality') }}</div>
                                             </td>
                                             <td><x-global.rating-distribution :distribution="$row['distribution']" :labels="$row['scale']" /></td>
                                         @else
                                             <td class="text-center">{{ number_format($row['comments']) }}</td>
-                                            <td class="text-center"><span class="badge bg-azure-lt">Open text</span></td>
-                                            <td class="text-secondary small">See comments below</td>
+                                            <td class="text-center"><span class="badge bg-azure-lt">{{ __('Open text') }}</span></td>
+                                            <td class="text-secondary small">{{ __('See comments below') }}</td>
                                         @endif
                                     </tr>
                                 @endforeach
@@ -264,15 +272,15 @@
                 <div class="col-12">
                     <div class="card overflow-hidden">
                         <div class="card-header p-2 px-3">
-                            <h4 class="mb-0">Company Breakdown</h4>
+                            <h4 class="mb-0">{{ __('Company Breakdown') }}</h4>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-vcenter mdka-border-gray-100 text-nowrap mb-0">
                                 <thead>
                                     <tr class="mdka-bg-gray-50">
-                                        <th class="text-capitalize fs-5 py-3">Company</th>
-                                        <th class="text-capitalize fs-5 py-3 text-center">Responses</th>
-                                        <th class="text-capitalize fs-5 py-3 text-center">Average</th>
+                                        <th class="text-capitalize fs-5 py-3">{{ __('Company') }}</th>
+                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Responses') }}</th>
+                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Average') }}</th>
                                         <th class="text-capitalize fs-5 py-3 text-center">CSAT</th>
                                     </tr>
                                 </thead>
@@ -298,21 +306,21 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0"><i class="ti ti-message-2 me-1"></i> Anonymous Comments</h4>
+                        <h4 class="mb-0"><i class="ti ti-message-2 me-1"></i> {{ __('Anonymous Comments') }}</h4>
                     </div>
                     <div class="card-body p-2">
                         <div class="row g-2">
                             <div class="col-12 d-flex flex-wrap gap-2">
                                 <select id="commentDepartment" class="form-select" style="max-width: 240px"
-                                    aria-label="Filter comments by department">
-                                    <option value="">All departments</option>
+                                    aria-label="{{ __('Filter comments by department') }}">
+                                    <option value="">{{ __('All departments') }}</option>
                                     @foreach ($departments as $department)
                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
                                     @endforeach
-                                    <option value="general">General</option>
+                                    <option value="general">{{ __('General') }}</option>
                                 </select>
                                 <div style="max-width: 280px" class="flex-grow-1">
-                                    <x-global.input-search id="commentSearch" placeholder="Search comments…" />
+                                    <x-global.input-search id="commentSearch" :placeholder="__('Search comments…')" />
                                 </div>
                             </div>
                             <div class="col-12">
@@ -321,10 +329,10 @@
                                         <table class="table table-vcenter mdka-border-gray-100 mb-0" id="commentTable">
                                             <thead>
                                                 <tr class="mdka-bg-gray-50">
-                                                    <th class="text-capitalize fs-5 py-3 text-center" width="40">No</th>
-                                                    <th class="text-capitalize fs-5 py-3">Department</th>
-                                                    <th class="text-capitalize fs-5 py-3">Question</th>
-                                                    <th class="text-capitalize fs-5 py-3">Comment</th>
+                                                    <th class="text-capitalize fs-5 py-3 text-center" width="40">{{ __('No') }}</th>
+                                                    <th class="text-capitalize fs-5 py-3">{{ __('Department') }}</th>
+                                                    <th class="text-capitalize fs-5 py-3">{{ __('Question') }}</th>
+                                                    <th class="text-capitalize fs-5 py-3">{{ __('Comment') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -406,7 +414,7 @@
                                 currentPage,
                                 limit,
                                 meta: response.meta,
-                                emptyText: 'No comments found.',
+                                emptyText: @json(__('No comments found.')),
                                 onPageChange: (page) => {
                                     currentPage = page;
                                     loadComments();

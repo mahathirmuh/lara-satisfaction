@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Questions')
+@section('page-title', __('Questions'))
 
 @section('content')
     <div class="row g-2">
@@ -10,9 +10,9 @@
                 <div class="card-body p-2">
                     <div class="row g-2 align-items-end">
                         <div class="col-md-4">
-                            <label for="surveyFilter" class="form-label">Survey Period</label>
+                            <label for="surveyFilter" class="form-label">{{ __('Survey Period') }}</label>
                             <select id="surveyFilter" class="form-select">
-                                <option value="">All surveys</option>
+                                <option value="">{{ __('All surveys') }}</option>
                                 @foreach ($surveys as $survey)
                                     <option value="{{ $survey->id }}" data-locked="{{ $survey->responses_count > 0 ? 1 : 0 }}"
                                         @selected($selectedSurveyId === $survey->id)>
@@ -22,19 +22,19 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="departmentFilter" class="form-label">Department</label>
+                            <label for="departmentFilter" class="form-label">{{ __('Department') }}</label>
                             <select id="departmentFilter" class="form-select">
-                                <option value="">All departments</option>
+                                <option value="">{{ __('All departments') }}</option>
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->name }}</option>
                                 @endforeach
-                                <option value="general">General</option>
+                                <option value="general">{{ __('General') }}</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="sectionFilter" class="form-label">Section</label>
+                            <label for="sectionFilter" class="form-label">{{ __('Section') }}</label>
                             <select id="sectionFilter" class="form-select" disabled>
-                                <option value="">All sections</option>
+                                <option value="">{{ __('All sections') }}</option>
                                 @foreach ($sections as $section)
                                     <option value="{{ $section->id }}" data-department="{{ $section->department_id }}">
                                         {{ $section->name }}
@@ -43,9 +43,9 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="typeFilter" class="form-label">Type</label>
+                            <label for="typeFilter" class="form-label">{{ __('Type') }}</label>
                             <select id="typeFilter" class="form-select">
-                                <option value="">All types</option>
+                                <option value="">{{ __('All types') }}</option>
                                 @foreach ($types as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -60,8 +60,7 @@
             <div class="alert alert-warning mb-0" role="alert">
                 <div class="d-flex gap-2">
                     <i class="ti ti-lock fs-2"></i>
-                    <div>This survey already has responses. Its questions are locked so earlier answers keep their
-                        meaning. Duplicate the survey to prepare a new question set.</div>
+                    <div>{{ __('This survey already has responses. Its questions are locked so earlier answers keep their meaning. Duplicate the survey to prepare a new question set.') }}</div>
                 </div>
             </div>
         </div>
@@ -74,18 +73,18 @@
                         <div class="col-12 d-flex flex-wrap justify-content-between gap-2">
                             <div class="d-flex gap-2">
                                 <input type="text" id="questionSearch" class="form-control rounded-3" autocomplete="off"
-                                    placeholder="Search…" />
+                                    placeholder="{{ __('Search…') }}" />
                                 <x-global.btn-detail label="" color="blue" size="sm" outline="true" id="toggleSearchButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Search">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Search') }}">
                                     <x-slot:icon><i class="ti ti-search"></i></x-slot:icon>
                                 </x-global.btn-detail>
                                 <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Reset">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Reset') }}">
                                     <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
                                 </x-global.btn-detail>
                             </div>
                             @if ($can['create'] && $surveys->isNotEmpty())
-                                <x-global.btn-detail label="Add Question" color="blue" size="sm" id="addQuestionButton"
+                                <x-global.btn-detail :label="__('Add Question')" color="blue" size="sm" id="addQuestionButton"
                                     onclick="toggleQuestionModal('add')">
                                     <x-slot:icon><i class="ti ti-plus"></i></x-slot:icon>
                                 </x-global.btn-detail>
@@ -98,13 +97,13 @@
                                     <table class="table table-vcenter mdka-border-gray-100" id="questionTable">
                                         <thead>
                                             <tr class="mdka-bg-gray-50">
-                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="sort_order" width="70">Order</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="question">Question</th>
-                                                <th class="text-capitalize fs-5 py-3">Department / Section</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="type">Type</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="is_required">Required</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Action</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">{{ __('No') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="sort_order" width="70">{{ __('Order') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="question">{{ __('Question') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Department / Section') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="type">{{ __('Type') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="is_required">{{ __('Required') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -165,19 +164,19 @@
                 className: 'text-center text-nowrap',
                 render: (item) => {
                     if (item.is_locked) {
-                        return '<span class="text-muted" data-bs-toggle="tooltip" data-bs-title="Survey has responses"><i class="ti ti-lock"></i></span>';
+                        return `<span class="text-muted" data-bs-toggle="tooltip" data-bs-title="${escapeHtml(@json(__('Survey has responses')))}"><i class="ti ti-lock"></i></span>`;
                     }
 
                     let html = '<div class="d-inline-flex gap-1">';
 
                     if (questionCan.update) {
-                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleQuestionModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="Edit">
+                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleQuestionModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Edit') }}">
                             <x-slot:icon><i class="ti ti-edit"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }
 
                     if (questionCan.delete) {
-                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteQuestion(${item.id})" data-bs-toggle="tooltip" data-bs-title="Delete">
+                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteQuestion(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Delete') }}">
                             <x-slot:icon><i class="ti ti-trash"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }

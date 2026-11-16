@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Error Log')
+@section('page-title', __('Error Log'))
 
 @section('content')
     <div class="row g-2">
@@ -10,9 +10,9 @@
                     <div class="row g-2">
                         <div class="col-12 d-flex flex-wrap gap-2">
                             <input type="text" id="errorSearch" class="form-control rounded-3" style="max-width: 320px"
-                                autocomplete="off" placeholder="Search message, exception or URL…" />
+                                autocomplete="off" placeholder="{{ __('Search message, exception or URL…') }}" />
                             <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
-                                data-bs-toggle="tooltip" data-bs-title="Reset">
+                                data-bs-toggle="tooltip" data-bs-title="{{ __('Reset') }}">
                                 <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -22,12 +22,12 @@
                                     <table class="table table-vcenter mdka-border-gray-100" id="errorTable">
                                         <thead>
                                             <tr class="mdka-bg-gray-50">
-                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
-                                                <th class="text-capitalize fs-5 py-3 text-nowrap" data-key="created_at">Time</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="exception">Exception</th>
-                                                <th class="text-capitalize fs-5 py-3">Message</th>
-                                                <th class="text-capitalize fs-5 py-3">Location</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Detail</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">{{ __('No') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-nowrap" data-key="created_at">{{ __('Time') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="exception">{{ __('Exception') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Message') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Location') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Detail') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -46,8 +46,8 @@
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Error Detail</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">{{ __('Error Detail') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <pre class="mb-0 small" id="errorDetailContent" style="white-space: pre-wrap"></pre>
@@ -86,7 +86,7 @@
             {
                 key: 'detail',
                 className: 'text-center',
-                render: (item) => `<x-global.btn-detail label="" color="blue" size="sm" outline="true" onclick="showErrorDetail(${item.id})" data-bs-toggle="tooltip" data-bs-title="Detail">
+                render: (item) => `<x-global.btn-detail label="" color="blue" size="sm" outline="true" onclick="showErrorDetail(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Detail') }}">
                     <x-slot:icon><i class="ti ti-eye"></i></x-slot:icon>
                 </x-global.btn-detail>`,
             },
@@ -113,7 +113,7 @@
                 }) => {
                     const trace = data.stack_trace;
                     delete data.stack_trace;
-                    $('#errorDetailContent').text(JSON.stringify(data, null, 2) + '\n\nStack trace:\n' + (trace || '-'));
+                    $('#errorDetailContent').text(JSON.stringify(data, null, 2) + '\n\n' + @json(__('Stack trace:')) + '\n' + (trace || '-'));
                     $('#errorDetailModal').modal('show');
                 })
                 .fail(showAjaxError);

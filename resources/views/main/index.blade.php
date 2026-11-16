@@ -7,12 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('page-title', 'Dashboard') | {{ config('merdeka.app_name') }}</title>
+    <title>@yield('page-title', __('Dashboard')) | {{ config('merdeka.app_name') }}</title>
     <meta name="description" content="{{ config('merdeka.app_name') }} - {{ config('merdeka.company_name') }}" />
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/branding/favicon.ico') }}" />
     <!--  Main Style -->
     @include('main.components.style.style')
     <meta name="theme-color" content="#0d6efd">
+    <script>
+        // Interface language for Intl number/date formatting in page scripts, e.g. "id" or "zh-CN".
+        window.appLocale = @json(str_replace('_', '-', app()->getLocale()));
+    </script>
 </head>
 
 <body class="layout-fluid">

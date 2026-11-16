@@ -1,6 +1,6 @@
 @props([
     'number' => 1,
-    'label' => 'Step 1',
+    'label' => null,
     'active' => false,
     'passed' => false,
 ])
@@ -72,5 +72,5 @@
         <i class="ti ti-check mcg-step-check"></i>
         <span class="mcg-step-digit">{{ $number }}</span>
     </div>
-    <div class="mcg-step-label">{{ $label }}</div>
+    <div class="mcg-step-label">{{ $label ?? __('Step :number', ['number' => $number]) }}</div>
 </div>

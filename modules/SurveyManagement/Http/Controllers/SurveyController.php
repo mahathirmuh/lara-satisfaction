@@ -89,7 +89,7 @@ class SurveyController extends Controller
         $survey = $this->surveys->create($request->validated(), $request->user());
 
         return response()->json([
-            'message' => 'Survey created successfully.',
+            'message' => __('Survey created successfully.'),
             'data' => ['id' => $survey->id],
         ], Response::HTTP_CREATED);
     }
@@ -101,7 +101,7 @@ class SurveyController extends Controller
     {
         $this->surveys->update($survey, $request->validated());
 
-        return response()->json(['message' => 'Survey updated successfully.']);
+        return response()->json(['message' => __('Survey updated successfully.')]);
     }
 
     /**
@@ -117,13 +117,13 @@ class SurveyController extends Controller
 
         if ($status === SurveyStatus::Active && $survey->questions()->doesntExist()) {
             throw ValidationException::withMessages([
-                'status' => 'Add at least one question before activating the survey.',
+                'status' => __('Add at least one question before activating the survey.'),
             ]);
         }
 
         $this->surveys->changeStatus($survey, $status);
 
-        return response()->json(['message' => 'Survey status changed to '.$status->label().'.']);
+        return response()->json(['message' => __('Survey status changed to :status.', ['status' => $status->label()])]);
     }
 
     /**
@@ -134,7 +134,7 @@ class SurveyController extends Controller
         $copy = $this->surveys->duplicate($survey, $request->user());
 
         return response()->json([
-            'message' => 'Survey duplicated as draft "'.$copy->title.'".',
+            'message' => __('Survey duplicated as draft ":title".', ['title' => $copy->title]),
             'data' => ['id' => $copy->id],
         ], Response::HTTP_CREATED);
     }
@@ -146,12 +146,12 @@ class SurveyController extends Controller
     {
         if ($survey->hasResponses()) {
             return response()->json([
-                'message' => 'This survey already has responses and cannot be deleted. Close it instead.',
+                'message' => __('This survey already has responses and cannot be deleted. Close it instead.'),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->surveys->delete($survey);
 
-        return response()->json(['message' => 'Survey deleted successfully.']);
+        return response()->json(['message' => __('Survey deleted successfully.')]);
     }
 }

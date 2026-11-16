@@ -29,10 +29,10 @@ class EnsureUserIsActive
             $request->session()->regenerateToken();
 
             if ($request->expectsJson()) {
-                abort(Response::HTTP_UNAUTHORIZED, 'Your account is inactive.');
+                abort(Response::HTTP_UNAUTHORIZED, __('Your account is inactive.'));
             }
 
-            Alert::warning('Account inactive', 'Your account has been deactivated. Please contact the IT Helpdesk.');
+            Alert::warning(__('Account inactive'), __('Your account has been deactivated. Please contact the IT Helpdesk.'));
 
             return redirect()->route('login');
         }

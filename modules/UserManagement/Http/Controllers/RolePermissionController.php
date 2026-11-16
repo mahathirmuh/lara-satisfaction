@@ -111,7 +111,7 @@ class RolePermissionController extends Controller
         }
 
         return response()->json([
-            'message' => 'Role created successfully.',
+            'message' => __('Role created successfully.'),
             'data' => ['id' => $role->id],
         ], Response::HTTP_CREATED);
     }
@@ -134,7 +134,7 @@ class RolePermissionController extends Controller
             $this->jobTitleRoles->syncAll();
         }
 
-        return response()->json(['message' => 'Role updated successfully.']);
+        return response()->json(['message' => __('Role updated successfully.')]);
     }
 
     /**
@@ -143,15 +143,15 @@ class RolePermissionController extends Controller
     public function destroy(Role $role): JsonResponse
     {
         if ($role->isItAdmin() || $role->id === (int) config('merdeka.default_role_id')) {
-            return response()->json(['message' => 'This built-in role cannot be deleted.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json(['message' => __('This built-in role cannot be deleted.')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         if ($role->users()->exists()) {
-            return response()->json(['message' => 'This role is still assigned to users.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json(['message' => __('This role is still assigned to users.')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->roles->delete($role);
 
-        return response()->json(['message' => 'Role deleted successfully.']);
+        return response()->json(['message' => __('Role deleted successfully.')]);
     }
 }

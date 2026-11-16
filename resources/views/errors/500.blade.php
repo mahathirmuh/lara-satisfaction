@@ -1,5 +1,5 @@
 @extends('errors.layout')
 
 @section('code', '500')
-@section('title', 'Something went wrong')
-@section('message', 'An unexpected error occurred. The IT team has been notified.')
+@section('title', __('Something went wrong'))
+@section('message', __('An unexpected error occurred. The IT team has been notified.'))

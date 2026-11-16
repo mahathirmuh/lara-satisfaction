@@ -12,13 +12,13 @@ enum DepartmentScope: string
     case Managed = 'MANAGED';
 
     /**
-     * Human readable label.
+     * Human readable label, in the interface language.
      */
     public function label(): string
     {
         return match ($this) {
-            self::All => 'All departments',
-            self::Managed => 'Departments managed by the job title',
+            self::All => __('All departments'),
+            self::Managed => __('Departments managed by the job title'),
         };
     }
 

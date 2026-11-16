@@ -40,6 +40,24 @@ class SurveyRequest extends FormRequest
     }
 
     /**
+     * Get custom attributes for validator errors (named so they can be
+     * translated; the English names are the ones Laravel derives).
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'title' => __('title'),
+            'description' => __('description'),
+            'start_date' => __('start date'),
+            'end_date' => __('end date'),
+            'status' => __('status'),
+            'estimated_minutes' => __('estimated minutes'),
+        ];
+    }
+
+    /**
      * A survey can only be activated once it has questions.
      *
      * @return array<int, callable(Validator): void>
@@ -55,7 +73,7 @@ class SurveyRequest extends FormRequest
                 $survey = $this->route('survey');
 
                 if (! $survey instanceof Survey || $survey->questions()->doesntExist()) {
-                    $validator->errors()->add('status', 'Add at least one question before activating the survey.');
+                    $validator->errors()->add('status', __('Add at least one question before activating the survey.'));
                 }
             },
         ];

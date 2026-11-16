@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Role & Permission')
+@section('page-title', __('Role & Permission'))
 
 @section('content')
     <div class="row g-2">
@@ -11,18 +11,18 @@
                         <div class="col-12 d-flex flex-wrap justify-content-between gap-2">
                             <div class="d-flex gap-2">
                                 <input type="text" id="roleSearch" class="form-control rounded-3" autocomplete="off"
-                                    placeholder="Search role…" />
+                                    placeholder="{{ __('Search role…') }}" />
                                 <x-global.btn-detail label="" color="blue" size="sm" outline="true" id="toggleSearchButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Search">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Search') }}">
                                     <x-slot:icon><i class="ti ti-search"></i></x-slot:icon>
                                 </x-global.btn-detail>
                                 <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Reset">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Reset') }}">
                                     <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
                                 </x-global.btn-detail>
                             </div>
                             @if ($can['create'])
-                                <x-global.btn-detail label="Add Role" color="blue" size="sm"
+                                <x-global.btn-detail :label="__('Add Role')" color="blue" size="sm"
                                     onclick="toggleRoleModal('add')">
                                     <x-slot:icon><i class="ti ti-plus"></i></x-slot:icon>
                                 </x-global.btn-detail>
@@ -35,13 +35,13 @@
                                     <table class="table table-vcenter mdka-border-gray-100 text-nowrap" id="roleTable">
                                         <thead>
                                             <tr class="mdka-bg-gray-50">
-                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="name">Role</th>
-                                                <th class="text-capitalize fs-5 py-3">Given By</th>
-                                                <th class="text-capitalize fs-5 py-3">Survey Results</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Menus</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="users_count">Users</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Action</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">{{ __('No') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="name">{{ __('Role') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Given By') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('Survey Results') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Menus') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="users_count">{{ __('Users') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -71,17 +71,19 @@
                 key: 'name',
                 sortable: true,
                 render: (item) => `<span class="fw-medium">${escapeHtml(item.name)}</span>
-                    ${item.is_protected ? '<span class="badge bg-red-lt ms-1">Unrestricted</span>' : ''}
-                    ${item.is_default ? '<span class="badge bg-blue-lt ms-1">Default role</span>' : ''}`,
+                    ${item.is_protected ? '<span class="badge bg-red-lt ms-1">' + @json(__('Unrestricted')) + '</span>' : ''}
+                    ${item.is_default ? '<span class="badge bg-blue-lt ms-1">' + @json(__('Default role')) + '</span>' : ''}`,
             },
             {
                 key: 'job_titles',
                 render: (item) => {
                     if (item.job_titles.length) {
-                        return `<span class="text-secondary small text-wrap"><i class="ti ti-id-badge-2 me-1"></i>Job title: ${item.job_titles.map(escapeHtml).join(', ')}</span>`;
+                        const jobTitles = item.job_titles.map(escapeHtml).join(', ');
+
+                        return `<span class="text-secondary small text-wrap"><i class="ti ti-id-badge-2 me-1"></i>${@json(__('Job title: :titles')).replace(':titles', () => jobTitles)}</span>`;
                     }
 
-                    return `<span class="text-secondary small">${item.is_default ? 'Job title matching no rule' : 'By hand (User Management)'}</span>`;
+                    return `<span class="text-secondary small">${item.is_default ? @json(__('Job title matching no rule')) : @json(__('By hand (User Management)'))}</span>`;
                 },
             },
             {
@@ -104,13 +106,13 @@
                     let html = '<div class="d-inline-flex gap-1">';
 
                     if (roleCan.update) {
-                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleRoleModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="Edit">
+                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleRoleModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Edit') }}">
                             <x-slot:icon><i class="ti ti-edit"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }
 
                     if (roleCan.delete && !item.is_protected && !item.is_default && item.users_count === 0) {
-                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteRole(${item.id})" data-bs-toggle="tooltip" data-bs-title="Delete">
+                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteRole(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Delete') }}">
                             <x-slot:icon><i class="ti ti-trash"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }

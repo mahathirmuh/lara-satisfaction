@@ -1,6 +1,6 @@
 @extends('auth.main.app')
 
-@section('page-title', 'Sign In')
+@section('page-title', __('Sign In'))
 
 @section('content')
     @php
@@ -20,7 +20,7 @@
                                             <button type="button" data-bs-target="#authCarousel"
                                                 data-bs-slide-to="{{ $index }}"
                                                 class="ratio ratio-4x3 {{ $index === 0 ? 'active' : '' }}"
-                                                aria-label="Slide {{ $index + 1 }}"
+                                                aria-label="{{ __('Slide :number', ['number' => $index + 1]) }}"
                                                 style="background-image: url({{ asset('assets/img/bg-auth/' . $image) }})"></button>
                                         @endforeach
                                     </div>
@@ -38,19 +38,20 @@
                                 <div class="p-4 p-md-5 pb-0 pb-md-0 mx-md-3 d-flex justify-content-between align-items-center">
                                     <img src="{{ asset('assets/img/branding/mcg-logo.png') }}" height="38"
                                         alt="Merdeka Copper Gold">
+                                    <x-global.locale-switcher />
                                     <img src="{{ asset('assets/img/branding/mbm-logo.jpg') }}" height="56"
                                         alt="Merdeka Battery Materials">
                                 </div>
                                 <div class="card-body px-4 px-md-5 pt-0 mx-md-3">
                                     <div class="text-center mt-4">
                                         <h1 class="text-secondary mb-1">{{ config('merdeka.app_name') }}</h1>
-                                        <div class="text-muted">Authentication required via employee credentials.</div>
+                                        <div class="text-muted">{{ __('Authentication required via employee credentials.') }}</div>
                                     </div>
                                     <hr class="my-3">
 
                                     @if ($ssoProviders !== [])
                                         <div class="text-center mb-3">
-                                            <span class="text-muted" style="font-size: 15px">Sign In with SSO</span>
+                                            <span class="text-muted" style="font-size: 15px">{{ __('Sign In with SSO') }}</span>
                                         </div>
                                         <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mb-2">
                                             @foreach ($ssoProviders as $provider => $isConfigured)
@@ -60,18 +61,18 @@
                                                         alt="">
                                                     <span class="h4 mb-0">{{ $provider === 'microsoft' ? 'Microsoft' : 'Google' }}</span>
                                                     @unless ($isConfigured)
-                                                        <span class="badge bg-yellow-lt ms-1" style="font-size: .7rem">Coming soon</span>
+                                                        <span class="badge bg-yellow-lt ms-1" style="font-size: .7rem">{{ __('Coming soon') }}</span>
                                                     @endunless
                                                 </a>
                                             @endforeach
                                         </div>
-                                        <div class="hr-text my-4"><span class="h6 mb-0">Or</span></div>
+                                        <div class="hr-text my-4"><span class="h6 mb-0">{{ __('Or') }}</span></div>
                                     @endif
 
                                     <div class="text-center">
-                                        <span class="text-muted" style="font-size: 15px">Sign in with Network Account (LDAP)</span>
+                                        <span class="text-muted" style="font-size: 15px">{{ __('Sign in with Network Account (LDAP)') }}</span>
                                         @unless ($isNetworkSignInConfigured)
-                                            <span class="badge bg-yellow-lt ms-1" style="font-size: .7rem">Coming soon</span>
+                                            <span class="badge bg-yellow-lt ms-1" style="font-size: .7rem">{{ __('Coming soon') }}</span>
                                         @endunless
                                     </div>
                                     <form id="loginForm" class="p-3 rounded" method="POST"
@@ -80,26 +81,26 @@
                                         <fieldset @disabled(! $isNetworkSignInConfigured)>
                                         <div class="row g-3">
                                             <div class="col-12">
-                                                <label for="username" class="form-label required">Username</label>
+                                                <label for="username" class="form-label required">{{ __('Username') }}</label>
                                                 <input type="text" class="form-control @error('username') is-invalid @enderror"
                                                     id="username" name="username" value="{{ old('username') }}"
-                                                    placeholder="firstname.lastname" autocomplete="username" required
+                                                    placeholder="{{ __('firstname.lastname') }}" autocomplete="username" required
                                                     autofocus>
                                                 @error('username')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
-                                                <small class="form-hint">Your network (Windows) username and password.</small>
+                                                <small class="form-hint">{{ __('Your network (Windows) username and password.') }}</small>
                                             </div>
                                             <div class="col-12">
-                                                <label for="password" class="form-label required">Password</label>
+                                                <label for="password" class="form-label required">{{ __('Password') }}</label>
                                                 <div class="input-group input-group-flat">
                                                     <input type="password"
                                                         class="form-control @error('password') is-invalid @enderror"
-                                                        id="password" name="password" placeholder="Password"
+                                                        id="password" name="password" placeholder="{{ __('Password') }}"
                                                         autocomplete="current-password" required>
                                                     <span class="input-group-text">
                                                         <a href="#" class="link-secondary" id="togglePassword"
-                                                            title="Show password" data-bs-toggle="tooltip">
+                                                            title="{{ __('Show password') }}" data-bs-toggle="tooltip">
                                                             <i class="ti ti-eye"></i>
                                                         </a>
                                                     </span>
@@ -112,29 +113,29 @@
                                                 <label class="form-check mb-0">
                                                     <input type="checkbox" class="form-check-input" name="remember"
                                                         value="1" @checked(old('remember'))>
-                                                    <span class="form-check-label">Remember me on this device</span>
+                                                    <span class="form-check-label">{{ __('Remember me on this device') }}</span>
                                                 </label>
                                             </div>
                                             <div class="col-12">
                                                 <button type="submit" class="btn btn-primary w-100">
-                                                    <i class="ti ti-login me-1"></i> Login
+                                                    <i class="ti ti-login me-1"></i> {{ __('Login') }}
                                                 </button>
                                             </div>
                                         </div>
                                         </fieldset>
                                     </form>
                                     <div class="text-center">
-                                        Access Login Guide :
+                                        {{ __('Access Login Guide :') }}
                                         <button type="button" class="btn btn-sm btn-info rounded" data-bs-toggle="modal"
                                             data-bs-target="#accessLoginGuide">
-                                            Click Here
+                                            {{ __('Click Here') }}
                                         </button>
                                     </div>
                                 </div>
 
                                 <div class="d-flex flex-column align-items-center pb-3 gap-1">
                                     <a href="{{ route('landing') }}" class="small">
-                                        <i class="ti ti-arrow-left"></i> Back to survey overview
+                                        <i class="ti ti-arrow-left"></i> {{ __('Back to survey overview') }}
                                     </a>
                                     <small class="text-muted">&copy; {{ config('merdeka.company_name') }}
                                         {{ date('Y') }}</small>
@@ -153,8 +154,8 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="accessLoginGuideLabel">Access Login Guide</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="accessLoginGuideLabel">{{ __('Access Login Guide') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                 </div>
                 <div class="modal-body p-3">
                     @php($guideColumn = isset($ssoProviders['google']) ? 'col-md-4' : 'col-md-6')
@@ -170,7 +171,7 @@
                                     <div class="text-center">
                                         Merdeka Copper Gold Group
                                         <br><span class="text-warning small">@merdekacoppergold.com</span>
-                                        <br>access via
+                                        <br>{{ __('access via') }}
                                         <br><span class="text-primary fw-bold">Google SSO</span>
                                     </div>
                                 </div>
@@ -186,23 +187,21 @@
                                 <div class="text-center">
                                     Merdeka Battery Materials Group
                                     <br><span class="text-warning small">@merdekabattery.com, @scmnickel.com</span>
-                                    <br>access via
+                                    <br>{{ __('access via') }}
                                     <br><span class="text-azure fw-bold">Microsoft SSO</span>
                                     @unless ($ssoProviders['microsoft'] ?? false)
-                                        <br><span class="badge bg-yellow-lt mt-1">Coming soon</span>
+                                        <br><span class="badge bg-yellow-lt mt-1">{{ __('Coming soon') }}</span>
                                     @endunless
                                 </div>
                             </div>
                         </div>
                         <div class="{{ $guideColumn }}">
                             <div class="px-3 py-5 w-100 border rounded d-flex flex-column gap-3">
-                                <h3 class="text-center mb-0">Login by Network Account (LDAP)</h3>
+                                <h3 class="text-center mb-0">{{ __('Login by Network Account (LDAP)') }}</h3>
                                 <div class="text-center">
-                                    Sign in with the username and password of your company network (Windows)
-                                    account. This application has no passwords of its own: please contact the IT
-                                    Helpdesk if you do not have a network or Microsoft account.
+                                    {{ __('Sign in with the username and password of your company network (Windows) account. This application has no passwords of its own: please contact the IT Helpdesk if you do not have a network or Microsoft account.') }}
                                     @unless ($isNetworkSignInConfigured)
-                                        <br><span class="badge bg-yellow-lt mt-1">Coming soon</span>
+                                        <br><span class="badge bg-yellow-lt mt-1">{{ __('Coming soon') }}</span>
                                     @endunless
                                 </div>
                             </div>

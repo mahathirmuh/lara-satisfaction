@@ -88,7 +88,7 @@ class SectionController extends Controller
         $section = $this->sections->create($request->sectionAttributes(), $request->imageUploads());
 
         return response()->json([
-            'message' => 'Section created successfully.',
+            'message' => __('Section created successfully.'),
             'data' => ['id' => $section->id],
         ], Response::HTTP_CREATED);
     }
@@ -100,7 +100,7 @@ class SectionController extends Controller
     {
         $this->sections->update($section, $request->sectionAttributes(), $request->imageUploads(), $request->imageRemovals());
 
-        return response()->json(['message' => 'Section updated successfully.']);
+        return response()->json(['message' => __('Section updated successfully.')]);
     }
 
     /**
@@ -110,12 +110,12 @@ class SectionController extends Controller
     {
         if ($section->isUsedInSurveys()) {
             return response()->json([
-                'message' => 'This section is used in surveys. Deactivate it instead of deleting it, so past results keep it.',
+                'message' => __('This section is used in surveys. Deactivate it instead of deleting it, so past results keep it.'),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->sections->delete($section);
 
-        return response()->json(['message' => 'Section deleted successfully.']);
+        return response()->json(['message' => __('Section deleted successfully.')]);
     }
 }

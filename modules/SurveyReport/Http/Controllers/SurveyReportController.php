@@ -30,7 +30,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class SurveyReportController extends Controller
 {
     /**
-     * Shown to a manager whose job title manages none of the surveyed departments.
+     * Shown to a manager whose job title manages none of the surveyed
+     * departments (English text, also the translation key).
      */
     public const NO_DEPARTMENT_MESSAGE = 'Your job title is not set as the manager of a surveyed department. Ask the IT Admin to add it in Master Data > Departments.';
 
@@ -46,7 +47,7 @@ class SurveyReportController extends Controller
     {
         return view('SurveyReport::index', [
             'surveys' => $this->reports->reportableSurveys(),
-            'noDepartmentMessage' => $request->user()->reportDepartmentIds() === [] ? self::NO_DEPARTMENT_MESSAGE : null,
+            'noDepartmentMessage' => $request->user()->reportDepartmentIds() === [] ? __(self::NO_DEPARTMENT_MESSAGE) : null,
         ]);
     }
 
@@ -91,14 +92,14 @@ class SurveyReportController extends Controller
 
         $scope = $this->scopeFor($request, $survey);
 
-        abort_unless($this->reports->summary($scope)['is_reportable'], Response::HTTP_FORBIDDEN, 'Not enough responses to protect respondent anonymity.');
+        abort_unless($this->reports->summary($scope)['is_reportable'], Response::HTTP_FORBIDDEN, __('Not enough responses to protect respondent anonymity.'));
 
         $params = Apps::tableParams($request, [], 'id');
         $comments = $this->reports->comments($scope, $filters, $params['per_page']);
 
         return Apps::tableResponse($comments, fn (SurveyAnswer $answer): array => [
-            'question' => $answer->question?->question,
-            'department' => $answer->department?->name ?? 'General',
+            'question' => $answer->question ? __($answer->question->question) : null,
+            'department' => $answer->department?->name ?? __('General'),
             'section' => $answer->section?->name,
             'color' => $answer->department?->color ?? 'gray',
             'comment' => $answer->comment,
@@ -115,7 +116,9 @@ class SurveyReportController extends Controller
         $scope = $this->scopeFor($request, $survey);
 
         if (! $this->reports->summary($scope)['is_reportable']) {
-            Alert::warning('Export unavailable', 'At least '.config('survey.min_group_size').' responses are required to protect respondent anonymity.');
+            Alert::warning(__('Export unavailable'), __('At least :count responses are required to protect respondent anonymity.', [
+                'count' => config('survey.min_group_size'),
+            ]));
 
             return redirect()->route('survey-report.show', array_filter([
                 'survey' => $survey,
@@ -151,7 +154,7 @@ class SurveyReportController extends Controller
         $departmentIds = $request->user()->reportDepartmentIds();
         $companyId = $request->integer('company_id') ?: null;
 
-        abort_if($departmentIds === [], Response::HTTP_FORBIDDEN, self::NO_DEPARTMENT_MESSAGE);
+        abort_if($departmentIds === [], Response::HTTP_FORBIDDEN, __(self::NO_DEPARTMENT_MESSAGE));
 
         return new ReportScope($survey, $companyId === null ? null : [$companyId], $departmentIds);
     }

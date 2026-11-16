@@ -62,7 +62,9 @@ interface SurveyReportInterface
     public function sectionScores(ReportScope $scope): SupportCollection;
 
     /**
-     * Score distribution per question.
+     * Score distribution per question. The question text is translated (the
+     * English text of a standard question is its translation key; questions
+     * written by admins stay as typed) and "{section}" is shown as "[section]".
      *
      * @return SupportCollection<int, array<string, mixed>>
      */

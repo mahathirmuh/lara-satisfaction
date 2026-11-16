@@ -1,6 +1,6 @@
 @props([
     'icon' => 'mood-empty',
-    'title' => 'No data found',
+    'title' => __('No data found'),
     'subtitle' => null,
 ])
 

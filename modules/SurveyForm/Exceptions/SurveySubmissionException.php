@@ -14,7 +14,7 @@ class SurveySubmissionException extends RuntimeException
      */
     public static function notOpen(): self
     {
-        return new self('This survey is not open for responses.');
+        return new self(__('This survey is not open for responses.'));
     }
 
     /**
@@ -22,6 +22,6 @@ class SurveySubmissionException extends RuntimeException
      */
     public static function alreadySubmitted(): self
     {
-        return new self('You have already completed this survey.');
+        return new self(__('You have already completed this survey.'));
     }
 }

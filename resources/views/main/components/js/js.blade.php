@@ -6,6 +6,30 @@
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
     const timezone = @json(config('app.timezone'));
 
+    /**
+     * Locale for Intl date/number formatting: the interface language
+     * (window.appLocale), while English keeps the given English variant.
+     */
+    function intlLocale(englishLocale = 'en-GB') {
+        const locale = window.appLocale || 'en';
+
+        return locale.startsWith('en') ? englishLocale : locale;
+    }
+
+    /**
+     * Fill the :placeholders of a translated text in one pass, longest name
+     * first like Laravel (so ":total" is never read as ":to").
+     */
+    function replacePlaceholders(text, replacements = {}) {
+        const keys = Object.keys(replacements).sort((a, b) => b.length - a.length);
+
+        if (!keys.length) {
+            return String(text);
+        }
+
+        return String(text).replace(new RegExp(`:(${keys.join('|')})`, 'g'), (match, key) => String(replacements[key]));
+    }
+
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': csrf,
@@ -87,7 +111,7 @@
         columns = [],
         currentPage = 1,
         limit = 10,
-        emptyText = 'No data found',
+        emptyText = @json(__('No data found')),
         loading = false,
         meta = null,
         onPageChange = () => {},
@@ -142,14 +166,14 @@
         columns = [],
         currentPage = 1,
         limit = 10,
-        emptyText = 'No data found',
+        emptyText = @json(__('No data found')),
         loading = false,
     }) {
         const tbody = $(`${container} tbody`);
 
         if (loading) {
             tbody.html(`<tr><td colspan="${columns.length}" class="text-center text-muted py-4">
-                <span class="spinner-border spinner-border-sm me-2"></span>Loading...</td></tr>`);
+                <span class="spinner-border spinner-border-sm me-2"></span>${escapeHtml(@json(__('Loading...')))}</td></tr>`);
             return;
         }
 
@@ -198,6 +222,11 @@
         }
 
         const pageLink = (page) => `<a data-page="${page}" class="btn-pagination cursor-pointer text-decoration-none ${meta.current_page === page ? 'mdka-btn-blue-500 text-white' : ''}">${page}</a>`;
+        const showingText = replacePlaceholders(@json(__('Showing :from - :to of :total')), {
+            from: meta.from || 0,
+            to: meta.to || 0,
+            total: meta.total,
+        });
 
         let html = `<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="d-flex flex-row justify-content-start align-items-center gap-3">`;
@@ -230,8 +259,8 @@
 
         html += `</div>
             <div class="d-flex flex-row justify-content-end align-items-center gap-2">
-                <div class="mb-0 text-nowrap">Showing ${meta.from || 0} - ${meta.to || 0} of ${meta.total}</div>
-                <div class="mb-0 text-nowrap">Show :</div>
+                <div class="mb-0 text-nowrap">${escapeHtml(showingText)}</div>
+                <div class="mb-0 text-nowrap">${escapeHtml(@json(__('Show :')))}</div>
                 <select class="form-select pagination-limit">
                     ${[10, 25, 50, 100].map((size) => `<option value="${size}" ${limit == size ? 'selected' : ''}>${size}</option>`).join('')}
                 </select>
@@ -268,7 +297,7 @@
         resetButton = null,
         filters = () => ({}),
         onReset = () => {},
-        emptyText = 'No data found',
+        emptyText = @json(__('No data found')),
     }) {
         const state = {
             currentPage: 1,
@@ -330,7 +359,7 @@
                     renderTableWithFeatures({
                         container,
                         columns,
-                        emptyText: ajaxErrorMessages(xhr)[0] || 'Error loading data. Please try again.',
+                        emptyText: ajaxErrorMessages(xhr)[0] || @json(__('Error loading data. Please try again.')),
                     });
                 },
             });
@@ -393,7 +422,7 @@
         url,
         method = 'POST',
         data = {},
-        confirmText = 'Data will be saved!',
+        confirmText = @json(__('Data will be saved!')),
         onSuccess = () => {},
     }) {
         return confirmSave(confirmText).then((result) => {
@@ -418,7 +447,7 @@
                 processData: !isFormData,
                 contentType: isFormData ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
                 success: (response) => {
-                    toastSuccess(response.message || 'Data has been saved.');
+                    toastSuccess(response.message || @json(__('Data has been saved.')));
                     onSuccess(response);
                 },
                 error: showAjaxError,
@@ -450,9 +479,9 @@
         modal.find('.image-preview-body').removeClass('is-zoomed');
         modal.find('#imagePreviewImage').attr({
             src: url,
-            alt: title || 'Image',
+            alt: title || @json(__('Image')),
         });
-        modal.find('#imagePreviewTitle').text(title || 'Image');
+        modal.find('#imagePreviewTitle').text(title || @json(__('Image')));
         modal.find('#imagePreviewCaption').text(caption || '');
         modal.modal('show');
     }
@@ -476,7 +505,7 @@
      */
     function deleteRecord({
         url,
-        confirmText = 'This action cannot be undone!',
+        confirmText = @json(__('This action cannot be undone!')),
         onSuccess = () => {},
     }) {
         return confirmDelete(confirmText).then((result) => {
@@ -492,7 +521,7 @@
                 },
                 dataType: 'json',
                 success: (response) => {
-                    toastSuccess(response.message || 'Data has been deleted.');
+                    toastSuccess(response.message || @json(__('Data has been deleted.')));
                     onSuccess(response);
                 },
                 error: showAjaxError,
@@ -551,7 +580,7 @@
     /**
      * Show plain-text error messages (escaped) in a SweetAlert dialog.
      */
-    const showError = (errors, title = 'Sorry!') => {
+    const showError = (errors, title = @json(__('Sorry!'))) => {
         const messages = Array.isArray(errors) ? errors : [errors];
 
         Swal.fire({
@@ -575,7 +604,7 @@
             return [json.message];
         }
 
-        return ['Something went wrong. Please try again.'];
+        return [@json(__('Something went wrong. Please try again.'))];
     }
 
     const showAjaxError = (xhr) => showError(ajaxErrorMessages(xhr));
@@ -583,14 +612,14 @@
     /**
      * Ask for confirmation before a save action (Merdeka style).
      */
-    function confirmSave(text = 'Data will be saved!') {
+    function confirmSave(text = @json(__('Data will be saved!'))) {
         return Swal.fire({
-            title: 'Is the data correct?',
+            title: escapeHtml(@json(__('Is the data correct?'))),
             text: text,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<i class="ti ti-check"></i> Save',
-            cancelButtonText: '<i class="ti ti-x"></i> Cancel',
+            confirmButtonText: '<i class="ti ti-check"></i> ' + escapeHtml(@json(__('Save'))),
+            cancelButtonText: '<i class="ti ti-x"></i> ' + escapeHtml(@json(__('Cancel'))),
             reverseButtons: true,
         });
     }
@@ -598,14 +627,14 @@
     /**
      * Ask for confirmation before a destructive action.
      */
-    function confirmDelete(text = 'This action cannot be undone!') {
+    function confirmDelete(text = @json(__('This action cannot be undone!'))) {
         return Swal.fire({
-            title: 'Are you sure?',
+            title: escapeHtml(@json(__('Are you sure?'))),
             text: text,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: '<i class="ti ti-check"></i> Yes, delete it!',
-            cancelButtonText: '<i class="ti ti-x"></i> Cancel',
+            confirmButtonText: '<i class="ti ti-check"></i> ' + escapeHtml(@js(__('Yes, delete it!'))),
+            cancelButtonText: '<i class="ti ti-x"></i> ' + escapeHtml(@json(__('Cancel'))),
             reverseButtons: true,
         });
     }
@@ -630,7 +659,7 @@
             return '';
         }
 
-        return new Date(dateTimeString).toLocaleDateString('en-GB', {
+        return new Date(dateTimeString).toLocaleDateString(intlLocale('en-GB'), {
             day: '2-digit',
             month: 'short',
             year: 'numeric',
@@ -643,7 +672,7 @@
             return '';
         }
 
-        return new Date(dateTimeString).toLocaleString('en-GB', {
+        return new Date(dateTimeString).toLocaleString(intlLocale('en-GB'), {
             day: '2-digit',
             month: 'short',
             year: 'numeric',

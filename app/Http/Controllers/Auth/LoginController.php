@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\Alert;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\SetLocale;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\CompanyAccounts;
 use App\Services\Auth\LdapAuthenticator;
@@ -37,7 +38,7 @@ class LoginController extends Controller
         $user = $request->user();
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
 
-        Alert::success('Welcome!', 'Signed in as '.$user->name.'.');
+        Alert::success(__('Welcome!'), __('Signed in as :name.', ['name' => $user->name]));
 
         return redirect()->intended($user->homeUrl());
     }
@@ -47,12 +48,17 @@ class LoginController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $locale = app()->getLocale();
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        Alert::success('Logout Success', 'Good Bye!');
+        // The sign-in page stays in the language the person was using.
+        $request->session()->put(SetLocale::SESSION_KEY, $locale);
+
+        Alert::success(__('Logout Success'), __('Good Bye!'));
 
         return redirect()->route('login');
     }

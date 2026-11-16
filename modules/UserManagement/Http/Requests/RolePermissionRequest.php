@@ -59,7 +59,7 @@ class RolePermissionRequest extends FormRequest
                 $role = $this->route('role');
 
                 if ($role instanceof Role && $role->isItAdmin() && JobTitles::parse($this->input('job_titles')) !== []) {
-                    $validator->errors()->add('job_titles', 'The IT Admin role is only given by hand, not by job title.');
+                    $validator->errors()->add('job_titles', __('The IT Admin role is only given by hand, not by job title.'));
                 }
             },
         ];
@@ -73,10 +73,10 @@ class RolePermissionRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'role name',
-            'home_page' => 'home page',
-            'job_titles' => 'job titles',
-            'department_scope' => 'survey results',
+            'name' => __('role name'),
+            'home_page' => __('home page'),
+            'job_titles' => __('job titles'),
+            'department_scope' => __('survey results'),
         ];
     }
 

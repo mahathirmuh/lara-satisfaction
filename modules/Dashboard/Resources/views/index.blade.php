@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Dashboard')
+@section('page-title', __('Dashboard'))
 
 @push('style')
     <link rel="stylesheet" href="{{ asset('assets/libs/apexcharts/apexcharts.css') }}?v=3.40.0" />
@@ -17,13 +17,13 @@
                             <i class="ti ti-message-heart fs-1"></i>
                         </span>
                         <div>
-                            <h2 class="mb-1">Welcome back, {{ auth()->user()->name }}!</h2>
+                            <h2 class="mb-1">{{ __('Welcome back, :name!', ['name' => auth()->user()->name]) }}</h2>
                             <div class="text-secondary">{{ config('merdeka.app_tagline') }} &middot;
-                                {{ now()->format('l, d F Y') }}</div>
+                                {{ now()->translatedFormat(__('l, d F Y')) }}</div>
                         </div>
                     </div>
                     @if ($canTakeSurveys)
-                        <x-global.btn-detail label="My Survey" color="blue" size="md" :href="route('survey-form.index')">
+                        <x-global.btn-detail :label="__('My Survey')" color="blue" size="md" :href="route('survey-form.index')">
                             <x-slot:icon><i class="ti ti-clipboard-check"></i></x-slot:icon>
                         </x-global.btn-detail>
                     @endif
@@ -34,7 +34,7 @@
         {{-- Open surveys --}}
         @if ($canTakeSurveys)
             <div class="col-12">
-                <h3 class="mb-0">Open Surveys</h3>
+                <h3 class="mb-0">{{ __('Open Surveys') }}</h3>
             </div>
             @forelse ($openSurveys as $survey)
                 <div class="col-md-6 col-xl-4">
@@ -43,8 +43,8 @@
             @empty
                 <div class="col-12">
                     <div class="card">
-                        <x-global.empty-state icon="clipboard-off" title="No survey is open right now"
-                            subtitle="You will be notified when the next operational audit opens." />
+                        <x-global.empty-state icon="clipboard-off" :title="__('No survey is open right now')"
+                            :subtitle="__('You will be notified when the next operational audit opens.')" />
                     </div>
                 </div>
             @endforelse
@@ -55,15 +55,15 @@
             <div class="col-12 mt-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div>
-                        <h3 class="mb-0">Survey Insights &middot; {{ $featuredSurvey->title }}</h3>
+                        <h3 class="mb-0">{{ __('Survey Insights') }} &middot; {{ $featuredSurvey->title }}</h3>
                         <div class="text-secondary small">
                             {{ $featuredSurvey->periodLabel() }}
                             @if ($previousSurvey)
-                                &middot; compared with {{ $previousSurvey->title }}
+                                &middot; {{ __('compared with :title', ['title' => $previousSurvey->title]) }}
                             @endif
                         </div>
                     </div>
-                    <x-global.btn-detail label="Full Report" color="blue" size="sm" outline="true"
+                    <x-global.btn-detail :label="__('Full Report')" color="blue" size="sm" outline="true"
                         :href="route('survey-report.show', $featuredSurvey)">
                         <x-slot:icon><i class="ti ti-report-analytics"></i></x-slot:icon>
                     </x-global.btn-detail>
@@ -71,8 +71,8 @@
             </div>
 
             <div class="col-sm-6 col-xl-3">
-                <x-global.summary-card title="Responses" :value="number_format($summary['responses'])" color="blue"
-                    :subtitle="number_format($summary['comments']) . ' written comments'">
+                <x-global.summary-card :title="__('Responses')" :value="number_format($summary['responses'])" color="blue"
+                    :subtitle="__(':count written comments', ['count' => number_format($summary['comments'])])">
                     <x-slot:icon><i class="ti ti-forms"></i></x-slot:icon>
                     <x-slot:trend>
                         <x-global.trend-indicator :base="$previousSummary['responses'] ?? null" :value="$summary['responses']" />
@@ -80,10 +80,10 @@
                 </x-global.summary-card>
             </div>
             <div class="col-sm-6 col-xl-3">
-                <x-global.summary-card title="Participation Rate"
+                <x-global.summary-card :title="__('Participation Rate')"
                     :value="$summary['participation_rate'] === null ? '—' : $summary['participation_rate'] . '%'"
                     color="purple"
-                    :subtitle="number_format($summary['participants']) . ' of ' . number_format($summary['eligible']) . ' employees'">
+                    :subtitle="__(':participants of :eligible employees', ['participants' => number_format($summary['participants']), 'eligible' => number_format($summary['eligible'])])">
                     <x-slot:icon><i class="ti ti-users-group"></i></x-slot:icon>
                     <x-slot:trend>
                         <x-global.trend-indicator :base="$previousSummary['participation_rate'] ?? null" :value="$summary['participation_rate']"
@@ -92,9 +92,9 @@
                 </x-global.summary-card>
             </div>
             <div class="col-sm-6 col-xl-3">
-                <x-global.summary-card title="Service Quality"
+                <x-global.summary-card :title="__('Service Quality')"
                     :value="$summary['average'] === null ? '—' : number_format($summary['average'], 2) . ' / 5'" color="green"
-                    :subtitle="number_format($summary['ratings']) . ' quality ratings'">
+                    :subtitle="__(':count quality ratings', ['count' => number_format($summary['ratings'])])">
                     <x-slot:icon><i class="ti ti-star"></i></x-slot:icon>
                     <x-slot:trend>
                         <x-global.trend-indicator :base="$previousSummary['average'] ?? null" :value="$summary['average']" />
@@ -103,7 +103,7 @@
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card title="CSAT" :value="$summary['csat'] === null ? '—' : $summary['csat'] . '%'"
-                    color="orange" :subtitle="'Share of quality ratings ≥ ' . config('survey.satisfied_threshold')">
+                    color="orange" :subtitle="__('Share of quality ratings ≥ :threshold', ['threshold' => config('survey.satisfied_threshold')])">
                     <x-slot:icon><i class="ti ti-mood-happy"></i></x-slot:icon>
                     <x-slot:trend>
                         <x-global.trend-indicator :base="$previousSummary['csat'] ?? null" :value="$summary['csat']"
@@ -116,7 +116,7 @@
                 <div class="col-lg-7">
                     <div class="card h-100">
                         <div class="card-header p-2 px-3">
-                            <h4 class="mb-0">Service Quality by Department</h4>
+                            <h4 class="mb-0">{{ __('Service Quality by Department') }}</h4>
                         </div>
                         <div class="card-body">
                             <div id="chartDepartmentScores"></div>
@@ -126,7 +126,7 @@
                 <div class="col-lg-5">
                     <div class="card h-100">
                         <div class="card-header p-2 px-3">
-                            <h4 class="mb-0">Department Ranking</h4>
+                            <h4 class="mb-0">{{ __('Department Ranking') }}</h4>
                         </div>
                         <div class="list-group list-group-flush">
                             @foreach ($departmentScores->sortByDesc('average')->values() as $row)
@@ -156,8 +156,8 @@
                         <div class="d-flex gap-2">
                             <i class="ti ti-shield-lock fs-2"></i>
                             <div>
-                                <strong>Results hidden to protect anonymity.</strong> Scores appear once at least
-                                {{ $summary['min_group_size'] }} responses are collected (currently {{ $summary['responses'] }}).
+                                <strong>{{ __('Results hidden to protect anonymity.') }}</strong>
+                                {{ __('Scores appear once at least :min responses are collected (currently :count).', ['min' => $summary['min_group_size'], 'count' => $summary['responses']]) }}
                             </div>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
             <div class="col-lg-{{ $latestComments->isNotEmpty() ? 7 : 12 }}">
                 <div class="card h-100">
                     <div class="card-header p-2 px-3">
-                        <h4 class="mb-0">Participation Trend</h4>
+                        <h4 class="mb-0">{{ __('Participation Trend') }}</h4>
                     </div>
                     <div class="card-body">
                         <div id="chartParticipation"></div>
@@ -178,14 +178,14 @@
                 <div class="col-lg-5">
                     <div class="card h-100">
                         <div class="card-header p-2 px-3">
-                            <h4 class="mb-0"><i class="ti ti-message-2 me-1"></i> Comment Highlights</h4>
+                            <h4 class="mb-0"><i class="ti ti-message-2 me-1"></i> {{ __('Comment Highlights') }}</h4>
                         </div>
                         <div class="list-group list-group-flush">
                             @foreach ($latestComments as $answer)
                                 <div class="list-group-item">
                                     <span
                                         class="badge mdka-bg-{{ $answer->department?->color ?? 'gray' }}-100 mdka-text-{{ $answer->department?->color ?? 'gray' }}-600 mb-1">
-                                        {{ $answer->department?->name ?? 'General' }}
+                                        {{ $answer->department?->name ?? __('General') }}
                                     </span>
                                     <div class="text-secondary small mb-1">{{ $answer->question?->question }}</div>
                                     <div style="white-space: pre-line">{{ \Illuminate\Support\Str::limit($answer->comment, 220) }}</div>
@@ -198,8 +198,8 @@
         @elseif ($canViewReports)
             <div class="col-12">
                 <div class="card">
-                    <x-global.empty-state icon="chart-bar-off" title="No survey results yet"
-                        subtitle="Create and publish a survey period to start collecting feedback." />
+                    <x-global.empty-state icon="chart-bar-off" :title="__('No survey results yet')"
+                        :subtitle="__('Create and publish a survey period to start collecting feedback.')" />
                 </div>
             </div>
         @endif

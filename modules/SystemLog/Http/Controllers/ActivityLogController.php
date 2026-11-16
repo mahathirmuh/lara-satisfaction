@@ -42,7 +42,7 @@ class ActivityLogController extends Controller
         return Apps::tableResponse($logs, fn (LogActivity $log): array => [
             'id' => $log->id,
             'created_at' => $log->created_at?->toIso8601String(),
-            'user' => $log->user?->name ?? 'Guest',
+            'user' => $log->user?->name ?? __('Guest'),
             'method' => $log->method,
             'route_name' => $log->route_name,
             'url' => $log->url,

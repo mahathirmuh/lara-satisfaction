@@ -122,11 +122,18 @@ class Survey extends Model
     }
 
     /**
-     * "Closes today", "Closes tomorrow" or "Closes in 5 days".
+     * "Closes today", "Closes tomorrow" or "Closes in 5 days", in the
+     * interface language.
      */
     public function deadlineLabel(): string
     {
-        return 'Closes '.static::deadlineText($this->daysLeft());
+        $daysLeft = $this->daysLeft();
+
+        return match (true) {
+            $daysLeft <= 0 => __('Closes today'),
+            $daysLeft === 1 => __('Closes tomorrow'),
+            default => __('Closes in :days days', ['days' => $daysLeft]),
+        };
     }
 
     /**
@@ -181,10 +188,11 @@ class Survey extends Model
     }
 
     /**
-     * Human readable period, e.g. "01 Nov 2026 - 30 Nov 2026".
+     * Human readable period in the interface language, e.g.
+     * "01 Nov 2026 - 30 Nov 2026" ("2026年11月1日 - 2026年11月30日" in Chinese).
      */
     public function periodLabel(): string
     {
-        return $this->start_date->format('d M Y').' - '.$this->end_date->format('d M Y');
+        return $this->start_date->translatedFormat(__('d M Y')).' - '.$this->end_date->translatedFormat(__('d M Y'));
     }
 }

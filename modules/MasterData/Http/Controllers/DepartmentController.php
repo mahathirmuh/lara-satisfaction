@@ -84,7 +84,7 @@ class DepartmentController extends Controller
         $department = $this->departments->create($request->departmentAttributes(), $request->file('image'));
 
         return response()->json([
-            'message' => 'Department created successfully.',
+            'message' => __('Department created successfully.'),
             'data' => ['id' => $department->id],
         ], Response::HTTP_CREATED);
     }
@@ -101,7 +101,7 @@ class DepartmentController extends Controller
             $request->boolean('remove_image'),
         );
 
-        return response()->json(['message' => 'Department updated successfully.']);
+        return response()->json(['message' => __('Department updated successfully.')]);
     }
 
     /**
@@ -111,12 +111,12 @@ class DepartmentController extends Controller
     {
         if ($department->questions()->exists()) {
             return response()->json([
-                'message' => 'This department is used by survey questions. Deactivate it instead of deleting it.',
+                'message' => __('This department is used by survey questions. Deactivate it instead of deleting it.'),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->departments->delete($department);
 
-        return response()->json(['message' => 'Department deleted successfully.']);
+        return response()->json(['message' => __('Department deleted successfully.')]);
     }
 }

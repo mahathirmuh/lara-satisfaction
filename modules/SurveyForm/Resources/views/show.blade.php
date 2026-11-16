@@ -114,8 +114,8 @@
                                             <i class="ti ti-alarm me-1"></i>{{ $survey->deadlineLabel() }}
                                         </span>
                                     @endif
-                                    <span><i class="ti ti-clock me-1"></i>&plusmn; {{ $survey->estimated_minutes }} minutes</span>
-                                    <span><i class="ti ti-shield-lock me-1"></i>Anonymous &amp; confidential</span>
+                                    <span><i class="ti ti-clock me-1"></i>&plusmn; {{ __(':minutes minutes', ['minutes' => $survey->estimated_minutes]) }}</span>
+                                    <span><i class="ti ti-shield-lock me-1"></i>{{ __('Anonymous & confidential') }}</span>
                                 </div>
                                 @if ($survey->description)
                                     <p class="text-secondary mt-2 mb-0">{{ $survey->description }}</p>
@@ -123,12 +123,12 @@
                             </div>
                             <div style="min-width: 240px">
                                 <div class="d-flex justify-content-between small mb-1">
-                                    <span class="fw-medium">Progress</span>
+                                    <span class="fw-medium">{{ __('Progress') }}</span>
                                     <span id="surveyProgressLabel" class="text-secondary"></span>
                                 </div>
                                 <div class="progress progress-sm">
                                     <div class="progress-bar bg-green" id="surveyProgress" style="width: 0%"
-                                        role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Survey progress">
+                                        role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Survey progress') }}">
                                     </div>
                                 </div>
                             </div>
@@ -142,13 +142,13 @@
                 <div class="card rounded-3">
                     <div class="card-body py-3">
                         <x-global.steps id="surveySteps">
-                            <x-global.steps.step :number="1" label="Personal Data" :active="true" class="cursor-pointer"
+                            <x-global.steps.step :number="1" :label="__('Personal Data')" :active="true" class="cursor-pointer"
                                 data-step-target="0" />
                             @foreach ($steps as $index => $step)
-                                <x-global.steps.step :number="$index + 2" :label="$step['department']?->name ?? 'General'"
+                                <x-global.steps.step :number="$index + 2" :label="$step['department']?->name ?? __('General')"
                                     class="cursor-pointer" data-step-target="{{ $index + 1 }}" />
                             @endforeach
-                            <x-global.steps.step :number="$steps->count() + 2" label="Review & Submit"
+                            <x-global.steps.step :number="$steps->count() + 2" :label="__('Review & Submit')"
                                 class="cursor-pointer" data-step-target="{{ $steps->count() + 1 }}" />
                         </x-global.steps>
                     </div>
@@ -156,31 +156,30 @@
             </div>
 
             {{-- Personal data (read from the employee account) --}}
-            <div class="col-12 survey-step" data-step="0" data-title="Personal Data">
+            <div class="col-12 survey-step" data-step="0" data-title="{{ __('Personal Data') }}">
                 <div class="card rounded-3">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-id-badge-2 me-2"></i>Personal Data</h3>
+                        <h3 class="card-title"><i class="ti ti-id-badge-2 me-2"></i>{{ __('Personal Data') }}</h3>
                     </div>
                     <div class="card-body">
                         <p class="text-secondary">
-                            Please check that the details below are yours before you start. They come from your employee
-                            account; contact the administrator if something is wrong.
+                            {{ __('Please check that the details below are yours before you start. They come from your employee account; contact the administrator if something is wrong.') }}
                         </p>
                         <div class="datagrid">
                             <div class="datagrid-item">
-                                <div class="datagrid-title">Name</div>
+                                <div class="datagrid-title">{{ __('Name') }}</div>
                                 <div class="datagrid-content">{{ $respondent->name }}</div>
                             </div>
                             <div class="datagrid-item">
-                                <div class="datagrid-title">Employee ID</div>
+                                <div class="datagrid-title">{{ __('Employee ID') }}</div>
                                 <div class="datagrid-content">{{ $respondent->employee_id ?: '—' }}</div>
                             </div>
                             <div class="datagrid-item">
-                                <div class="datagrid-title">Email</div>
+                                <div class="datagrid-title">{{ __('Email') }}</div>
                                 <div class="datagrid-content">{{ $respondent->email }}</div>
                             </div>
                             <div class="datagrid-item">
-                                <div class="datagrid-title">Company</div>
+                                <div class="datagrid-title">{{ __('Company') }}</div>
                                 <div class="datagrid-content">{{ $respondent->company?->name ?? '—' }}</div>
                             </div>
                         </div>
@@ -188,10 +187,8 @@
                             <div class="d-flex gap-2">
                                 <i class="ti ti-shield-lock fs-2"></i>
                                 <div>
-                                    <strong>Your evaluation is anonymous.</strong> Your account is only used to make sure
-                                    everyone answers once. Your answers are stored separately without your name; only your
-                                    company is kept so results can be compared between companies. A draft you save is
-                                    encrypted, visible only to you and deleted as soon as you submit.
+                                    <strong>{{ __('Your evaluation is anonymous.') }}</strong>
+                                    {{ __('Your account is only used to make sure everyone answers once. Your answers are stored separately without your name; only your company is kept so results can be compared between companies. A draft you save is encrypted, visible only to you and deleted as soon as you submit.') }}
                                 </div>
                             </div>
                         </div>
@@ -205,7 +202,7 @@
                 @php($color = $department?->color ?? 'gray')
                 @php($sections = $step['sections'])
                 <div class="col-12 survey-step" data-step="{{ $index + 1 }}"
-                    data-title="{{ $department?->name ?? 'General' }}" hidden>
+                    data-title="{{ $department?->name ?? __('General') }}" hidden>
                     <div class="card rounded-3 overflow-hidden">
                         @if ($department?->imageUrl())
                             <img src="{{ $department->imageUrl() }}" alt="{{ $department->name }}" class="department-banner">
@@ -217,9 +214,9 @@
                                     <i class="ti ti-{{ $department?->icon ?: 'message-circle' }}"></i>
                                 </span>
                                 <div>
-                                    <h3 class="card-title mb-0">{{ $department?->name ?? 'General' }}</h3>
+                                    <h3 class="card-title mb-0">{{ $department?->name ?? __('General') }}</h3>
                                     <div class="text-secondary small">
-                                        {{ $department ? $department->sectionsLabel($sections) : 'Overall experience across departments' }}
+                                        {{ $department ? $department->sectionsLabel($sections) : __('Overall experience across departments') }}
                                     </div>
                                 </div>
                             </div>
@@ -233,7 +230,7 @@
                                 <div class="section-choice mb-4">
                                     <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2">
                                         <label class="form-label required mb-0" for="sectionChoice{{ $department->id }}">
-                                            Select Section to Evaluate
+                                            {{ __('Select Section to Evaluate') }}
                                         </label>
                                         <span class="badge bg-blue-lt section-progress"></span>
                                     </div>
@@ -243,27 +240,26 @@
                                         @endforeach
                                     </select>
                                     <small class="form-hint">
-                                        Evaluate every section of {{ $department->name }} before continuing; completed
-                                        sections are marked with &#10003;.
+                                        {{ __('Evaluate every section of :department before continuing; completed sections are marked with ✓.', ['department' => $department->name]) }}
                                     </small>
                                 </div>
 
                                 @foreach ($sections as $section)
                                     <div class="section-panel" data-section-id="{{ $section->id }}"
                                         data-section-name="{{ $section->name }}" @unless ($loop->first) hidden @endunless>
-                                        <h3 class="section-heading">{{ $section->name }} Overview</h3>
+                                        <h3 class="section-heading">{{ __(':name Overview', ['name' => $section->name]) }}</h3>
                                         @if ($section->teamPhotoUrl() || $section->workSummaryUrl())
                                             <div class="row g-3 mb-3">
                                                 @foreach ([
-                                                    ['url' => $section->teamPhotoUrl(), 'title' => $section->name . ' Team Picture', 'caption' => $section->team_caption],
-                                                    ['url' => $section->workSummaryUrl(), 'title' => $section->name . ' Work Summary', 'caption' => $section->work_summary_caption],
+                                                    ['url' => $section->teamPhotoUrl(), 'title' => __(':name Team Picture', ['name' => $section->name]), 'caption' => $section->team_caption],
+                                                    ['url' => $section->workSummaryUrl(), 'title' => __(':name Work Summary', ['name' => $section->name]), 'caption' => $section->work_summary_caption],
                                                 ] as $picture)
                                                     @if ($picture['url'])
                                                         <div class="col-md-6">
                                                             <div class="card h-100">
                                                                 <div class="card-body">
                                                                     <a href="{{ $picture['url'] }}" target="_blank" rel="noopener"
-                                                                        class="overview-image mb-3" title="Click to enlarge" data-image-preview
+                                                                        class="overview-image mb-3" title="{{ __('Click to enlarge') }}" data-image-preview
                                                                         data-title="{{ $picture['title'] }}" data-caption="{{ $picture['caption'] }}">
                                                                         <img src="{{ $picture['url'] }}" alt="{{ $picture['title'] }}"
                                                                             loading="lazy">
@@ -281,12 +277,12 @@
                                         @endif
                                         @if ($section->description)
                                             <div class="role-overview rounded-3 p-3 p-md-4 mb-4">
-                                                <h4 class="section-heading mb-2">Role Overview</h4>
+                                                <h4 class="section-heading mb-2">{{ __('Role Overview') }}</h4>
                                                 <p class="mb-0" style="white-space: pre-line">{{ $section->description }}</p>
                                             </div>
                                         @endif
 
-                                        <h3 class="section-heading">{{ $section->name }} Evaluation</h3>
+                                        <h3 class="section-heading">{{ __(':name Evaluation', ['name' => $section->name]) }}</h3>
                                         @foreach ($step['questions']->filter(fn ($question) => $question->appliesTo($section->id))->values() as $questionIndex => $question)
                                             @include('SurveyForm::partials.question', [
                                                 'number' => $questionIndex + 1,
@@ -298,7 +294,7 @@
                                     </div>
                                 @endforeach
                             @else
-                                <h3 class="section-heading">{{ $department ? $department->name . ' Evaluation' : 'General Questions' }}</h3>
+                                <h3 class="section-heading">{{ $department ? __(':name Evaluation', ['name' => $department->name]) : __('General Questions') }}</h3>
                                 @foreach ($step['questions']->values() as $questionIndex => $question)
                                     @include('SurveyForm::partials.question', [
                                         'number' => $questionIndex + 1,
@@ -314,24 +310,23 @@
             @endforeach
 
             {{-- Review --}}
-            <div class="col-12 survey-step" data-step="{{ $steps->count() + 1 }}" data-title="Review" hidden>
+            <div class="col-12 survey-step" data-step="{{ $steps->count() + 1 }}" data-title="{{ __('Review') }}" hidden>
                 <div class="card rounded-3">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-checklist me-2"></i>Review &amp; Submit</h3>
+                        <h3 class="card-title"><i class="ti ti-checklist me-2"></i>{{ __('Review & Submit') }}</h3>
                     </div>
                     <div class="card-body">
                         <p class="text-secondary">
-                            Check that every department is complete. You can go back to any step to change your answers
-                            before submitting.
+                            {{ __('Check that every department is complete. You can go back to any step to change your answers before submitting.') }}
                         </p>
                         <div class="table-responsive border rounded mb-3">
                             <table class="table table-vcenter mb-0" id="reviewTable">
                                 <thead>
                                     <tr class="mdka-bg-gray-50">
-                                        <th class="text-capitalize fs-5 py-3">Department</th>
-                                        <th class="text-capitalize fs-5 py-3 text-center">Sections Evaluated</th>
-                                        <th class="text-capitalize fs-5 py-3 text-center">Answered</th>
-                                        <th class="text-capitalize fs-5 py-3 text-center">Status</th>
+                                        <th class="text-capitalize fs-5 py-3">{{ __('Department') }}</th>
+                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Sections Evaluated') }}</th>
+                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Answered') }}</th>
+                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Status') }}</th>
                                         <th class="py-3"></th>
                                     </tr>
                                 </thead>
@@ -342,9 +337,9 @@
                             <div class="d-flex gap-2">
                                 <i class="ti ti-shield-lock fs-2"></i>
                                 <div>
-                                    <strong>Your privacy is protected.</strong> We only record <em>that</em> you completed
-                                    the survey. Your answers are stored separately without your name and can no longer be
-                                    changed after submission.
+                                    <strong>{{ __('Your privacy is protected.') }}</strong>
+                                    {!! __('We only record <em>that</em> you completed the survey.') !!}
+                                    {{ __('Your answers are stored separately without your name and can no longer be changed after submission.') }}
                                 </div>
                             </div>
                         </div>
@@ -356,24 +351,24 @@
             <div class="col-12 survey-nav">
                 <div class="card rounded-3 shadow-sm">
                     <div class="card-body d-flex justify-content-between align-items-center gap-2 p-2">
-                        <x-global.btn-detail label="Previous" color="blue" size="sm" outline="true" id="btnPrevious">
+                        <x-global.btn-detail :label="__('Previous')" color="blue" size="sm" outline="true" id="btnPrevious">
                             <x-slot:icon><i class="ti ti-chevron-left"></i></x-slot:icon>
                         </x-global.btn-detail>
                         <div class="small text-secondary d-none d-md-block" id="draftStatus">
                             @if ($draft)
-                                <i class="ti ti-cloud-check me-1"></i>Draft saved {{ $draft['saved_label'] }}
+                                <i class="ti ti-cloud-check me-1"></i>{{ __('Draft saved :time', ['time' => $draft['saved_label']]) }}
                             @else
-                                <i class="ti ti-device-floppy me-1"></i>Not saved yet. Use Save as Draft to continue later.
+                                <i class="ti ti-device-floppy me-1"></i>{{ __('Not saved yet. Use Save as Draft to continue later.') }}
                             @endif
                         </div>
                         <div class="d-flex gap-2">
-                            <x-global.btn-detail label="Save as Draft" color="azure" size="sm" outline="true" id="btnSaveDraft">
+                            <x-global.btn-detail :label="__('Save as Draft')" color="azure" size="sm" outline="true" id="btnSaveDraft">
                                 <x-slot:icon><i class="ti ti-device-floppy"></i></x-slot:icon>
                             </x-global.btn-detail>
-                            <x-global.btn-detail label="Next" color="blue" size="sm" id="btnNext" iconPosition="right">
+                            <x-global.btn-detail :label="__('Next')" color="blue" size="sm" id="btnNext" iconPosition="right">
                                 <x-slot:icon><i class="ti ti-chevron-right"></i></x-slot:icon>
                             </x-global.btn-detail>
-                            <x-global.btn-detail label="Submit Survey" color="green" size="sm" id="btnSubmit"
+                            <x-global.btn-detail :label="__('Submit Survey')" color="green" size="sm" id="btnSubmit"
                                 class="d-none" iconPosition="right">
                                 <x-slot:icon><i class="ti ti-send"></i></x-slot:icon>
                             </x-global.btn-detail>
@@ -396,6 +391,23 @@
             const urlDraft = @json(route('survey-form.draft', $survey));
             const serverDraft = @json($draft);
             const hasServerErrors = @json($errors->any());
+            const translations = {
+                sectionsEvaluated: @json(__(':completed of :total sections evaluated')),
+                answeredCount: @json(__(':answered of :total answered')),
+                requiredMissing: @json(__(':count required missing')),
+                complete: @json(__('Complete')),
+                edit: @json(__('Edit')),
+                incompleteEvaluation: @json(__('Incomplete evaluation')),
+                evaluateSection: @json(__('Please evaluate :section before continuing.')),
+                answerRequired: @json(__('Please answer every required question (*) before continuing.')),
+                answerRequiredOfSection: @json(__('Please answer every required question (*) of :section before continuing.')),
+                sectionEvaluated: @json(__(':section evaluated. Please continue with :next.')),
+                draftSaved: @json(__('Draft saved :time')),
+                submitTitle: @json(__('Submit your responses?')),
+                submitText: @json(__('Your answers are stored anonymously and cannot be changed after submission.')),
+                submit: @json(__('Submit')),
+                reviewAgain: @json(__('Review again')),
+            };
             let currentStep = 0;
 
             const stepPanel = (index) => steps.filter(`[data-step="${index}"]`);
@@ -452,7 +464,8 @@
                     option.text(`${isDone ? '✓ ' : ''}${$(this).data('section-name')}`);
                 });
 
-                stepPanel(index).find('.section-progress').text(`${completed} of ${panels.length} sections evaluated`)
+                stepPanel(index).find('.section-progress')
+                    .text(translations.sectionsEvaluated.replace(':completed', completed).replace(':total', panels.length))
                     .toggleClass('bg-blue-lt', completed < panels.length)
                     .toggleClass('bg-green-lt', completed === panels.length);
             }
@@ -463,7 +476,7 @@
                 const percentage = questions.length ? Math.round(answered / questions.length * 100) : 0;
 
                 $('#surveyProgress').css('width', percentage + '%').attr('aria-valuenow', percentage);
-                $('#surveyProgressLabel').text(`${answered} of ${questions.length} answered`);
+                $('#surveyProgressLabel').text(translations.answeredCount.replace(':answered', answered).replace(':total', questions.length));
             }
 
             function renderReview() {
@@ -484,9 +497,9 @@
                         <td class="text-center">${panels.length ? `${sectionsDone} / ${panels.length}` : '&mdash;'}</td>
                         <td class="text-center">${answered} / ${questions.length}</td>
                         <td class="text-center">${missing
-                            ? `<span class="status status-red"><span class="status-dot"></span>${missing} required missing</span>`
-                            : '<span class="status status-green"><span class="status-dot"></span>Complete</span>'}</td>
-                        <td class="text-end"><a href="#" class="review-edit" data-step="${index}">Edit</a></td>
+                            ? `<span class="status status-red"><span class="status-dot"></span>${escapeHtml(translations.requiredMissing.replace(':count', missing))}</span>`
+                            : `<span class="status status-green"><span class="status-dot"></span>${escapeHtml(translations.complete)}</span>`}</td>
+                        <td class="text-end"><a href="#" class="review-edit" data-step="${index}">${escapeHtml(translations.edit)}</a></td>
                     </tr>`;
                 }
 
@@ -552,7 +565,7 @@
                 missing.addClass('has-error');
 
                 if (missing.length) {
-                    showError([message], 'Incomplete evaluation');
+                    showError([message], translations.incompleteEvaluation);
 
                     return false;
                 }
@@ -570,12 +583,12 @@
 
                 if (section.length) {
                     showSection(index, section.data('section-id'));
-                    validateScope(section, `Please evaluate ${section.data('section-name')} before continuing.`);
+                    validateScope(section, translations.evaluateSection.replace(':section', section.data('section-name')));
 
                     return;
                 }
 
-                validateScope(stepPanel(index), 'Please answer every required question (*) before continuing.');
+                validateScope(stepPanel(index), translations.answerRequired);
             }
 
             function firstInvalidStep(upTo) {
@@ -678,7 +691,7 @@
                     })
                     .done((response) => {
                         toastSuccess(response.message);
-                        $('#draftStatus').html(`<i class="ti ti-cloud-check me-1"></i>Draft saved ${escapeHtml(response.saved_label)}`);
+                        $('#draftStatus').html(`<i class="ti ti-cloud-check me-1"></i>${escapeHtml(translations.draftSaved.replace(':time', response.saved_label))}`);
                         saveLocalDraft(response.saved_at);
                     })
                     .fail(showAjaxError)
@@ -690,7 +703,7 @@
                 const current = visibleSectionOf(currentStep);
 
                 if (current.length) {
-                    if (!validateScope(current, `Please answer every required question (*) of ${current.data('section-name')} before continuing.`)) {
+                    if (!validateScope(current, translations.answerRequiredOfSection.replace(':section', current.data('section-name')))) {
                         return;
                     }
 
@@ -698,7 +711,9 @@
 
                     if (next.length) {
                         showSection(currentStep, next.data('section-id'));
-                        toastSuccess(`${current.data('section-name')} evaluated. Please continue with ${next.data('section-name')}.`);
+                        toastSuccess(translations.sectionEvaluated
+                            .replace(':section', current.data('section-name'))
+                            .replace(':next', next.data('section-name')));
 
                         // Keep the section list visible below the sticky top bar.
                         const choice = stepPanel(currentStep).find('.section-choice')[0];
@@ -709,7 +724,7 @@
 
                         return;
                     }
-                } else if (!validateScope(stepPanel(currentStep), 'Please answer every required question (*) before continuing.')) {
+                } else if (!validateScope(stepPanel(currentStep), translations.answerRequired)) {
                     return;
                 }
 
@@ -767,12 +782,12 @@
                 }
 
                 Swal.fire({
-                    title: 'Submit your responses?',
-                    text: 'Your answers are stored anonymously and cannot be changed after submission.',
+                    title: translations.submitTitle,
+                    text: translations.submitText,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: '<i class="ti ti-send"></i> Submit',
-                    cancelButtonText: '<i class="ti ti-x"></i> Review again',
+                    confirmButtonText: `<i class="ti ti-send"></i> ${escapeHtml(translations.submit)}`,
+                    cancelButtonText: `<i class="ti ti-x"></i> ${escapeHtml(translations.reviewAgain)}`,
                     reverseButtons: true,
                 }).then((result) => {
                     if (result.isConfirmed) {

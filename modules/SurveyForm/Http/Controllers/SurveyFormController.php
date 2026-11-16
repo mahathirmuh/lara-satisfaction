@@ -57,7 +57,7 @@ class SurveyFormController extends Controller
                 'values' => $draft->formValues(),
                 'step' => (int) ($draft->payload['step'] ?? 0),
                 'saved_at' => $draft->updated_at->toIso8601String(),
-                'saved_label' => $draft->updated_at->format('d M Y H:i'),
+                'saved_label' => $draft->updated_at->translatedFormat(__('d M Y H:i')),
             ],
             'commentMaxLength' => (int) config('survey.comment_max_length', 500),
             'feedbackGuidelines' => config('survey.feedback_guidelines', []),
@@ -71,7 +71,7 @@ class SurveyFormController extends Controller
     {
         if (! $survey->isOpen() || $this->surveyForm->hasParticipated($survey, $request->user())) {
             return response()->json([
-                'message' => 'This survey is closed or already submitted, so the draft cannot be saved.',
+                'message' => __('This survey is closed or already submitted, so the draft cannot be saved.'),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -82,9 +82,9 @@ class SurveyFormController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Draft saved. You can continue later from My Survey, also on another device.',
+            'message' => __('Draft saved. You can continue later from My Survey, also on another device.'),
             'saved_at' => $draft->updated_at->toIso8601String(),
-            'saved_label' => $draft->updated_at->format('d M Y H:i'),
+            'saved_label' => $draft->updated_at->translatedFormat(__('d M Y H:i')),
         ]);
     }
 
@@ -105,7 +105,7 @@ class SurveyFormController extends Controller
                 $request->validated('evaluations') ?? [],
             );
         } catch (SurveySubmissionException $exception) {
-            Alert::warning('Submission not saved', $exception->getMessage());
+            Alert::warning(__('Submission not saved'), $exception->getMessage());
 
             return redirect()->route('survey-form.index');
         }
@@ -133,13 +133,13 @@ class SurveyFormController extends Controller
     protected function redirectIfUnavailable(Request $request, Survey $survey): ?RedirectResponse
     {
         if (! $survey->isOpen() || $survey->questions()->doesntExist()) {
-            Alert::warning('Survey unavailable', 'This survey is not open for responses.');
+            Alert::warning(__('Survey unavailable'), __('This survey is not open for responses.'));
 
             return redirect()->route('survey-form.index');
         }
 
         if ($this->surveyForm->hasParticipated($survey, $request->user())) {
-            Alert::info('Already submitted', 'You have already completed this survey. Thank you!');
+            Alert::info(__('Already submitted'), __('You have already completed this survey. Thank you!'));
 
             return redirect()->route('survey-form.index');
         }

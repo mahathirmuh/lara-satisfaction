@@ -64,7 +64,7 @@ class QuestionController extends Controller
         return Apps::tableResponse($questions, fn (SurveyQuestion $question): array => [
             'id' => $question->id,
             'survey' => $question->survey?->title,
-            'department' => $question->department?->name ?? 'General',
+            'department' => $question->department?->name ?? __('General'),
             'department_color' => $question->department?->color ?? 'gray',
             'section' => $question->section?->name,
             'type' => $question->type->value,
@@ -98,7 +98,7 @@ class QuestionController extends Controller
         $question = $this->questions->create($request->validated());
 
         return response()->json([
-            'message' => 'Question created successfully.',
+            'message' => __('Question created successfully.'),
             'data' => ['id' => $question->id],
         ], Response::HTTP_CREATED);
     }
@@ -110,7 +110,7 @@ class QuestionController extends Controller
     {
         $this->questions->update($question, $request->validated());
 
-        return response()->json(['message' => 'Question updated successfully.']);
+        return response()->json(['message' => __('Question updated successfully.')]);
     }
 
     /**
@@ -120,12 +120,12 @@ class QuestionController extends Controller
     {
         if ($question->survey()->whereHas('responses')->exists()) {
             return response()->json([
-                'message' => 'This survey already has responses, so its questions can no longer be changed.',
+                'message' => __('This survey already has responses, so its questions can no longer be changed.'),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->questions->delete($question);
 
-        return response()->json(['message' => 'Question deleted successfully.']);
+        return response()->json(['message' => __('Question deleted successfully.')]);
     }
 }

@@ -5,7 +5,6 @@ namespace Modules\SurveyReport\Services;
 use App\Models\Organization\Company;
 use App\Models\Organization\DepartmentSection;
 use App\Models\Survey\SurveyAnswer;
-use App\Models\Survey\SurveyQuestion;
 use App\Models\Survey\SurveyResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,21 +28,22 @@ class SurveyResultExporter
     {
         $columns = $this->columns($scope);
         $companyLabels = $this->companyLabels($scope);
+        $otherCompanyLabel = __('Other');
 
         fwrite($stream, "\xEF\xBB\xBF");
-        $this->writeRow($stream, ['No', 'Company', ...array_column($columns, 'header')]);
+        $this->writeRow($stream, [__('No'), __('Company'), ...array_column($columns, 'header')]);
 
         $number = 0;
 
         $this->responseQuery($scope)
             ->with('answers')
             ->orderBy('id')
-            ->chunk(200, function (Collection $responses) use ($stream, $columns, $companyLabels, &$number): void {
+            ->chunk(200, function (Collection $responses) use ($stream, $columns, $companyLabels, $otherCompanyLabel, &$number): void {
                 foreach ($responses as $response) {
                     $answers = $response->answers->keyBy(
                         fn (SurveyAnswer $answer): string => $answer->survey_question_id.':'.($answer->department_section_id ?? 0)
                     );
-                    $row = [++$number, $companyLabels[(int) ($response->company_id ?? 0)] ?? 'Other'];
+                    $row = [++$number, $companyLabels[(int) ($response->company_id ?? 0)] ?? $otherCompanyLabel];
 
                     foreach ($columns as $column) {
                         $answer = $answers->get($column['key']);
@@ -59,7 +59,9 @@ class SurveyResultExporter
      * One column per question and evaluated section, in display order, e.g.
      * "Q1 [External Affairs / Asset Protection] Please rate … of Asset Protection …".
      * A question answered per section gets a column for every section with answers.
-     * Only the departments of the scope are exported (a manager's own).
+     * Only the departments of the scope are exported (a manager's own). Headers
+     * are in the user's language: a standard question's English text is its
+     * translation key, questions written by admins stay as typed.
      *
      * @return array<int, array{key: string, header: string, is_rating: bool}>
      */
@@ -95,12 +97,11 @@ class SurveyResultExporter
             foreach ($targets as $section) {
                 $columns[] = [
                     'key' => $question->id.':'.($section?->id ?? 0),
-                    'header' => sprintf(
-                        'Q%d [%s] %s',
-                        $index + 1,
-                        collect([$question->department?->name ?? 'General', $section?->name])->filter()->implode(' / '),
-                        $section ? str_replace(SurveyQuestion::SECTION_PLACEHOLDER, $section->name, $question->question) : $question->displayText(),
-                    ),
+                    'header' => __('Q:number [:context] :question', [
+                        'number' => $index + 1,
+                        'context' => collect([$question->department?->name ?? __('General'), $section?->name])->filter()->implode(' / '),
+                        'question' => $question->textFor($section?->name ?? __('[section]')),
+                    ]),
                     'is_rating' => $question->isRating(),
                 ];
             }
@@ -130,6 +131,8 @@ class SurveyResultExporter
     protected function companyLabels(ReportScope $scope): array
     {
         $minGroupSize = max(1, (int) config('survey.min_group_size', 5));
+        $unassignedLabel = __('Unassigned company');
+        $otherLabel = __('Other');
 
         $counts = SurveyResponse::query()
             ->toBase()
@@ -146,8 +149,8 @@ class SurveyResultExporter
             $companyId = (int) ($count->company_id ?? 0);
 
             $labels[$companyId] = (int) $count->total >= $minGroupSize
-                ? ($names[$companyId] ?? 'Unassigned company')
-                : 'Other';
+                ? ($names[$companyId] ?? $unassignedLabel)
+                : $otherLabel;
         }
 
         return $labels;

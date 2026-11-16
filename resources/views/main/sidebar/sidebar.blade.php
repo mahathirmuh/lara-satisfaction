@@ -2,7 +2,7 @@
 <aside class="navbar navbar-vertical navbar-expand-lg mdka-bg-gray-50" data-bs-theme="light">
     <div class="container-fluid overflow-x-hidden">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
-            aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+            aria-controls="sidebar-menu" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
         </button>
         <h1 class="navbar-brand navbar-brand-autodark">
@@ -20,17 +20,18 @@
         </h1>
 
         <div class="navbar-nav flex-row d-lg-none align-items-center gap-3">
+            <x-global.locale-switcher />
             @include('main.navbar.notifications')
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
-                    aria-label="Open user menu">
+                    aria-label="{{ __('Open user menu') }}">
                     <span class="avatar avatar-sm rounded-circle"
                         style="background-image: url({{ asset('assets/img/avatar/1.png') }})"></span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <span class="dropdown-header">{{ Auth::user()->name }}</span>
                     <a href="{{ route('logout') }}" class="dropdown-item text-danger" onclick="logout(event)">
-                        <i class="ti ti-logout me-2"></i> Logout
+                        <i class="ti ti-logout me-2"></i> {{ __('Logout') }}
                     </a>
                 </div>
             </div>

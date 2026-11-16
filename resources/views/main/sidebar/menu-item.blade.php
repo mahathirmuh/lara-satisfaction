@@ -26,7 +26,7 @@
                         </span>
                     @endif
                     <span class="nav-link-title sidebar-control">
-                        {{ $menu->title }}
+                        {{ __($menu->title) }}
                     </span>
                 </a>
                 <div class="dropdown-menu {{ $isDescendantActive ? 'show' : '' }}">
@@ -40,7 +40,7 @@
                 </div>
             </li>
         @else
-            <span class="dropdown-header sidebar-control">{{ $menu->title }}</span>
+            <span class="dropdown-header sidebar-control">{{ __($menu->title) }}</span>
             @foreach ($children as $child)
                 @include('main.sidebar.menu-item', ['menu' => $child, 'allowedMenuIds' => $allowedMenuIds])
             @endforeach
@@ -55,7 +55,7 @@
                         </span>
                     @endif
                     <span class="nav-link-title sidebar-control">
-                        {{ $menu->title }}
+                        {{ __($menu->title) }}
                     </span>
                 </a>
             </li>
@@ -67,7 +67,7 @@
                     </span>
                 @endif
                 <span class="nav-link-title sidebar-control">
-                    {{ $menu->title }}
+                    {{ __($menu->title) }}
                 </span>
             </a>
         @endif

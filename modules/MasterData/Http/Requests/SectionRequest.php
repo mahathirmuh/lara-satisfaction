@@ -82,7 +82,7 @@ class SectionRequest extends FormRequest
                 }
 
                 if ($this->integer('department_id') !== $section->department_id && $section->isUsedInSurveys()) {
-                    $validator->errors()->add('department_id', 'This section is used in surveys and cannot be moved to another department.');
+                    $validator->errors()->add('department_id', __('This section is used in surveys and cannot be moved to another department.'));
                 }
             },
         ];
@@ -136,11 +136,11 @@ class SectionRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'description' => 'role overview',
-            'team_photo' => 'team picture',
-            'team_caption' => 'team picture caption',
-            'work_summary' => 'work summary',
-            'work_summary_caption' => 'work summary caption',
+            'description' => __('role overview'),
+            'team_photo' => __('team picture'),
+            'team_caption' => __('team picture caption'),
+            'work_summary' => __('work summary'),
+            'work_summary_caption' => __('work summary caption'),
         ];
     }
 
@@ -152,7 +152,7 @@ class SectionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'This department already has a section with this name.',
+            'name.unique' => __('This department already has a section with this name.'),
         ];
     }
 }

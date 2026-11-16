@@ -145,6 +145,14 @@ resources/views/     main/ (layout, sidebar, navbar), auth/, components/global/ 
   `survey_answers` store *what* was answered without user, timestamps or ordered ids (random
   UUIDv4). Survey payloads are never written to the activity log and results are hidden for
   groups below the threshold.
+- **Languages**: the interface is in English, Bahasa Indonesia and Simplified Chinese
+  (`config('app.available_locales')`, switcher `x-global.locale-switcher`). The choice is kept in
+  the session and on the user (`users.locale`, also used for their notifications); otherwise the
+  browser language is used. English texts are the keys of `lang/id.json` and `lang/zh_CN.json`:
+  wrap every new text in `__('…')` and add it to both files (`TranslationFilesTest` checks they
+  match). Date formats are keys too (`translatedFormat(__('d M Y'))`). Data typed by admins
+  (department/section names and descriptions, survey titles, custom questions) is shown as typed;
+  the standard questions and the default landing page texts are translated.
 
 ## New module
 

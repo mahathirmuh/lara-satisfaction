@@ -40,37 +40,37 @@
     aria-hidden="true">
     <div class="modal-dialog modal-lg modal-fullscreen-lg-down modal-dialog-centered">
         <div class="modal-content p-3">
-            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
             <div class="modal-body p-1">
-                <h3 class="modal-title mb-3">Role</h3>
+                <h3 class="modal-title mb-3">{{ __('Role') }}</h3>
                 <form id="roleForm" novalidate>
                     <div class="row g-2">
                         <div class="col-12">
                             <div class="row">
-                                <label for="roleName" class="col-md-3 col-form-label required">Role</label>
+                                <label for="roleName" class="col-md-3 col-form-label required">{{ __('Role') }}</label>
                                 <div class="col-md-6">
                                     <input type="text" id="roleName" class="form-control" maxlength="255"
-                                        placeholder="Role.." required>
+                                        placeholder="{{ __('Role..') }}" required>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="homePageSelect" class="col-md-3 col-form-label">Home Page</label>
+                                <label for="homePageSelect" class="col-md-3 col-form-label">{{ __('Home Page') }}</label>
                                 <div class="col-md-6">
                                     <select id="homePageSelect" class="form-select">
-                                        <option value="">Dashboard (default)</option>
+                                        <option value="">{{ __('Dashboard (default)') }}</option>
                                         @foreach ($menus as $root)
                                             @if ($root->children->isNotEmpty())
-                                                <optgroup label="{{ $root->title }}">
+                                                <optgroup label="{{ __($root->title) }}">
                                                     @foreach ($root->children as $child)
                                                         @if ($child->route)
-                                                            <option value="{{ $child->id }}">{{ $child->title }}</option>
+                                                            <option value="{{ $child->id }}">{{ __($child->title) }}</option>
                                                         @endif
                                                     @endforeach
                                                 </optgroup>
                                             @elseif ($root->route)
-                                                <option value="{{ $root->id }}">{{ $root->title }}</option>
+                                                <option value="{{ $root->id }}">{{ __($root->title) }}</option>
                                             @endif
                                         @endforeach
                                     </select>
@@ -79,48 +79,44 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="roleDepartmentScopeSelect" class="col-md-3 col-form-label required">Survey Results</label>
+                                <label for="roleDepartmentScopeSelect" class="col-md-3 col-form-label required">{{ __('Survey Results') }}</label>
                                 <div class="col-md-6">
                                     <select id="roleDepartmentScopeSelect" class="form-select" required>
                                         @foreach ($departmentScopes as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                    <small class="form-hint">With "managed" departments, the report only shows the
-                                        departments whose manager job titles (Master Data &gt; Departments) match the
-                                        user's job title.</small>
+                                    <small class="form-hint">{{ __('With "managed" departments, the report only shows the departments whose manager job titles (Master Data > Departments) match the user\'s job title.') }}</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="roleJobTitles" class="col-md-3 col-form-label">Job Titles</label>
+                                <label for="roleJobTitles" class="col-md-3 col-form-label">{{ __('Job Titles') }}</label>
                                 <div class="col-md-9">
                                     <textarea id="roleJobTitles" class="form-control font-monospace" rows="3" maxlength="2000"
                                         placeholder="*Manager&#10;Deputy GM&#10;!Assistant of *"></textarea>
-                                    <small class="form-hint" id="roleJobTitlesHint">One job title per line: people whose
-                                        directory job title matches get this role at every sign-in. <code>*</code> stands
-                                        for any text, <code>!</code> excludes. Leave empty to give the role by hand.</small>
+                                    <small class="form-hint" id="roleJobTitlesHint">{!! __('One job title per line: people whose directory job title matches get this role at every sign-in. :any stands for any text, :not excludes. Leave empty to give the role by hand.', ['any' => '<code>*</code>', 'not' => '<code>!</code>']) !!}</small>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-12">
                             <div class="row">
-                                <label class="col-md-3 col-form-label">Menu &amp; Permission</label>
+                                <label class="col-md-3 col-form-label">{{ __('Menu & Permission') }}</label>
                                 <div class="col-md-9">
                                     <div class="table-responsive border rounded menu-permission-wrapper">
                                         <table class="table table-sm table-vcenter mb-0" id="menuPermissionTable">
                                             <thead>
                                                 <tr class="mdka-bg-gray-50">
-                                                    <th class="py-2">Menu</th>
+                                                    <th class="py-2">{{ __('Menu') }}</th>
                                                     <th class="py-2 text-center" width="80">
-                                                        Access<br>
+                                                        {{ __('Access') }}<br>
                                                         <input class="form-check-input" type="checkbox" id="selectAllMenus"
-                                                            data-bs-toggle="tooltip" title="Grant full access to every menu" />
+                                                            data-bs-toggle="tooltip" title="{{ __('Grant full access to every menu') }}" />
                                                     </th>
                                                     @foreach ($permissions as $permission)
-                                                        <th class="py-2 text-center" width="80">{{ $permission->name }}</th>
+                                                        <th class="py-2 text-center" width="80">{{ __($permission->name) }}</th>
                                                     @endforeach
                                                 </tr>
                                             </thead>
@@ -134,12 +130,12 @@
                                                         ])>
                                                             <td>
                                                                 @if ($isChild)
-                                                                    <span class="menu-child-label">{{ $item->title }}</span>
+                                                                    <span class="menu-child-label">{{ __($item->title) }}</span>
                                                                 @elseif ($menu->children->isNotEmpty())
                                                                     <i class="ti ti-folder me-1 text-muted"></i>
-                                                                    <span class="fw-semibold">{{ $item->title }}</span>
+                                                                    <span class="fw-semibold">{{ __($item->title) }}</span>
                                                                 @else
-                                                                    {{ $item->title }}
+                                                                    {{ __($item->title) }}
                                                                 @endif
                                                             </td>
                                                             <td class="text-center">
@@ -147,7 +143,7 @@
                                                                     type="checkbox" value="{{ $item->id }}"
                                                                     data-menu-id="{{ $item->id }}"
                                                                     data-parent-id="{{ $item->parent_id }}"
-                                                                    aria-label="Access {{ $item->title }}" />
+                                                                    aria-label="{{ __('Access :menu', ['menu' => __($item->title)]) }}" />
                                                             </td>
                                                             @foreach ($permissions as $permission)
                                                                 <td class="text-center">
@@ -155,7 +151,7 @@
                                                                         <input class="form-check-input menu-permission-checkbox"
                                                                             type="checkbox" value="{{ $permission->id }}"
                                                                             data-menu-id="{{ $item->id }}"
-                                                                            aria-label="{{ $permission->name }} {{ $item->title }}" />
+                                                                            aria-label="{{ __(':permission :menu', ['permission' => __($permission->name), 'menu' => __($item->title)]) }}" />
                                                                     @endif
                                                                 </td>
                                                             @endforeach
@@ -165,14 +161,13 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <small class="form-hint">Access opens the menu page; Read loads its data; Create,
-                                        Update and Delete allow the matching actions.</small>
+                                    <small class="form-hint">{{ __('Access opens the menu page; Read loads its data; Create, Update and Delete allow the matching actions.') }}</small>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-12 mt-3 d-flex justify-content-end gap-2">
-                            <x-global.btn-detail label="Save" color="blue" size="sm" type="submit">
+                            <x-global.btn-detail :label="__('Save')" color="blue" size="sm" type="submit">
                                 <x-slot:icon><i class="ti ti-device-floppy"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -251,7 +246,7 @@
                 id
             };
             resetRoleForm();
-            modal.find('.modal-title').text(mode === 'edit' ? 'Edit Role' : 'Add New Role');
+            modal.find('.modal-title').text(mode === 'edit' ? @json(__('Edit Role')) : @json(__('Add New Role')));
 
             if (mode !== 'edit') {
                 modal.modal('show');
@@ -310,7 +305,7 @@
             const errors = [];
 
             if (!data.name) {
-                errors.push('Role name cannot be empty.');
+                errors.push(@json(__('Role name cannot be empty.')));
             }
 
             if (errors.length) {
@@ -325,7 +320,7 @@
                 url: isEdit ? urlRoleUpdate.replace(':id', roleModalState.id) : urlRoleStore,
                 method: isEdit ? 'PUT' : 'POST',
                 data,
-                confirmText: `This action will ${isEdit ? 'update' : 'create'} the role!`,
+                confirmText: isEdit ? @json(__('This action will update the role!')) : @json(__('This action will create the role!')),
                 onSuccess: () => {
                     $('#roleModal').modal('hide');
                     roleTable.reload();

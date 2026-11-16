@@ -43,7 +43,7 @@
                 height: Math.max(220, rows.length * 56),
             },
             series: [{
-                name: 'Average score',
+                name: @json(__('Average score')),
                 data: rows.map((row) => row.average ?? 0),
             }],
             xaxis: {
@@ -86,7 +86,11 @@
                 y: {
                     formatter: (value, {
                         dataPointIndex
-                    }) => `${Number(value).toFixed(2)} / 5 (CSAT ${rows[dataPointIndex].csat ?? 0}%, ${rows[dataPointIndex].ratings} ratings)`,
+                    }) => replacePlaceholders(@js(__(':average / 5 (CSAT :csat%, :ratings ratings)')), {
+                        average: Number(value).toFixed(2),
+                        csat: rows[dataPointIndex].csat ?? 0,
+                        ratings: rows[dataPointIndex].ratings,
+                    }),
                 },
             },
         }).render();
@@ -128,7 +132,7 @@
                             show: true,
                             total: {
                                 show: true,
-                                label: 'Ratings',
+                                label: @json(__('Ratings')),
                             },
                         },
                     },
@@ -148,7 +152,7 @@
         }
 
         if (!trend.labels.length) {
-            element.innerHTML = '<div class="text-center text-muted py-5">The survey period has not started yet.</div>';
+            element.innerHTML = `<div class="text-center text-muted py-5">${escapeHtml(@json(__('The survey period has not started yet.')))}</div>`;
 
             return;
         }
@@ -160,12 +164,12 @@
                 height: 280,
             },
             series: [{
-                    name: 'Completed per day',
+                    name: @json(__('Completed per day')),
                     type: 'column',
                     data: trend.daily
                 },
                 {
-                    name: 'Cumulative',
+                    name: @json(__('Cumulative')),
                     type: 'area',
                     data: trend.cumulative
                 },
@@ -184,7 +188,7 @@
             },
             yaxis: [{
                     title: {
-                        text: 'Per day'
+                        text: @json(__('Per day'))
                     },
                     min: 0,
                     forceNiceScale: true,
@@ -195,7 +199,7 @@
                 {
                     opposite: true,
                     title: {
-                        text: 'Cumulative'
+                        text: @json(__('Cumulative'))
                     },
                     min: 0,
                     forceNiceScale: true,

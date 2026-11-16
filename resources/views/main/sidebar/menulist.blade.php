@@ -3,7 +3,7 @@
     @if ($menu->isVisibleFor($allowedMenuIds))
         @if ($menu->section && $menu->section !== $lastSection)
             <li class="nav-item menu-section-header">
-                <span class="subheader text-wrap sidebar-control">{{ $menu->section }}</span>
+                <span class="subheader text-wrap sidebar-control">{{ __($menu->section) }}</span>
             </li>
             @php($lastSection = $menu->section)
         @endif

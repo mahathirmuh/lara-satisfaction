@@ -9,7 +9,8 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Reminds an employee who has not completed an open survey that its end
- * date is near (in-app notification and email).
+ * date is near (in-app notification and email). The texts are written in the
+ * recipient's language (User::preferredLocale()).
  */
 class SurveyDeadlineReminder extends Notification
 {
@@ -35,15 +36,23 @@ class SurveyDeadlineReminder extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $deadline = Survey::deadlineText($this->daysLeft);
+        $replace = $this->replacements();
 
         return (new MailMessage)
-            ->subject("Reminder: {$this->survey->title} closes {$deadline}")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("The {$this->survey->title} closes {$deadline} ({$this->survey->end_date->format('d M Y')}) and you have not completed it yet.")
-            ->line("It takes about {$this->survey->estimated_minutes} minutes and your answers are anonymous. If you saved a draft, you can continue where you left off.")
-            ->action('Complete the Survey', route('survey-form.show', $this->survey))
-            ->line('Thank you for helping us improve our support services.');
+            ->subject($this->forDeadline(
+                __('Reminder: :survey closes today', $replace),
+                __('Reminder: :survey closes tomorrow', $replace),
+                __('Reminder: :survey closes in :days days', $replace),
+            ))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line($this->forDeadline(
+                __('The :survey closes today (:date) and you have not completed it yet.', $replace),
+                __('The :survey closes tomorrow (:date) and you have not completed it yet.', $replace),
+                __('The :survey closes in :days days (:date) and you have not completed it yet.', $replace),
+            ))
+            ->line(__('It takes about :minutes minutes and your answers are anonymous. If you saved a draft, you can continue where you left off.', ['minutes' => $this->survey->estimated_minutes]))
+            ->action(__('Complete the Survey'), route('survey-form.show', $this->survey))
+            ->line(__('Thank you for helping us improve our support services.'));
     }
 
     /**
@@ -53,13 +62,45 @@ class SurveyDeadlineReminder extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $replace = $this->replacements();
+
         return [
-            'title' => 'Survey deadline approaching',
-            'message' => "{$this->survey->title} closes ".Survey::deadlineText($this->daysLeft)
-                ." ({$this->survey->end_date->format('d M Y')}). Please complete it before the deadline.",
+            'title' => __('Survey deadline approaching'),
+            'message' => $this->forDeadline(
+                __(':survey closes today (:date). Please complete it before the deadline.', $replace),
+                __(':survey closes tomorrow (:date). Please complete it before the deadline.', $replace),
+                __(':survey closes in :days days (:date). Please complete it before the deadline.', $replace),
+            ),
             'url' => route('survey-form.show', $this->survey, false),
             'survey_id' => $this->survey->id,
             'days_left' => $this->daysLeft,
         ];
+    }
+
+    /**
+     * Values of the :survey, :days and :date placeholders.
+     *
+     * @return array{survey: string, days: int, date: string}
+     */
+    protected function replacements(): array
+    {
+        return [
+            'survey' => $this->survey->title,
+            'days' => $this->daysLeft,
+            'date' => $this->survey->end_date->translatedFormat(__('d M Y')),
+        ];
+    }
+
+    /**
+     * The text matching the time left: the survey closes today (or already
+     * ended), tomorrow or in a number of days (see Survey::deadlineText()).
+     */
+    protected function forDeadline(string $today, string $tomorrow, string $inDays): string
+    {
+        return match (true) {
+            $this->daysLeft <= 0 => $today,
+            $this->daysLeft === 1 => $tomorrow,
+            default => $inDays,
+        };
     }
 }

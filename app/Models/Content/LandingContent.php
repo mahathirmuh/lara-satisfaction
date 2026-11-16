@@ -84,14 +84,16 @@ class LandingContent extends Model
 
     /**
      * Hero introduction with the open survey title in bold; every part is escaped.
+     * The default introduction is translated (its translations keep "{survey}"),
+     * a saved one has no translation key and is shown as typed.
      */
     public function heroIntroHtml(?Survey $survey): HtmlString
     {
         if ($survey === null) {
-            return new HtmlString(e('There is no survey open at the moment. Sign in to view your survey history or check back when the next operational audit opens.'));
+            return new HtmlString(e(__('There is no survey open at the moment. Sign in to view your survey history or check back when the next operational audit opens.')));
         }
 
-        $parts = explode(self::SURVEY_PLACEHOLDER, (string) $this->hero_intro);
+        $parts = explode(self::SURVEY_PLACEHOLDER, (string) __((string) $this->hero_intro));
         $title = '<strong class="text-reset">'.e($survey->title).'</strong>';
 
         return new HtmlString(implode($title, array_map(fn (string $part): string => e($part), $parts)));

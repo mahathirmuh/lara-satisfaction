@@ -2,19 +2,19 @@
     aria-hidden="true">
     <div class="modal-dialog modal-lg modal-fullscreen-lg-down modal-dialog-centered">
         <div class="modal-content p-3">
-            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
             <div class="modal-body p-0">
-                <h3 class="modal-title mb-3">Question</h3>
+                <h3 class="modal-title mb-3">{{ __('Question') }}</h3>
                 <form id="questionForm" novalidate>
                     <div class="row g-2">
                         <div class="col-12">
                             <div class="row">
-                                <label for="questionSurvey" class="col-md-3 col-form-label required">Survey Period</label>
+                                <label for="questionSurvey" class="col-md-3 col-form-label required">{{ __('Survey Period') }}</label>
                                 <div class="col-md-9">
                                     <select id="questionSurvey" class="form-select" required>
                                         @foreach ($surveys as $survey)
                                             <option value="{{ $survey->id }}" @disabled($survey->responses_count > 0)>
-                                                {{ $survey->title }}{{ $survey->responses_count > 0 ? ' (locked)' : '' }}
+                                                {{ $survey->responses_count > 0 ? __(':title (locked)', ['title' => $survey->title]) : $survey->title }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -23,13 +23,13 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="questionDepartment" class="col-md-3 col-form-label">Department</label>
+                                <label for="questionDepartment" class="col-md-3 col-form-label">{{ __('Department') }}</label>
                                 <div class="col-md-9">
                                     <select id="questionDepartment" class="form-select">
-                                        <option value="">General (not tied to a department)</option>
+                                        <option value="">{{ __('General (not tied to a department)') }}</option>
                                         @foreach ($departments as $department)
                                             <option value="{{ $department->id }}">
-                                                {{ $department->name }}{{ $department->is_active ? '' : ' (inactive)' }}
+                                                {{ $department->is_active ? $department->name : __(':name (inactive)', ['name' => $department->name]) }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -38,24 +38,23 @@
                         </div>
                         <div class="col-12" id="questionSectionRow">
                             <div class="row">
-                                <label for="questionSection" class="col-md-3 col-form-label">Section</label>
+                                <label for="questionSection" class="col-md-3 col-form-label">{{ __('Section') }}</label>
                                 <div class="col-md-9">
                                     <select id="questionSection" class="form-select">
-                                        <option value="">Any section (asked about the section the employee chooses)</option>
+                                        <option value="">{{ __('Any section (asked about the section the employee chooses)') }}</option>
                                         @foreach ($sections as $section)
                                             <option value="{{ $section->id }}" data-department="{{ $section->department_id }}">
-                                                Only {{ $section->name }}{{ $section->is_active ? '' : ' (inactive)' }}
+                                                {{ $section->is_active ? __('Only :name', ['name' => $section->name]) : __('Only :name (inactive)', ['name' => $section->name]) }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    <small class="form-hint">Employees choose one section per department to evaluate. Pick a
-                                        section only for a question that is specific to it.</small>
+                                    <small class="form-hint">{{ __('Employees choose one section per department to evaluate. Pick a section only for a question that is specific to it.') }}</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label class="col-md-3 col-form-label required">Type</label>
+                                <label class="col-md-3 col-form-label required">{{ __('Type') }}</label>
                                 <div class="col-md-9">
                                     <div class="form-selectgroup">
                                         @foreach ($types as $value => $label)
@@ -73,42 +72,41 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="questionText" class="col-md-3 col-form-label required">Question</label>
+                                <label for="questionText" class="col-md-3 col-form-label required">{{ __('Question') }}</label>
                                 <div class="col-md-9">
                                     <textarea id="questionText" class="form-control" rows="3" maxlength="1000"
-                                        placeholder="How would you rate the service quality of {section} towards your department?"
+                                        placeholder="{{ __('How would you rate the service quality of {section} towards your department?') }}"
                                         required></textarea>
-                                    <small class="form-hint">Write <code>{section}</code> where the name of the evaluated
-                                        section should appear.</small>
+                                    <small class="form-hint">{!! str_replace(':code', '<code>{section}</code>', e(__('Write :code where the name of the evaluated section should appear.'))) !!}</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="questionHelp" class="col-md-3 col-form-label">Help Text</label>
+                                <label for="questionHelp" class="col-md-3 col-form-label">{{ __('Help Text') }}</label>
                                 <div class="col-md-9">
                                     <input type="text" id="questionHelp" class="form-control" maxlength="500"
-                                        placeholder="Optional hint shown below the question">
+                                        placeholder="{{ __('Optional hint shown below the question') }}">
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label for="questionOrder" class="col-md-3 col-form-label">Display Order</label>
+                                <label for="questionOrder" class="col-md-3 col-form-label">{{ __('Display Order') }}</label>
                                 <div class="col-md-3">
                                     <input type="number" id="questionOrder" class="form-control" min="0" max="65535"
-                                        placeholder="Auto">
+                                        placeholder="{{ __('Auto') }}">
                                 </div>
                                 <div class="col-md-6 d-flex align-items-center">
                                     <label class="form-check form-switch mb-0">
                                         <input class="form-check-input" type="checkbox" id="questionRequired" checked>
-                                        <span class="form-check-label">Answer required</span>
+                                        <span class="form-check-label">{{ __('Answer required') }}</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 mt-3 d-flex justify-content-end gap-2">
-                            <x-global.btn-detail label="Save" color="blue" size="sm" type="submit">
+                            <x-global.btn-detail :label="__('Save')" color="blue" size="sm" type="submit">
                                 <x-slot:icon><i class="ti ti-device-floppy"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -154,7 +152,7 @@
                 id
             };
             form[0].reset();
-            modal.find('.modal-title').text(mode === 'edit' ? 'Edit Question' : 'Add New Question');
+            modal.find('.modal-title').text(mode === 'edit' ? @json(__('Edit Question')) : @json(__('Add New Question')));
 
             if (mode !== 'edit') {
                 const selectedSurvey = $('#surveyFilter').val();
@@ -206,7 +204,7 @@
             };
 
             if (!data.survey_id || !data.question) {
-                showError(['Survey period and question text are required.']);
+                showError([@json(__('Survey period and question text are required.'))]);
 
                 return;
             }
@@ -217,7 +215,7 @@
                 url: isEdit ? urlQuestionUpdate.replace(':id', questionModalState.id) : urlQuestionStore,
                 method: isEdit ? 'PUT' : 'POST',
                 data,
-                confirmText: `This action will ${isEdit ? 'update' : 'create'} the question!`,
+                confirmText: isEdit ? @json(__('This action will update the question!')) : @json(__('This action will create the question!')),
                 onSuccess: () => {
                     $('#questionModal').modal('hide');
                     questionTable.reload();

@@ -64,7 +64,7 @@ class SurveyRepository implements SurveyInterface
         return DB::transaction(function () use ($survey, $creator): Survey {
             $copy = $survey->replicate(['created_by']);
             $copy->fill([
-                'title' => Str::limit($survey->title.' (Copy)', 255, ''),
+                'title' => Str::limit(__(':title (Copy)', ['title' => $survey->title]), 255, ''),
                 'status' => SurveyStatus::Draft,
                 'created_by' => $creator->getKey(),
             ]);

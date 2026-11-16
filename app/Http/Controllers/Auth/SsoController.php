@@ -95,7 +95,7 @@ class SsoController extends Controller
             $socialUser = Socialite::driver(self::DRIVERS[$provider])->user();
         } catch (Throwable $exception) {
             report($exception);
-            Alert::error('Sign in failed', 'We could not verify your '.Str::headline($provider).' account. Please try again.');
+            Alert::error(__('Sign in failed'), __('We could not verify your :provider account. Please try again.', ['provider' => Str::headline($provider)]));
 
             return redirect()->route('login');
         }
@@ -103,7 +103,7 @@ class SsoController extends Controller
         $email = $this->emailOf($socialUser);
 
         if ($email === null) {
-            Alert::warning('Sign in failed', 'Your '.Str::headline($provider).' account did not share an email address.');
+            Alert::warning(__('Sign in failed'), __('Your :provider account did not share an email address.', ['provider' => Str::headline($provider)]));
 
             return redirect()->route('login');
         }
@@ -111,7 +111,7 @@ class SsoController extends Controller
         $domain = Str::after($email, '@');
 
         if (in_array($domain, config('merdeka.sso.blocked_domains', []), true)) {
-            Alert::warning('Public email is not allowed', "Please sign in with your company account. Email used: {$email}");
+            Alert::warning(__('Public email is not allowed'), __('Please sign in with your company account. Email used: :email', ['email' => $email]));
 
             return redirect()->route('login');
         }
@@ -119,7 +119,7 @@ class SsoController extends Controller
         $user = $this->accounts->resolve($email, $socialUser->getName());
 
         if ($user === null) {
-            Alert::warning('Account not registered', "The account {$email} is not registered in this application. Please contact HR or the IT Helpdesk.");
+            Alert::warning(__('Account not registered'), __('The account :email is not registered in this application. Please contact HR or the IT Helpdesk.', ['email' => $email]));
 
             return redirect()->route('login');
         }
@@ -131,7 +131,7 @@ class SsoController extends Controller
         $this->accounts->applyEmployeeId($user, $this->rawProfileValue($socialUser, 'employeeId'));
 
         if (! $user->is_active) {
-            Alert::warning('Account inactive', 'Your account has been deactivated. Please contact the IT Helpdesk.');
+            Alert::warning(__('Account inactive'), __('Your account has been deactivated. Please contact the IT Helpdesk.'));
 
             return redirect()->route('login');
         }
@@ -141,7 +141,7 @@ class SsoController extends Controller
 
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
 
-        Alert::success('Welcome!', 'Signed in as '.$user->name.'.');
+        Alert::success(__('Welcome!'), __('Signed in as :name.', ['name' => $user->name]));
 
         return redirect()->intended($user->homeUrl());
     }
@@ -157,8 +157,8 @@ class SsoController extends Controller
         }
 
         Alert::warning(
-            Str::headline($provider).' sign-in is not active yet',
-            'Single sign-on with '.Str::headline($provider).' will be available soon. Please sign in with your network account (username and password) for now.',
+            __(':provider sign-in is not active yet', ['provider' => Str::headline($provider)]),
+            __('Single sign-on with :provider will be available soon. Please sign in with your network account (username and password) for now.', ['provider' => Str::headline($provider)]),
         );
 
         return redirect()->route('login');

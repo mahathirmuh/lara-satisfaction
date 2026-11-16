@@ -9,14 +9,14 @@ enum SurveyStatus: string
     case Closed = 'closed';
 
     /**
-     * Human readable label.
+     * Human readable label, in the interface language.
      */
     public function label(): string
     {
         return match ($this) {
-            self::Draft => 'Draft',
-            self::Active => 'Active',
-            self::Closed => 'Closed',
+            self::Draft => __('Draft'),
+            self::Active => __('Active'),
+            self::Closed => __('Closed'),
         };
     }
 

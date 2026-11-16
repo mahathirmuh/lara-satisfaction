@@ -71,10 +71,10 @@ class UserRegisteredRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'company_id' => 'company',
-            'role_id' => 'role',
-            'role_id.*' => 'role',
-            'employee_id' => 'employee ID',
+            'company_id' => __('company'),
+            'role_id' => __('role'),
+            'role_id.*' => __('role'),
+            'employee_id' => __('employee ID'),
         ];
     }
 
@@ -86,8 +86,8 @@ class UserRegisteredRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'role_id.*.not_in' => 'Only an IT admin can assign the IT Admin role.',
-            'employee_id.regex' => 'The employee ID may only contain letters, numbers, dots, dashes and underscores.',
+            'role_id.*.not_in' => __('Only an IT admin can assign the IT Admin role.'),
+            'employee_id.regex' => __('The employee ID may only contain letters, numbers, dots, dashes and underscores.'),
         ];
     }
 }

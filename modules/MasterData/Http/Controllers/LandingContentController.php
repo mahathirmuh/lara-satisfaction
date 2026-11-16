@@ -45,7 +45,7 @@ class LandingContentController extends Controller
             $request->user(),
         );
 
-        Alert::success('Landing page updated', 'The public landing page now shows the new content.');
+        Alert::success(__('Landing page updated'), __('The public landing page now shows the new content.'));
 
         return redirect()->route('master-data.landing-content.index');
     }

@@ -77,8 +77,8 @@ class DepartmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'code.regex' => 'The code may only contain letters, numbers, dashes and underscores.',
-            'icon.regex' => 'The icon must be a Tabler icon name, e.g. "leaf" or "users".',
+            'code.regex' => __('The code may only contain letters, numbers, dashes and underscores.'),
+            'icon.regex' => __('The icon must be a Tabler icon name, e.g. "leaf" or "users".'),
         ];
     }
 }

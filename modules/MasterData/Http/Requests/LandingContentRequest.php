@@ -58,15 +58,15 @@ class LandingContentRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'hero_title' => 'headline',
-            'hero_intro' => 'introduction',
-            'hero_image' => 'hero image',
-            'hero_image_alt' => 'image description',
-            'feedback_title' => 'feedback title',
-            'feedback_body' => 'feedback text',
-            'feedback_note' => 'feedback note',
-            'closing_title' => 'closing title',
-            'closing_note' => 'closing note',
+            'hero_title' => __('headline'),
+            'hero_intro' => __('introduction'),
+            'hero_image' => __('hero image'),
+            'hero_image_alt' => __('image description'),
+            'feedback_title' => __('feedback title'),
+            'feedback_body' => __('feedback text'),
+            'feedback_note' => __('feedback note'),
+            'closing_title' => __('closing title'),
+            'closing_note' => __('closing note'),
         ];
     }
 

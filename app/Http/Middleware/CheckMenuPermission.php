@@ -43,12 +43,12 @@ class CheckMenuPermission
         $routeName = $request->route()?->getName();
         $menuId = $routeName !== null ? Menu::idForRoute($routeName) : null;
 
-        abort_if($menuId === null, Response::HTTP_FORBIDDEN, 'This page is not registered in the menu configuration.');
+        abort_if($menuId === null, Response::HTTP_FORBIDDEN, __('This page is not registered in the menu configuration.'));
 
         abort_unless(
             $user->guardRole($menuId),
             Response::HTTP_FORBIDDEN,
-            'You do not have access to this menu.'
+            __('You do not have access to this menu.')
         );
 
         $permission = static::requiredPermission($routeName, $request->method());
@@ -57,7 +57,7 @@ class CheckMenuPermission
             abort_unless(
                 $user->hasMenuPermission($menuId, $permission),
                 Response::HTTP_FORBIDDEN,
-                'You are not allowed to perform this action.'
+                __('You are not allowed to perform this action.')
             );
         }
 

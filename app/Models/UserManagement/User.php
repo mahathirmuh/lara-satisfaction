@@ -9,6 +9,7 @@ use App\Models\Organization\Company;
 use App\Models\Organization\Department;
 use App\Models\Survey\SurveyParticipation;
 use Database\Factories\UserManagement\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -33,7 +34,7 @@ use Illuminate\Support\Str;
  */
 #[Fillable(['name', 'email', 'employee_id', 'job_title', 'company_id', 'password', 'is_active', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
@@ -292,6 +293,15 @@ class User extends Authenticatable
         }
 
         return route('dashboard.index');
+    }
+
+    /**
+     * The interface language the user chose, used for their notifications
+     * and e-mails too; null when they never chose one.
+     */
+    public function preferredLocale(): ?string
+    {
+        return array_key_exists((string) $this->locale, config('app.available_locales', [])) ? $this->locale : null;
     }
 
     /**

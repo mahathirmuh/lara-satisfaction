@@ -60,14 +60,19 @@ class QuestionRequest extends FormRequest
     }
 
     /**
-     * Get custom attributes for validator errors.
+     * Get custom attributes for validator errors (named so they can be
+     * translated; the English names are the ones Laravel derives).
      *
      * @return array<string, string>
      */
     public function attributes(): array
     {
         return [
-            'department_section_id' => 'section',
+            'department_section_id' => __('section'),
+            'type' => __('type'),
+            'question' => __('question'),
+            'help_text' => __('help text'),
+            'sort_order' => __('sort order'),
         ];
     }
 
@@ -79,8 +84,8 @@ class QuestionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'department_section_id.exists' => 'The section must belong to the selected department.',
-            'department_section_id.prohibited_if' => 'A general question cannot have a section.',
+            'department_section_id.exists' => __('The section must belong to the selected department.'),
+            'department_section_id.prohibited_if' => __('A general question cannot have a section.'),
         ];
     }
 
@@ -104,7 +109,7 @@ class QuestionRequest extends FormRequest
                 ]);
 
                 if (Survey::query()->whereKey($surveyIds)->whereHas('responses')->exists()) {
-                    $validator->errors()->add('survey_id', 'This survey already has responses, so its questions can no longer be changed.');
+                    $validator->errors()->add('survey_id', __('This survey already has responses, so its questions can no longer be changed.'));
                 }
             },
         ];

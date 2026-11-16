@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Survey Period')
+@section('page-title', __('Survey Period'))
 
 @section('content')
     <div class="row g-2">
@@ -8,14 +8,14 @@
         <div class="col-12">
             <div class="card" id="surveyFilterCard" style="display: none;">
                 <div class="card-header p-2">
-                    <h4 class="mb-0">Filter</h4>
+                    <h4 class="mb-0">{{ __('Filter') }}</h4>
                 </div>
                 <div class="card-body p-2">
                     <div class="row g-2">
                         <div class="col-md-3">
-                            <label for="statusFilter" class="form-label">Status</label>
+                            <label for="statusFilter" class="form-label">{{ __('Status') }}</label>
                             <select id="statusFilter" class="form-select">
-                                <option value="">All status</option>
+                                <option value="">{{ __('All status') }}</option>
                                 @foreach ($statuses as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
@@ -23,7 +23,7 @@
                         </div>
                         <div class="col-12 d-flex gap-2">
                             <x-global.btn-detail label="" color="green" size="sm" outline="true" id="applyFilterButton"
-                                data-bs-toggle="tooltip" data-bs-title="Apply Filter">
+                                data-bs-toggle="tooltip" data-bs-title="{{ __('Apply Filter') }}">
                                 <x-slot:icon><i class="ti ti-check"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -40,22 +40,22 @@
                         <div class="col-12 d-flex flex-wrap justify-content-between gap-2">
                             <div class="d-flex gap-2">
                                 <input type="text" id="surveySearch" class="form-control rounded-3" autocomplete="off"
-                                    placeholder="Search…" />
+                                    placeholder="{{ __('Search…') }}" />
                                 <x-global.btn-detail label="" color="blue" size="sm" outline="true" id="toggleSearchButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Search">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Search') }}">
                                     <x-slot:icon><i class="ti ti-search"></i></x-slot:icon>
                                 </x-global.btn-detail>
                                 <x-global.btn-detail label="" color="purple" size="sm" outline="true" id="toggleFilterButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Filter">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Filter') }}">
                                     <x-slot:icon><i class="ti ti-filter"></i></x-slot:icon>
                                 </x-global.btn-detail>
                                 <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
-                                    data-bs-toggle="tooltip" data-bs-title="Reset">
+                                    data-bs-toggle="tooltip" data-bs-title="{{ __('Reset') }}">
                                     <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
                                 </x-global.btn-detail>
                             </div>
                             @if ($can['create'])
-                                <x-global.btn-detail label="Add Survey" color="blue" size="sm"
+                                <x-global.btn-detail :label="__('Add Survey')" color="blue" size="sm"
                                     onclick="toggleSurveyModal('add')">
                                     <x-slot:icon><i class="ti ti-plus"></i></x-slot:icon>
                                 </x-global.btn-detail>
@@ -68,13 +68,13 @@
                                     <table class="table table-vcenter mdka-border-gray-100 text-nowrap" id="surveyTable">
                                         <thead>
                                             <tr class="mdka-bg-gray-50">
-                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="title">Title</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="start_date">Period</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="status">Status</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Questions</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Responses</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Action</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">{{ __('No') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="title">{{ __('Title') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="start_date">{{ __('Period') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="status">{{ __('Status') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Questions') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Responses') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -107,28 +107,29 @@
         const statusActions = {
             draft: [{
                 status: 'active',
-                label: 'Publish',
+                label: @json(__('Publish')),
                 icon: 'player-play',
                 color: 'green'
             }],
             active: [{
                 status: 'closed',
-                label: 'Close',
+                label: @json(__('Close')),
                 icon: 'lock',
                 color: 'red'
             }, {
                 status: 'draft',
-                label: 'Back to Draft',
+                label: @json(__('Back to Draft')),
                 icon: 'pencil',
                 color: 'gray'
             }],
             closed: [{
                 status: 'active',
-                label: 'Re-open',
+                label: @json(__('Re-open')),
                 icon: 'lock-open',
                 color: 'green'
             }],
         };
+        const minutesText = @json(__(':count min'));
 
         const surveyColumns = [
             'index',
@@ -136,7 +137,7 @@
                 key: 'title',
                 sortable: true,
                 render: (item) => `<div class="fw-medium">${escapeHtml(item.title)}</div>
-                    <div class="text-secondary small"><i class="ti ti-clock me-1"></i>${escapeHtml(item.estimated_minutes)} min</div>`,
+                    <div class="text-secondary small"><i class="ti ti-clock me-1"></i>${escapeHtml(minutesText.replace(':count', item.estimated_minutes))}</div>`,
             },
             {
                 key: 'start_date',
@@ -166,27 +167,27 @@
                     let html = '<div class="d-inline-flex gap-1">';
 
                     if (surveyCan.update) {
-                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleSurveyModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="Edit">
+                        html += `<x-global.btn-detail label="" color="orange" size="sm" onclick="toggleSurveyModal('edit', ${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Edit') }}">
                             <x-slot:icon><i class="ti ti-edit"></i></x-slot:icon>
                         </x-global.btn-detail>`;
 
                         (statusActions[item.status] || []).forEach((action) => {
-                            html += `<button type="button" class="btn btn-sm px-2 py-1 rounded-2 btn-outline-${action.color}" onclick="changeSurveyStatus(${item.id}, '${action.status}', '${action.label}')" data-bs-toggle="tooltip" data-bs-title="${action.label}"><i class="ti ti-${action.icon}"></i></button>`;
+                            html += `<button type="button" class="btn btn-sm px-2 py-1 rounded-2 btn-outline-${action.color}" onclick="changeSurveyStatus(${item.id}, '${action.status}', ${escapeHtml(JSON.stringify(action.label))})" data-bs-toggle="tooltip" data-bs-title="${escapeHtml(action.label)}"><i class="ti ti-${action.icon}"></i></button>`;
                         });
                     }
 
                     if (surveyCan.create) {
-                        html += `<x-global.btn-detail label="" color="purple" size="sm" outline="true" onclick="duplicateSurvey(${item.id})" data-bs-toggle="tooltip" data-bs-title="Duplicate">
+                        html += `<x-global.btn-detail label="" color="purple" size="sm" outline="true" onclick="duplicateSurvey(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Duplicate') }}">
                             <x-slot:icon><i class="ti ti-copy"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }
 
                     if (canViewReports && item.status !== 'draft') {
-                        html += `<a class="btn btn-sm px-2 py-1 rounded-2 btn-outline-blue" href="${urlReportShow.replace(':id', item.id)}" data-bs-toggle="tooltip" data-bs-title="Report"><i class="ti ti-report-analytics"></i></a>`;
+                        html += `<a class="btn btn-sm px-2 py-1 rounded-2 btn-outline-blue" href="${urlReportShow.replace(':id', item.id)}" data-bs-toggle="tooltip" data-bs-title="${escapeHtml(@json(__('Report')))}"><i class="ti ti-report-analytics"></i></a>`;
                     }
 
                     if (surveyCan.delete && item.responses_count === 0) {
-                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteSurvey(${item.id})" data-bs-toggle="tooltip" data-bs-title="Delete">
+                        html += `<x-global.btn-detail label="" color="red" size="sm" onclick="deleteSurvey(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Delete') }}">
                             <x-slot:icon><i class="ti ti-trash"></i></x-slot:icon>
                         </x-global.btn-detail>`;
                     }
@@ -228,7 +229,7 @@
                 data: {
                     status
                 },
-                confirmText: `The survey will be changed to "${label}".`,
+                confirmText: @json(__('The survey will be changed to ":action".')).replace(':action', label),
                 onSuccess: () => surveyTable.reload(),
             });
         }
@@ -237,7 +238,7 @@
             saveRecord({
                 url: urlSurveyDuplicate.replace(':id', id),
                 method: 'POST',
-                confirmText: 'A draft copy of this survey (including its questions) will be created.',
+                confirmText: @json(__('A draft copy of this survey (including its questions) will be created.')),
                 onSuccess: () => surveyTable.reload(),
             });
         }

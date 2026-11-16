@@ -106,14 +106,35 @@ class SurveyQuestion extends Model
     }
 
     /**
+     * Question text in the interface language. The standard questions
+     * (SurveySeeder::SECTION_QUESTIONS) are translated, their English text
+     * being the key; a text typed by an admin has no translation and stays
+     * as it is. "{section}" is kept.
+     */
+    public function text(): string
+    {
+        $translated = __($this->question);
+
+        return is_string($translated) ? $translated : $this->question;
+    }
+
+    /**
      * Question text for the wizard: escaped, with every "{section}" wrapped in
      * a span the page fills with the name of the chosen section.
      */
     public function textHtml(string $sectionFallback): HtmlString
     {
-        $parts = array_map(e(...), explode(self::SECTION_PLACEHOLDER, $this->question));
+        $parts = array_map(e(...), explode(self::SECTION_PLACEHOLDER, $this->text()));
 
         return new HtmlString(implode('<span class="js-section-name">'.e($sectionFallback).'</span>', $parts));
+    }
+
+    /**
+     * Question text with "{section}" replaced by the given section name.
+     */
+    public function textFor(string $sectionName): string
+    {
+        return str_replace(self::SECTION_PLACEHOLDER, $sectionName, $this->text());
     }
 
     /**
@@ -122,7 +143,7 @@ class SurveyQuestion extends Model
      */
     public function displayText(): string
     {
-        return str_replace(self::SECTION_PLACEHOLDER, '[section]', $this->question);
+        return $this->textFor(__('[section]'));
     }
 
     /**
@@ -148,7 +169,7 @@ class SurveyQuestion extends Model
      */
     public function contextLabel(): string
     {
-        return collect([$this->department?->name ?? 'General', $this->section?->name])
+        return collect([$this->department?->name ?? __('General'), $this->section?->name])
             ->filter()
             ->implode(' / ');
     }

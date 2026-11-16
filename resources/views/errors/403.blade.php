@@ -1,5 +1,5 @@
 @extends('errors.layout')
 
 @section('code', '403')
-@section('title', 'Access denied')
-@section('message', $exception?->getMessage() ?: 'You do not have permission to access this page.')
+@section('title', __('Access denied'))
+@section('message', $exception?->getMessage() ?: __('You do not have permission to access this page.'))

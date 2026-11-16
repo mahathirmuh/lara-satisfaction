@@ -61,7 +61,7 @@ class LoginRequest extends FormRequest
 
         if (! $directory->isConfigured()) {
             throw ValidationException::withMessages([
-                'username' => 'Network sign-in is not configured yet. Please sign in with Microsoft or contact the IT Helpdesk.',
+                'username' => __('Network sign-in is not configured yet. Please sign in with Microsoft or contact the IT Helpdesk.'),
             ]);
         }
 
@@ -71,7 +71,7 @@ class LoginRequest extends FormRequest
             report($exception);
 
             throw ValidationException::withMessages([
-                'username' => 'The network sign-in service cannot be reached right now. Please try again shortly.',
+                'username' => __('The network sign-in service cannot be reached right now. Please try again shortly.'),
             ]);
         }
 
@@ -89,7 +89,7 @@ class LoginRequest extends FormRequest
 
         if ($user === null) {
             throw ValidationException::withMessages([
-                'username' => 'Your network account is not registered in this application. Please contact HR or the IT Helpdesk.',
+                'username' => __('Your network account is not registered in this application. Please contact HR or the IT Helpdesk.'),
             ]);
         }
 
@@ -98,7 +98,7 @@ class LoginRequest extends FormRequest
 
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'username' => 'Your account is inactive. Please contact the IT Helpdesk.',
+                'username' => __('Your account is inactive. Please contact the IT Helpdesk.'),
             ]);
         }
 

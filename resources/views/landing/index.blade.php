@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ config('merdeka.app_name') }} | {{ config('merdeka.company_name') }}</title>
-    <meta name="description" content="{{ $content->hero_title }}" />
+    <meta name="description" content="{{ __($content->hero_title) }}" />
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/branding/favicon.ico') }}" />
     <link href="{{ asset('assets/css/apps.min.css') }}?v={{ config('merdeka.app_version') }}" rel="stylesheet" />
     <link href="{{ asset('assets/libs/tabler-icons/tabler-icons.min.css') }}?v=2.36.0" rel="stylesheet" />
@@ -152,10 +152,11 @@
 </head>
 
 <body>
+    {{-- Saved texts are shown as typed; the default texts (LandingContent::DEFAULTS) are translated. --}}
     @php
         $ctaUrl = auth()->check() ? route('survey-form.index') : route('login');
-        $ctaLabel = auth()->check() ? 'Go to My Survey' : 'Begin Survey';
-        $startLabel = $survey ? (auth()->check() ? 'Start the Survey' : 'Begin Identification') : 'Sign In';
+        $ctaLabel = auth()->check() ? __('Go to My Survey') : __('Begin Survey');
+        $startLabel = $survey ? (auth()->check() ? __('Start the Survey') : __('Begin Identification')) : __('Sign In');
     @endphp
 
     <!-- Navbar -->
@@ -166,9 +167,10 @@
                 <img src="{{ asset('assets/img/branding/mbm-logo.png') }}" height="28" alt="Merdeka Battery Materials">
             </a>
             <div class="d-flex align-items-center gap-3 ms-auto">
-                <a href="#guidelines" class="link-secondary d-none d-md-inline">Guidelines</a>
-                <a href="#departments" class="link-secondary d-none d-md-inline">Departments</a>
-                <a href="#privacy" class="link-secondary d-none d-md-inline">Privacy</a>
+                <a href="#guidelines" class="link-secondary d-none d-md-inline">{{ __('Guidelines') }}</a>
+                <a href="#departments" class="link-secondary d-none d-md-inline">{{ __('Departments') }}</a>
+                <a href="#privacy" class="link-secondary d-none d-md-inline">{{ __('Privacy') }}</a>
+                <x-global.locale-switcher />
                 <a href="{{ $ctaUrl }}" class="btn mdka-btn-brand-500 text-white border-0 rounded-pill px-3">
                     <i class="ti ti-clipboard-check me-1"></i> {{ $ctaLabel }}
                 </a>
@@ -182,19 +184,19 @@
             <div class="row g-5 align-items-stretch">
                 <div class="col-lg-7 d-flex flex-column justify-content-center">
                     <div class="eyebrow mdka-text-brand-500 mb-3">{{ config('merdeka.app_name') }}</div>
-                    <h1 class="fw-bold mb-4">{{ $content->hero_title }}</h1>
+                    <h1 class="fw-bold mb-4">{{ __($content->hero_title) }}</h1>
                     <p class="lead text-secondary mb-4">{{ $content->heroIntroHtml($survey) }}</p>
                     <div class="d-flex flex-wrap gap-2">
                         <a href="{{ $ctaUrl }}" class="btn btn-lg mdka-btn-brand-500 text-white border-0 rounded-pill px-4">
                             {{ $startLabel }} <i class="ti ti-arrow-right ms-1"></i>
                         </a>
-                        <a href="#guidelines" class="btn btn-lg btn-outline-secondary rounded-pill px-4">How it works</a>
+                        <a href="#guidelines" class="btn btn-lg btn-outline-secondary rounded-pill px-4">{{ __('How it works') }}</a>
                     </div>
                 </div>
                 <div class="col-lg-5">
                     <figure class="hero-media">
                         <img src="{{ $content->heroImageUrl() }}"
-                            alt="{{ $content->hero_image_alt ?: config('merdeka.app_name') }}">
+                            alt="{{ $content->hero_image_alt ? __($content->hero_image_alt) : config('merdeka.app_name') }}">
                     </figure>
                 </div>
             </div>
@@ -211,10 +213,10 @@
                             <span class="avatar avatar-md rounded-3 mdka-bg-brand-50 mdka-text-brand-500 mb-3">
                                 <i class="ti ti-shield-lock fs-2"></i>
                             </span>
-                            <h2 class="mb-3">{{ $content->feedback_title }}</h2>
-                            <p class="text-secondary mb-0" style="white-space: pre-line">{{ $content->feedback_body }}</p>
+                            <h2 class="mb-3">{{ __($content->feedback_title) }}</h2>
+                            <p class="text-secondary mb-0" style="white-space: pre-line">{{ __($content->feedback_body) }}</p>
                             @if ($content->feedback_note)
-                                <div class="eyebrow mdka-text-brand-500 mt-4">{{ $content->feedback_note }}</div>
+                                <div class="eyebrow mdka-text-brand-500 mt-4">{{ __($content->feedback_note) }}</div>
                             @endif
                         </div>
                     </div>
@@ -222,21 +224,21 @@
                 <div class="col-lg-4">
                     <div class="card overview-card h-100 mdka-bg-brand-500 text-white border-0">
                         <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
-                            <h3 class="text-white fs-1 mb-3">Survey Overview</h3>
+                            <h3 class="text-white fs-1 mb-3">{{ __('Survey Overview') }}</h3>
                             <ul class="list-unstyled d-grid gap-2 mb-0 fw-medium">
                                 <li class="d-flex align-items-center gap-2">
                                     <span class="dot"></span>
-                                    {{ $departments->count() }} Key {{ Str::plural('Department', $departments->count()) }}
+                                    {{ trans_choice(':count Key Department|:count Key Departments', $departments->count()) }}
                                 </li>
                                 <li class="d-flex align-items-center gap-2">
-                                    <span class="dot"></span> {{ $survey?->estimated_minutes ?? 15 }} Minute Completion
+                                    <span class="dot"></span> {{ __(':minutes Minute Completion', ['minutes' => $survey?->estimated_minutes ?? 15]) }}
                                 </li>
                                 <li class="d-flex align-items-center gap-2">
-                                    <span class="dot"></span> Confidential &amp; Anonymous Processing
+                                    <span class="dot"></span> {{ __('Confidential & Anonymous Processing') }}
                                 </li>
                                 @if ($survey)
                                     <li class="d-flex align-items-center gap-2">
-                                        <span class="dot"></span> Open {{ $survey->periodLabel() }}
+                                        <span class="dot"></span> {{ __('Open :period', ['period' => $survey->periodLabel()]) }}
                                     </li>
                                 @endif
                             </ul>
@@ -278,7 +280,7 @@
                     </div>
                 @else
                     <div class="card border-0 mt-3">
-                        <x-global.empty-state icon="building" title="No departments configured yet" />
+                        <x-global.empty-state icon="building" :title="__('No departments configured yet')" />
                     </div>
                 @endif
             </div>
@@ -288,15 +290,15 @@
     <!-- Final CTA -->
     <section class="landing-cta" id="privacy">
         <div class="container-xl text-center">
-            <h2 class="mb-4">{{ $content->closing_title }}</h2>
+            <h2 class="mb-4">{{ __($content->closing_title) }}</h2>
             <a href="{{ $ctaUrl }}" class="btn btn-lg mdka-btn-brand-500 text-white border-0 rounded-pill px-4">
                 <i class="ti ti-fingerprint me-1"></i> {{ $startLabel }}
             </a>
             @if ($content->closing_note)
-                <p class="text-secondary small mt-3 mb-1">{{ $content->closing_note }}</p>
+                <p class="text-secondary small mt-3 mb-1">{{ __($content->closing_note) }}</p>
             @endif
             <p class="text-secondary small mb-0">
-                Participation is recorded separately from your answers, so nobody can link a response back to you.
+                {{ __('Participation is recorded separately from your answers, so nobody can link a response back to you.') }}
             </p>
         </div>
     </section>
@@ -304,7 +306,7 @@
     <footer class="footer footer-transparent border-top d-print-none py-4">
         <div class="container-xl d-flex flex-wrap justify-content-between align-items-center gap-2 small text-secondary">
             <strong class="text-body">{{ config('merdeka.app_name') }}</strong>
-            <span>&copy; {{ date('Y') }} {{ config('merdeka.company_name') }}. Confidential &amp; Secure.</span>
+            <span>&copy; {{ date('Y') }} {{ config('merdeka.company_name') }}. {{ __('Confidential & Secure.') }}</span>
         </div>
     </footer>
 

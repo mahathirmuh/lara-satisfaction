@@ -70,19 +70,19 @@ class FileApps
         $size = @getimagesize($file->getRealPath());
 
         if ($size === false) {
-            throw ValidationException::withMessages([$attribute => 'The image could not be processed.']);
+            throw ValidationException::withMessages([$attribute => __('The image could not be processed.')]);
         }
 
         if (! static::fitsInMemory($size[0], $size[1])) {
             throw ValidationException::withMessages([
-                $attribute => 'The image is too large to process. Please resize it to at most '.self::MAX_STORED_DIMENSION.' pixels and try again.',
+                $attribute => __('The image is too large to process. Please resize it to at most :size pixels and try again.', ['size' => self::MAX_STORED_DIMENSION]),
             ]);
         }
 
         $image = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
 
         if ($image === false) {
-            throw ValidationException::withMessages([$attribute => 'The image could not be processed.']);
+            throw ValidationException::withMessages([$attribute => __('The image could not be processed.')]);
         }
 
         imagepalettetotruecolor($image);

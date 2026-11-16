@@ -5,11 +5,11 @@
         <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
             <h3 class="card-title mb-0">{{ $survey->title }}</h3>
             @if ($survey->has_participated)
-                <x-global.status-badge color="green" label="Completed" />
+                <x-global.status-badge color="green" :label="__('Completed')" />
             @elseif ($survey->has_draft)
-                <x-global.status-badge color="azure" label="Draft saved" />
+                <x-global.status-badge color="azure" :label="__('Draft saved')" />
             @else
-                <x-global.status-badge color="yellow" label="Not started" />
+                <x-global.status-badge color="yellow" :label="__('Not started')" />
             @endif
         </div>
         <div class="text-secondary small mb-3 d-flex flex-wrap align-items-center gap-2">
@@ -24,17 +24,17 @@
             <p class="text-secondary mb-3">{{ \Illuminate\Support\Str::limit($survey->description, 160) }}</p>
         @endif
         <div class="d-flex flex-wrap gap-3 small text-secondary mt-auto mb-3">
-            <span><i class="ti ti-clock me-1"></i>{{ $survey->estimated_minutes }} min</span>
-            <span><i class="ti ti-list-check me-1"></i>{{ $survey->questions_count }} questions</span>
-            <span><i class="ti ti-shield-lock me-1"></i>Anonymous</span>
+            <span><i class="ti ti-clock me-1"></i>{{ __(':minutes min', ['minutes' => $survey->estimated_minutes]) }}</span>
+            <span><i class="ti ti-list-check me-1"></i>{{ __(':count questions', ['count' => $survey->questions_count]) }}</span>
+            <span><i class="ti ti-shield-lock me-1"></i>{{ __('Anonymous') }}</span>
         </div>
         @if ($survey->has_participated)
-            <x-global.btn-detail label="Thank you for participating" color="green" size="sm" outline="true" disabled>
+            <x-global.btn-detail :label="__('Thank you for participating')" color="green" size="sm" outline="true" disabled>
                 <x-slot:icon><i class="ti ti-circle-check"></i></x-slot:icon>
             </x-global.btn-detail>
         @else
             @permission('survey-form', 'Create')
-                <x-global.btn-detail :label="$survey->has_draft ? 'Continue Survey' : 'Start Survey'" color="blue" size="sm"
+                <x-global.btn-detail :label="$survey->has_draft ? __('Continue Survey') : __('Start Survey')" color="blue" size="sm"
                     :href="route('survey-form.show', $survey)" iconPosition="right">
                     <x-slot:icon><i class="ti ti-arrow-right"></i></x-slot:icon>
                 </x-global.btn-detail>

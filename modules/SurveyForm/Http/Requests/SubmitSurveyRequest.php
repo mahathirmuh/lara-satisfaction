@@ -85,7 +85,10 @@ class SubmitSurveyRequest extends FormRequest
         foreach ($this->steps() as $step) {
             if ($step['sections']->isEmpty()) {
                 foreach ($step['questions']->values() as $index => $question) {
-                    $attributes['answers.'.$question->id] = 'question '.($index + 1).' of '.($step['department']?->name ?? 'General');
+                    $attributes['answers.'.$question->id] = __('question :number of :name', [
+                        'number' => $index + 1,
+                        'name' => $step['department']?->name ?? __('General'),
+                    ]);
                 }
 
                 continue;
@@ -93,7 +96,10 @@ class SubmitSurveyRequest extends FormRequest
 
             foreach ($step['sections'] as $section) {
                 foreach ($this->questionsFor($step, $section) as $index => $question) {
-                    $attributes['evaluations.'.$section->id.'.'.$question->id] = 'question '.($index + 1).' of '.$section->name;
+                    $attributes['evaluations.'.$section->id.'.'.$question->id] = __('question :number of :name', [
+                        'number' => $index + 1,
+                        'name' => $section->name,
+                    ]);
                 }
             }
         }
@@ -109,9 +115,9 @@ class SubmitSurveyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'answers.array' => 'The submitted answers do not match this survey.',
-            'evaluations.array' => 'The submitted answers do not match this survey.',
-            'evaluations.*.array' => 'The submitted answers do not match this survey.',
+            'answers.array' => __('The submitted answers do not match this survey.'),
+            'evaluations.array' => __('The submitted answers do not match this survey.'),
+            'evaluations.*.array' => __('The submitted answers do not match this survey.'),
         ];
     }
 

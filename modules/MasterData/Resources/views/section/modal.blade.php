@@ -2,68 +2,84 @@
     aria-hidden="true">
     <div class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content p-3">
-            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
             <div class="modal-body p-0">
-                <h3 class="modal-title mb-3">Section</h3>
+                <h3 class="modal-title mb-3">{{ __('Section') }}</h3>
                 <form id="sectionForm" novalidate>
                     <div class="row g-3">
                         <div class="col-lg-6">
-                            <label for="sectionDepartment" class="form-label required">Department</label>
+                            <label for="sectionDepartment" class="form-label required">{{ __('Department') }}</label>
                             <select id="sectionDepartment" class="form-select" required>
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->id }}">
-                                        {{ $department->name }}{{ $department->is_active ? '' : ' (inactive)' }}
+                                        {{ $department->is_active ? $department->name : __(':name (inactive)', ['name' => $department->name]) }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-lg-6">
-                            <label for="sectionName" class="form-label required">Section</label>
+                            <label for="sectionName" class="form-label required">{{ __('Section') }}</label>
                             <input type="text" id="sectionName" class="form-control" maxlength="255"
                                 placeholder="Asset Protection" required>
                         </div>
                         <div class="col-12">
-                            <label for="sectionDescription" class="form-label">Role Overview</label>
+                            <label for="sectionDescription" class="form-label">{{ __('Role Overview') }}</label>
                             <textarea id="sectionDescription" class="form-control" rows="4" maxlength="3000"
-                                placeholder="What this section does for the other departments. Employees read it before they evaluate the section."></textarea>
+                                placeholder="{{ __('What this section does for the other departments. Employees read it before they evaluate the section.') }}"></textarea>
                         </div>
 
                         @foreach ([
-                            'team_photo' => ['label' => 'Team Picture', 'caption' => 'team_caption', 'placeholder' => 'Asset Protection Team (Left to Right): …'],
-                            'work_summary' => ['label' => 'Work Summary', 'caption' => 'work_summary_caption', 'placeholder' => 'Work Summary Matrix Asset Protection Semester 1 - 2026'],
+                            'team_photo' => [
+                                'label' => __('Team Picture'),
+                                'preview' => __('Team Picture preview'),
+                                'file' => __('Team Picture file'),
+                                'remove' => __('Remove current team picture'),
+                                'caption' => 'team_caption',
+                                'caption_label' => __('Team Picture caption'),
+                                'placeholder' => 'Asset Protection Team (Left to Right): …',
+                            ],
+                            'work_summary' => [
+                                'label' => __('Work Summary'),
+                                'preview' => __('Work Summary preview'),
+                                'file' => __('Work Summary file'),
+                                'remove' => __('Remove current work summary'),
+                                'caption' => 'work_summary_caption',
+                                'caption_label' => __('Work Summary caption'),
+                                'placeholder' => 'Work Summary Matrix Asset Protection Semester 1 - 2026',
+                            ],
                         ] as $field => $image)
                             <div class="col-lg-6">
                                 <div class="border rounded-3 p-3 h-100">
                                     <div class="form-label">{{ $image['label'] }}</div>
-                                    <img src="" alt="{{ $image['label'] }} preview" data-preview="{{ $field }}"
+                                    <img src="" alt="{{ $image['preview'] }}" data-preview="{{ $field }}"
                                         class="section-image-preview rounded border mb-2 d-none">
                                     <input type="file" class="form-control" data-image="{{ $field }}"
-                                        accept="image/jpeg,image/png,image/webp" aria-label="{{ $image['label'] }} file">
-                                    <small class="form-hint">JPG, PNG or WebP, max 2 MB.</small>
+                                        accept="image/jpeg,image/png,image/webp" aria-label="{{ $image['file'] }}">
+                                    <small class="form-hint">{{ __('JPG, PNG or WebP, max 2 MB.') }}</small>
                                     <label class="form-check mt-1 mb-2 d-none" data-remove-wrapper="{{ $field }}">
                                         <input class="form-check-input" type="checkbox" data-remove="{{ $field }}">
-                                        <span class="form-check-label">Remove current {{ strtolower($image['label']) }}</span>
+                                        <span class="form-check-label">{{ $image['remove'] }}</span>
                                     </label>
                                     <input type="text" class="form-control mt-2" data-caption="{{ $image['caption'] }}"
                                         maxlength="255" placeholder="{{ $image['placeholder'] }}"
-                                        aria-label="{{ $image['label'] }} caption">
+                                        aria-label="{{ $image['caption_label'] }}">
                                 </div>
                             </div>
                         @endforeach
 
                         <div class="col-lg-6">
-                            <label for="sectionOrder" class="form-label">Display Order</label>
+                            <label for="sectionOrder" class="form-label">{{ __('Display Order') }}</label>
                             <input type="number" id="sectionOrder" class="form-control" min="0" max="65535"
-                                placeholder="Auto">
+                                placeholder="{{ __('Auto') }}">
                         </div>
                         <div class="col-lg-6 d-flex align-items-end">
                             <label class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="sectionActive" checked>
-                                <span class="form-check-label">Active (employees can choose it)</span>
+                                <span class="form-check-label">{{ __('Active (employees can choose it)') }}</span>
                             </label>
                         </div>
                         <div class="col-12 mt-3 d-flex justify-content-end gap-2">
-                            <x-global.btn-detail label="Save" color="blue" size="sm" type="submit">
+                            <x-global.btn-detail :label="__('Save')" color="blue" size="sm" type="submit">
                                 <x-slot:icon><i class="ti ti-device-floppy"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -91,6 +107,10 @@
         const urlSectionStore = @json(route('master-data.section.store'));
         const urlSectionUpdate = @json(route('master-data.section.update', ':id'));
         const sectionImageFields = ['team_photo', 'work_summary'];
+        const sectionImageTooLarge = {
+            team_photo: @json(__('The team photo may not be larger than 2 MB.')),
+            work_summary: @json(__('The work summary may not be larger than 2 MB.')),
+        };
         let sectionModalState = {
             mode: 'add',
             id: null
@@ -107,7 +127,7 @@
             form[0].reset();
             form.find('[data-preview]').attr('src', '').addClass('d-none');
             form.find('[data-remove-wrapper]').addClass('d-none');
-            modal.find('.modal-title').text(mode === 'edit' ? 'Edit Section' : 'Add New Section');
+            modal.find('.modal-title').text(mode === 'edit' ? @json(__('Edit Section')) : @json(__('Add New Section')));
 
             if (mode !== 'edit') {
                 const selectedDepartment = $('#departmentFilter').val();
@@ -178,13 +198,13 @@
                     data.append(field, file);
 
                     if (file.size > 2 * 1024 * 1024) {
-                        errors.push(`The ${field.replace('_', ' ')} may not be larger than 2 MB.`);
+                        errors.push(sectionImageTooLarge[field]);
                     }
                 }
             });
 
             if (!data.get('department_id') || !data.get('name')) {
-                errors.unshift('Department and section name are required.');
+                errors.unshift(@json(__('Department and section name are required.')));
             }
 
             if (errors.length) {
@@ -199,7 +219,7 @@
                 url: isEdit ? urlSectionUpdate.replace(':id', sectionModalState.id) : urlSectionStore,
                 method: isEdit ? 'PUT' : 'POST',
                 data,
-                confirmText: `This action will ${isEdit ? 'update' : 'create'} the section!`,
+                confirmText: isEdit ? @json(__('This action will update the section!')) : @json(__('This action will create the section!')),
                 onSuccess: () => {
                     $('#sectionModal').modal('hide');
                     sectionTable.reload();

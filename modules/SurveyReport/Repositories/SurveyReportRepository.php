@@ -142,7 +142,7 @@ class SurveyReportRepository implements SurveyReportInterface
 
                 return [
                     'department_id' => $departmentId ?: null,
-                    'name' => $department?->name ?? 'General',
+                    'name' => $department?->name ?? __('General'),
                     'color' => $department?->color ?? 'gray',
                     'icon' => $department?->icon ?? 'message-circle',
                     'sort_order' => $department?->sort_order ?? PHP_INT_MAX,
@@ -180,8 +180,8 @@ class SurveyReportRepository implements SurveyReportInterface
                 return [
                     'section_id' => $sectionId,
                     'department_id' => $section?->department_id,
-                    'name' => $section?->name ?? 'Removed section',
-                    'department' => $section?->department?->name ?? 'General',
+                    'name' => $section?->name ?? __('Removed section'),
+                    'department' => $section?->department?->name ?? __('General'),
                     'color' => $section?->department?->color ?? 'gray',
                     'department_sort_order' => $section?->department?->sort_order ?? PHP_INT_MAX,
                     'sort_order' => $section?->sort_order ?? PHP_INT_MAX,
@@ -224,7 +224,7 @@ class SurveyReportRepository implements SurveyReportInterface
                 'type' => $question->type->value,
                 'type_label' => $question->type->label(),
                 'scale' => $question->type->scaleLabels(),
-                'department' => $question->department?->name ?? 'General',
+                'department' => $question->department?->name ?? __('General'),
                 'section' => $question->section?->name,
                 'color' => $question->department?->color ?? 'gray',
                 'comments' => (int) ($commentCounts[$question->id] ?? 0),
@@ -284,7 +284,7 @@ class SurveyReportRepository implements SurveyReportInterface
             }
 
             $rows->push($this->companyRow(
-                $companies[$companyKey] ?? 'Unassigned company',
+                $companies[$companyKey] ?? __('Unassigned company'),
                 $responses,
                 (int) ($stats->total ?? 0),
                 (int) ($stats->rating_sum ?? 0),
@@ -294,7 +294,7 @@ class SurveyReportRepository implements SurveyReportInterface
 
         if ($other['responses'] > 0) {
             $otherRow = $this->companyRow(
-                'Other companies (groups below '.$minGroupSize.' responses)',
+                __('Other companies (groups below :count responses)', ['count' => $minGroupSize]),
                 $other['responses'],
                 $other['total'],
                 $other['rating_sum'],
@@ -340,7 +340,7 @@ class SurveyReportRepository implements SurveyReportInterface
             $count = (int) ($dailyCounts[$day->toDateString()] ?? 0);
             $runningTotal += $count;
 
-            $trend['labels'][] = $day->format('d M');
+            $trend['labels'][] = $day->translatedFormat(__('d M'));
             $trend['daily'][] = $count;
             $trend['cumulative'][] = $runningTotal;
         }

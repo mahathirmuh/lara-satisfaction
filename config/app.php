@@ -86,6 +86,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Interface Languages
+    |--------------------------------------------------------------------------
+    |
+    | Languages people can switch the interface to (locale => its own name).
+    | English is the source language: its texts are the keys of the
+    | lang/{locale}.json files. The choice is kept in the session and on the
+    | user's account; without one the browser's language is used when it is
+    | supported, else the default locale above.
+    |
+    */
+
+    'available_locales' => [
+        'en' => 'English',
+        'id' => 'Bahasa Indonesia',
+        'zh_CN' => '简体中文',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

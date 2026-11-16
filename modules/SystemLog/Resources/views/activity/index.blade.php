@@ -1,6 +1,6 @@
 @extends('main.index')
 
-@section('page-title', 'Activity Log')
+@section('page-title', __('Activity Log'))
 
 @section('content')
     <div class="row g-2">
@@ -10,15 +10,15 @@
                     <div class="row g-2">
                         <div class="col-12 d-flex flex-wrap gap-2">
                             <input type="text" id="activitySearch" class="form-control rounded-3" style="max-width: 280px"
-                                autocomplete="off" placeholder="Search route, URL or IP…" />
-                            <select id="methodFilter" class="form-select" style="max-width: 160px" aria-label="Method">
-                                <option value="">All methods</option>
+                                autocomplete="off" placeholder="{{ __('Search route, URL or IP…') }}" />
+                            <select id="methodFilter" class="form-select" style="max-width: 160px" aria-label="{{ __('Method') }}">
+                                <option value="">{{ __('All methods') }}</option>
                                 @foreach (['POST', 'PUT', 'PATCH', 'DELETE'] as $method)
                                     <option value="{{ $method }}">{{ $method }}</option>
                                 @endforeach
                             </select>
                             <x-global.btn-detail label="" color="red" size="sm" outline="true" id="toggleResetButton"
-                                data-bs-toggle="tooltip" data-bs-title="Reset">
+                                data-bs-toggle="tooltip" data-bs-title="{{ __('Reset') }}">
                                 <x-slot:icon><i class="ti ti-restore"></i></x-slot:icon>
                             </x-global.btn-detail>
                         </div>
@@ -28,14 +28,14 @@
                                     <table class="table table-vcenter mdka-border-gray-100 text-nowrap" id="activityTable">
                                         <thead>
                                             <tr class="mdka-bg-gray-50">
-                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="created_at">Time</th>
-                                                <th class="text-capitalize fs-5 py-3">User</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="method">Method</th>
-                                                <th class="text-capitalize fs-5 py-3" data-key="route_name">Route</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="status_code">Status</th>
-                                                <th class="text-capitalize fs-5 py-3">IP</th>
-                                                <th class="text-capitalize fs-5 py-3 text-center">Detail</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" width="30">{{ __('No') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="created_at">{{ __('Time') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('User') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="method">{{ __('Method') }}</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="route_name">{{ __('Route') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center" data-key="status_code">{{ __('Status') }}</th>
+                                                <th class="text-capitalize fs-5 py-3">{{ __('IP') }}</th>
+                                                <th class="text-capitalize fs-5 py-3 text-center">{{ __('Detail') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody></tbody>
@@ -54,8 +54,8 @@
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Activity Detail</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">{{ __('Activity Detail') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <pre class="mb-0 small" id="logDetailContent" style="white-space: pre-wrap"></pre>
@@ -109,7 +109,7 @@
             {
                 key: 'detail',
                 className: 'text-center',
-                render: (item) => `<x-global.btn-detail label="" color="blue" size="sm" outline="true" onclick="showActivity(${item.id})" data-bs-toggle="tooltip" data-bs-title="Detail">
+                render: (item) => `<x-global.btn-detail label="" color="blue" size="sm" outline="true" onclick="showActivity(${item.id})" data-bs-toggle="tooltip" data-bs-title="{{ __('Detail') }}">
                     <x-slot:icon><i class="ti ti-eye"></i></x-slot:icon>
                 </x-global.btn-detail>`,
             },

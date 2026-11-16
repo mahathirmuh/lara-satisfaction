@@ -17,14 +17,14 @@ enum QuestionType: string
     case Text = 'text';
 
     /**
-     * Human readable label.
+     * Human readable label, in the interface language.
      */
     public function label(): string
     {
         return match ($this) {
-            self::Rating => 'Service Quality (1-5)',
-            self::Criticality => 'Criticality (1-5)',
-            self::Text => 'Open Text',
+            self::Rating => __('Service Quality (1-5)'),
+            self::Criticality => __('Criticality (1-5)'),
+            self::Text => __('Open Text'),
         };
     }
 
@@ -45,21 +45,37 @@ enum QuestionType: string
     }
 
     /**
-     * The rating scale (title and the label and description of every level).
+     * The rating scale (title and the label and description of every level),
+     * in the interface language.
      *
      * @return array{title: string, levels: array<int, array{label: string, description: string}>}|null
      */
     public function scale(): ?array
     {
-        return match ($this) {
+        $scale = match ($this) {
             self::Rating => config('survey.scales.quality'),
             self::Criticality => config('survey.scales.criticality'),
             self::Text => null,
         };
+
+        if ($scale === null) {
+            return null;
+        }
+
+        return [
+            ...$scale,
+            'title' => __($scale['title']),
+            'levels' => array_map(fn (array $level): array => [
+                ...$level,
+                'label' => __($level['label']),
+                'description' => __($level['description']),
+            ], $scale['levels']),
+        ];
     }
 
     /**
-     * Label of every rating level, e.g. [1 => 'Very Poor', ..., 5 => 'Excellent'].
+     * Label of every rating level, e.g. [1 => 'Very Poor', ..., 5 => 'Excellent'],
+     * in the interface language.
      *
      * @return array<int, string>
      */

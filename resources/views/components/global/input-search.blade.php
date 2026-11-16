@@ -1,6 +1,6 @@
 @props([
     'name' => 'search',
-    'placeholder' => 'Search…',
+    'placeholder' => __('Search…'),
 ])
 
 <div class="input-icon">

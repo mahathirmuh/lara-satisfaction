@@ -106,7 +106,7 @@ class UserRegisteredController extends Controller
         );
 
         return response()->json([
-            'message' => 'User registered successfully.',
+            'message' => __('User registered successfully.'),
             'data' => ['id' => $user->id],
         ], Response::HTTP_CREATED);
     }
@@ -124,7 +124,7 @@ class UserRegisteredController extends Controller
             $request->validated('role_id') ?? [],
         );
 
-        return response()->json(['message' => 'User updated successfully.']);
+        return response()->json(['message' => __('User updated successfully.')]);
     }
 
     /**
@@ -136,12 +136,12 @@ class UserRegisteredController extends Controller
         $this->ensureManageable($actor, $user);
 
         if ($user->is($actor)) {
-            return response()->json(['message' => 'You cannot delete your own account.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json(['message' => __('You cannot delete your own account.')], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->users->delete($user);
 
-        return response()->json(['message' => 'User deleted successfully.']);
+        return response()->json(['message' => __('User deleted successfully.')]);
     }
 
     /**
@@ -149,7 +149,7 @@ class UserRegisteredController extends Controller
      */
     protected function ensureManageable(User $actor, User $user): void
     {
-        abort_if(! $actor->isItAdmin() && $user->isItAdmin(), Response::HTTP_FORBIDDEN, 'Only an IT admin can manage this account.');
+        abort_if(! $actor->isItAdmin() && $user->isItAdmin(), Response::HTTP_FORBIDDEN, __('Only an IT admin can manage this account.'));
     }
 
     /**

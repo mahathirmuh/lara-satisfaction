@@ -27,7 +27,7 @@
                         <p class="empty-subtitle text-secondary">@yield('message')</p>
                         <div class="empty-action">
                             <a href="{{ url('/') }}" class="btn btn-primary">
-                                <i class="ti ti-arrow-left me-1"></i> Take me home
+                                <i class="ti ti-arrow-left me-1"></i> {{ __('Take me home') }}
                             </a>
                         </div>
                     </div>
