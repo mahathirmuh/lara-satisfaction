@@ -90,6 +90,35 @@ class ParticipationStatusTest extends TestCase
             ->assertViewHas('surveys', fn ($surveys): bool => $surveys->sole()->participation_status === ParticipationStatus::InProgress);
     }
 
+    public function test_the_survey_form_shows_the_survey_in_progress(): void
+    {
+        $savedAsDraftNote = '<div class="mcg-step-note">Saved as draft</div>';
+
+        $this->actingAs($this->employee)
+            ->get(route('survey-form.show', $this->survey))
+            ->assertOk()
+            ->assertSee('aria-label="Status: In Progress"', false)
+            ->assertDontSee($savedAsDraftNote, false);
+
+        SurveyDraft::factory()->for($this->survey)->for($this->employee)->create();
+
+        $this->actingAs($this->employee)
+            ->get(route('survey-form.show', $this->survey))
+            ->assertOk()
+            ->assertSee('aria-label="Status: In Progress"', false)
+            ->assertSee($savedAsDraftNote, false);
+    }
+
+    public function test_the_thank_you_page_shows_the_survey_completed(): void
+    {
+        SurveyParticipation::create(['survey_id' => $this->survey->id, 'user_id' => $this->employee->id, 'submitted_at' => now()]);
+
+        $this->actingAs($this->employee)
+            ->get(route('survey-form.thanks', $this->survey))
+            ->assertOk()
+            ->assertSee('aria-label="Status: Completed"', false);
+    }
+
     public function test_a_completed_survey_is_not_started_again(): void
     {
         SurveyParticipation::create(['survey_id' => $this->survey->id, 'user_id' => $this->employee->id, 'submitted_at' => now()]);

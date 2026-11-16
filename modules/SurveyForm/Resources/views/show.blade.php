@@ -120,6 +120,12 @@
                                 @if ($survey->description)
                                     <p class="text-secondary mt-2 mb-0">{{ $survey->description }}</p>
                                 @endif
+                                @include('SurveyForm::partials.status-flow', [
+                                    'status' => \App\Enums\ParticipationStatus::InProgress,
+                                    'savedDraft' => $draft !== null,
+                                    'id' => 'surveyStatusFlow',
+                                    'class' => 'mt-3',
+                                ])
                             </div>
                             <div style="min-width: 240px">
                                 <div class="d-flex justify-content-between small mb-1">
@@ -403,6 +409,7 @@
                 answerRequiredOfSection: @json(__('Please answer every required question (*) of :section before continuing.')),
                 sectionEvaluated: @json(__(':section evaluated. Please continue with :next.')),
                 draftSaved: @json(__('Draft saved :time')),
+                savedAsDraft: @json(__('Saved as draft')),
                 submitTitle: @json(__('Submit your responses?')),
                 submitText: @json(__('Your answers are stored anonymously and cannot be changed after submission.')),
                 submit: @json(__('Submit')),
@@ -612,6 +619,17 @@
             }
 
             /**
+             * Show "Saved as draft" under In Progress in the status flow once a draft is saved.
+             */
+            function markSavedAsDraft() {
+                const step = $('#surveyStatusFlow .mcg-step.active');
+
+                if (step.length && !step.find('.mcg-step-note').length) {
+                    step.append($('<div>').addClass('mcg-step-note').text(translations.savedAsDraft));
+                }
+            }
+
+            /**
              * Keep a copy of the answers on this device (automatic, between server drafts).
              */
             function saveLocalDraft(savedAt = new Date().toISOString()) {
@@ -692,6 +710,7 @@
                     .done((response) => {
                         toastSuccess(response.message);
                         $('#draftStatus').html(`<i class="ti ti-cloud-check me-1"></i>${escapeHtml(translations.draftSaved.replace(':time', response.saved_label))}`);
+                        markSavedAsDraft();
                         saveLocalDraft(response.saved_at);
                     })
                     .fail(showAjaxError)

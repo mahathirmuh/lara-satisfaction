@@ -9,6 +9,12 @@
                 <div class="card-status-top bg-green"></div>
                 <x-global.empty-state icon="circle-check" :title="__('Thank you for your feedback!')"
                     :subtitle="__('Your answers for “:survey” have been recorded anonymously. They cannot be traced back to you and can no longer be changed.', ['survey' => $survey->title])">
+                    <div class="d-flex justify-content-center mb-3">
+                        @include('SurveyForm::partials.status-flow', [
+                            'status' => \App\Enums\ParticipationStatus::Completed,
+                            'savedDraft' => false,
+                        ])
+                    </div>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
                         <x-global.btn-detail :label="__('Back to My Survey')" color="blue" size="sm"
                             :href="route('survey-form.index')">

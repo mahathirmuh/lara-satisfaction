@@ -18,13 +18,7 @@
         </div>
 
         {{-- Where the person stands now --}}
-        <x-global.steps class="mb-3 survey-status-flow" :aria-label="__('Status: :status', ['status' => $status->label()])">
-            @foreach (\App\Enums\ParticipationStatus::cases() as $step)
-                <x-global.steps.step :number="$step->step()" :label="$step->label()"
-                    :passed="$isCompleted || $step->step() < $status->step()" :active="$step === $status"
-                    :note="$step === \App\Enums\ParticipationStatus::InProgress && $status === $step && $survey->has_draft ? __('Saved as draft') : null" />
-            @endforeach
-        </x-global.steps>
+        @include('SurveyForm::partials.status-flow', ['status' => $status, 'savedDraft' => (bool) $survey->has_draft, 'class' => 'mb-3'])
 
         @if ($survey->description)
             <p class="text-secondary mb-3">{{ \Illuminate\Support\Str::limit($survey->description, 160) }}</p>
