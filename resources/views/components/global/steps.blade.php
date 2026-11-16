@@ -1,3 +1,5 @@
+@props(['vertical' => false])
+
 @pushOnce('style')
     <style>
         .mcg-steps-container {
@@ -21,10 +23,41 @@
             margin: auto;
             opacity: .35;
         }
+
+        /* Vertical stepper: steps stacked, the label beside its number. */
+        .mcg-steps-container.vertical {
+            overflow-x: visible;
+        }
+
+        .mcg-steps-container.vertical .mcg-steps {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            min-width: 0;
+        }
+
+        .mcg-steps-container.vertical .mcg-step {
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        .mcg-steps-container.vertical .mcg-step-text {
+            align-items: flex-start;
+        }
+
+        .mcg-steps-container.vertical .mcg-step-divider {
+            flex: none;
+            width: 0;
+            min-width: 0;
+            height: 20px;
+            margin: 4px 0 4px 17px;
+            border: 0;
+            border-left: 1px dashed #000000;
+        }
     </style>
 @endPushOnce
 
-<div {{ $attributes->merge(['class' => 'mcg-steps-container']) }}>
+<div {{ $attributes->merge(['class' => 'mcg-steps-container' . ($vertical ? ' vertical' : '')]) }}>
     <div class="mcg-steps">
         {{ $slot }}
     </div>

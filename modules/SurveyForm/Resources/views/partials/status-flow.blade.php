@@ -1,6 +1,6 @@
-{{-- Where the signed-in person stands with a survey: Not Started -> In Progress (Saved as draft) -> Completed, the current step highlighted. Expects $status (App\Enums\ParticipationStatus) and $savedDraft (bool); optional $id and $class. --}}
+{{-- Where the signed-in person stands with a survey: Not Started -> In Progress (Saved as draft) -> Completed, the current step highlighted. Expects $status (App\Enums\ParticipationStatus) and $savedDraft (bool); optional $vertical (stacked steps) and $class. --}}
 @php($isCompleted = $status === \App\Enums\ParticipationStatus::Completed)
-<x-global.steps :id="$id ?? null" :class="'survey-status-flow ' . ($class ?? '')"
+<x-global.steps :vertical="$vertical ?? false" :class="'survey-status-flow ' . ($class ?? '')"
     :aria-label="__('Status: :status', ['status' => $status->label()])">
     @foreach (\App\Enums\ParticipationStatus::cases() as $step)
         <x-global.steps.step :number="$step->step()" :label="$step->label()"
