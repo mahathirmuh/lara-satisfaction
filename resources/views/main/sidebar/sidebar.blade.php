@@ -30,6 +30,10 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <span class="dropdown-header">{{ Auth::user()->name }}</span>
+                    <a href="{{ route('profile.show') }}" class="dropdown-item">
+                        <i class="ti ti-user-circle me-2"></i> {{ __('My Profile') }}
+                    </a>
+                    <div class="dropdown-divider"></div>
                     <a href="{{ route('logout') }}" class="dropdown-item text-danger" onclick="logout(event)">
                         <i class="ti ti-logout me-2"></i> {{ __('Logout') }}
                     </a>
