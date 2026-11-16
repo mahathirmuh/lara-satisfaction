@@ -2,6 +2,11 @@
 
 @section('page-title', __('Thank You'))
 
+@push('breadcrumbs')
+    <x-global.breadcrumb-item>{{ $survey->title }}</x-global.breadcrumb-item>
+    <x-global.breadcrumb-item current>{{ __('Thank You') }}</x-global.breadcrumb-item>
+@endpush
+
 @section('content')
     <div class="row justify-content-center">
         <div class="col-lg-8">

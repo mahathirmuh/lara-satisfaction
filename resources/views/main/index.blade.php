@@ -30,6 +30,7 @@
             <!--  Main Page -->
             <div class="page-body mt-1">
                 <div class="container-xl" style="max-width: 1440px">
+                    @include('main.breadcrumb')
                     @yield('content')
                 </div>
             </div>

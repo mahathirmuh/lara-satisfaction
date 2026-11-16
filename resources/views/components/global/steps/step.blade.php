@@ -66,16 +66,10 @@
             color: #3B82F6;
         }
 
-        .mcg-step-text {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-
         .mcg-step-note {
             font-size: 11px;
-            line-height: 1.2;
+            line-height: 1;
+            margin-top: -2px;
             white-space: nowrap;
             color: #6B7280;
         }
@@ -87,10 +81,8 @@
         <i class="ti ti-check mcg-step-check"></i>
         <span class="mcg-step-digit">{{ $number }}</span>
     </div>
-    <div class="mcg-step-text">
-        <div class="mcg-step-label">{{ $label ?? __('Step :number', ['number' => $number]) }}</div>
-        @if ($note)
-            <div class="mcg-step-note">{{ $note }}</div>
-        @endif
-    </div>
+    <div class="mcg-step-label">{{ $label ?? __('Step :number', ['number' => $number]) }}</div>
+    @if ($note)
+        <div class="mcg-step-note">{{ $note }}</div>
+    @endif
 </div>

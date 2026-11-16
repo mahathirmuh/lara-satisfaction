@@ -98,7 +98,6 @@ class ParticipationStatusTest extends TestCase
             ->get(route('survey-form.show', $this->survey))
             ->assertOk()
             ->assertSee('aria-label="Status: In Progress"', false)
-            ->assertSee('class="mcg-steps-container vertical survey-status-flow', false)
             ->assertDontSee($savedAsDraftNote, false);
 
         SurveyDraft::factory()->for($this->survey)->for($this->employee)->create();

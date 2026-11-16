@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\PermissionAction;
+use App\View\Composers\BreadcrumbComposer;
 use App\View\Composers\NotificationComposer;
 use App\View\Composers\SidebarComposer;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         $this->registerBladeDirectives();
 
         View::composer('main.sidebar.menulist', SidebarComposer::class);
+        View::composer('main.breadcrumb', BreadcrumbComposer::class);
         View::composer('main.index', NotificationComposer::class);
     }
 

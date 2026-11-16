@@ -2,6 +2,10 @@
 
 @section('page-title', $survey->title)
 
+@push('breadcrumbs')
+    <x-global.breadcrumb-item current>{{ $survey->title }}</x-global.breadcrumb-item>
+@endpush
+
 @push('style')
     <style>
         .rating-option .form-selectgroup-label {
@@ -93,24 +97,12 @@
             bottom: .75rem;
             z-index: 5;
         }
-
-        /* Status and progress panel on the right (wide screens), following the scroll. */
-        .survey-side {
-            width: 220px;
-        }
-
-        .survey-side-card {
-            position: sticky;
-            top: 72px;
-        }
     </style>
 @endpush
 
 @section('content')
     <form id="surveyForm" method="POST" action="{{ route('survey-form.store', $survey) }}" novalidate>
         @csrf
-        <div class="row g-3">
-        <div class="col">
         <div class="row g-3">
             {{-- Header --}}
             <div class="col-12">
@@ -132,21 +124,20 @@
                                 @if ($survey->description)
                                     <p class="text-secondary mt-2 mb-0">{{ $survey->description }}</p>
                                 @endif
-                            </div>
-                            {{-- Status and progress (smaller screens; wide screens use the side panel) --}}
-                            <div class="flex-shrink-0 d-xxl-none" style="min-width: 240px">
-                                <div class="small fw-medium mb-2">{{ __('Status') }}</div>
                                 @include('SurveyForm::partials.status-flow', [
                                     'status' => \App\Enums\ParticipationStatus::InProgress,
                                     'savedDraft' => $draft !== null,
-                                    'class' => 'js-status-flow mb-3',
+                                    'id' => 'surveyStatusFlow',
+                                    'class' => 'mt-3',
                                 ])
+                            </div>
+                            <div style="min-width: 240px">
                                 <div class="d-flex justify-content-between small mb-1">
                                     <span class="fw-medium">{{ __('Progress') }}</span>
-                                    <span class="text-secondary js-survey-progress-label"></span>
+                                    <span id="surveyProgressLabel" class="text-secondary"></span>
                                 </div>
                                 <div class="progress progress-sm">
-                                    <div class="progress-bar bg-green js-survey-progress" style="width: 0%"
+                                    <div class="progress-bar bg-green" id="surveyProgress" style="width: 0%"
                                         role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Survey progress') }}">
                                     </div>
                                 </div>
@@ -396,30 +387,6 @@
                 </div>
             </div>
         </div>
-        </div>
-
-        {{-- Side panel (wide screens): status and progress, following the scroll --}}
-        <div class="col-auto d-none d-xxl-block survey-side">
-            <div class="card rounded-3 survey-side-card">
-                <div class="card-body">
-                    <div class="small fw-medium mb-2">{{ __('Status') }}</div>
-                    @include('SurveyForm::partials.status-flow', [
-                        'status' => \App\Enums\ParticipationStatus::InProgress,
-                        'savedDraft' => $draft !== null,
-                        'vertical' => true,
-                        'class' => 'js-status-flow mb-4',
-                    ])
-                    <div class="small fw-medium mb-1">{{ __('Progress') }}</div>
-                    <div class="progress progress-sm mb-1">
-                        <div class="progress-bar bg-green js-survey-progress" style="width: 0%"
-                            role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Survey progress') }}">
-                        </div>
-                    </div>
-                    <div class="small text-secondary js-survey-progress-label"></div>
-                </div>
-            </div>
-        </div>
-        </div>
     </form>
 @endsection
 
@@ -519,8 +486,8 @@
                 const answered = questions.filter((_, question) => isAnswered(question)).length;
                 const percentage = questions.length ? Math.round(answered / questions.length * 100) : 0;
 
-                $('.js-survey-progress').css('width', percentage + '%').attr('aria-valuenow', percentage);
-                $('.js-survey-progress-label').text(translations.answeredCount.replace(':answered', answered).replace(':total', questions.length));
+                $('#surveyProgress').css('width', percentage + '%').attr('aria-valuenow', percentage);
+                $('#surveyProgressLabel').text(translations.answeredCount.replace(':answered', answered).replace(':total', questions.length));
             }
 
             function renderReview() {
@@ -656,15 +623,14 @@
             }
 
             /**
-             * Show "Saved as draft" under In Progress in the status flows (header and side
-             * panel) once a draft is saved.
+             * Show "Saved as draft" under In Progress in the status flow once a draft is saved.
              */
             function markSavedAsDraft() {
-                $('.js-status-flow .mcg-step.active .mcg-step-text').each(function() {
-                    if (!$(this).find('.mcg-step-note').length) {
-                        $(this).append($('<div>').addClass('mcg-step-note').text(translations.savedAsDraft));
-                    }
-                });
+                const step = $('#surveyStatusFlow .mcg-step.active');
+
+                if (step.length && !step.find('.mcg-step-note').length) {
+                    step.append($('<div>').addClass('mcg-step-note').text(translations.savedAsDraft));
+                }
             }
 
             /**
