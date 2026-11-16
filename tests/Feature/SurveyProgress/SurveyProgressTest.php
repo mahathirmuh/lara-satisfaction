@@ -61,6 +61,17 @@ class SurveyProgressTest extends TestCase
             ]);
     }
 
+    public function test_the_summary_cards_show_their_icons_not_their_names(): void
+    {
+        $page = $this->actingAs($this->admin)->get(route('survey-progress.index'))->assertOk();
+
+        foreach (['users', 'circle-dashed', 'loader', 'circle-check'] as $icon) {
+            $page->assertSee('<i class="ti ti-'.$icon.'" aria-hidden="true"></i>', false);
+        }
+
+        $this->assertDoesNotMatchRegularExpression('#<div class="summary-icon[^"]*">\s*users\s*<span#', (string) $page->getContent());
+    }
+
     public function test_each_person_is_listed_with_their_status(): void
     {
         $rows = $this->actingAs($this->admin)

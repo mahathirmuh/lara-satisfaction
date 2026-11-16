@@ -4,6 +4,13 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.10.1] - 2026-11-16
+
+### Fixed
+
+- The summary cards of **Survey Progress** (Employees, Not Started, In Progress, Completed) show their icons again,
+  not the names of the icons as text.
+
 ## [0.10.0] - 2026-11-16
 
 ### Added

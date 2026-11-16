@@ -61,7 +61,12 @@
     <div class="card-body {{ $cardPadding }}">
         <div class="d-flex h-100 w-100 justify-content-start align-items-center gap-4">
             <div class="summary-icon rounded-3 {{ $textColor }} {{ $bgColor }}">
-                {{ $icon }}
+                {{-- The icon: markup given as a slot (<x-slot:icon>), or the name of a Tabler icon (icon="users"). --}}
+                @if ($icon instanceof \Illuminate\Contracts\Support\Htmlable)
+                    {{ $icon }}
+                @elseif (filled($icon))
+                    <i class="ti ti-{{ $icon }}" aria-hidden="true"></i>
+                @endif
                 <span class="summary-icon-clip {{ $clipColor }}"></span>
             </div>
             <div class="d-flex flex-column position-relative min-w-0">
