@@ -120,14 +120,16 @@
                                 @if ($survey->description)
                                     <p class="text-secondary mt-2 mb-0">{{ $survey->description }}</p>
                                 @endif
+                            </div>
+                            {{-- Status and progress, on the right --}}
+                            <div class="flex-shrink-0" style="min-width: 240px">
+                                <div class="small fw-medium mb-2">{{ __('Status') }}</div>
                                 @include('SurveyForm::partials.status-flow', [
                                     'status' => \App\Enums\ParticipationStatus::InProgress,
                                     'savedDraft' => $draft !== null,
                                     'id' => 'surveyStatusFlow',
-                                    'class' => 'mt-3',
+                                    'class' => 'mb-3',
                                 ])
-                            </div>
-                            <div style="min-width: 240px">
                                 <div class="d-flex justify-content-between small mb-1">
                                     <span class="fw-medium">{{ __('Progress') }}</span>
                                     <span id="surveyProgressLabel" class="text-secondary"></span>
