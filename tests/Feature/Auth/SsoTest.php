@@ -124,6 +124,30 @@ class SsoTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'someone@contractor.co.id']);
     }
 
+    public function test_microsoft_job_title_decides_the_roles(): void
+    {
+        $employee = $this->employee(['email' => 'budi@merdekabattery.com']);
+        $this->fakeMicrosoftUser('budi@merdekabattery.com', jobTitle: 'OHS Manager');
+
+        $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
+
+        $employee->refresh();
+        $this->assertSame('OHS Manager', $employee->job_title);
+        $this->assertSame(['Manager'], $employee->roles->pluck('name')->all());
+    }
+
+    public function test_microsoft_account_without_a_job_title_keeps_the_known_one(): void
+    {
+        $manager = $this->manager(['email' => 'budi@merdekabattery.com', 'job_title' => 'OHS Manager']);
+        $this->fakeMicrosoftUser('budi@merdekabattery.com');
+
+        $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
+
+        $manager->refresh();
+        $this->assertSame('OHS Manager', $manager->job_title);
+        $this->assertSame(['Manager'], $manager->roles->pluck('name')->all());
+    }
+
     public function test_inactive_user_is_not_signed_in(): void
     {
         $this->employee(['email' => 'left@merdekabattery.com', 'is_active' => false]);
@@ -139,9 +163,9 @@ class SsoTest extends TestCase
     /**
      * Make the Microsoft provider return the given account.
      */
-    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso'): void
+    protected function fakeMicrosoftUser(string $email, string $name = 'Budi Santoso', ?string $jobTitle = null): void
     {
-        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email])->map([
+        $socialUser = (new SocialiteUser)->setRaw(['mail' => $email, 'jobTitle' => $jobTitle])->map([
             'id' => 'azure-object-id',
             'name' => $name,
             'email' => $email,

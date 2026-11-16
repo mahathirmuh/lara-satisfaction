@@ -18,11 +18,11 @@ class RolePermissionRepository implements RolePermissionInterface
      * The id tie-breaker is skipped when sorting on the id itself: SQL Server
      * rejects an ORDER BY list that names a column twice.
      */
-    public function paginate(array $params, bool $includeSuperAdmin): LengthAwarePaginator
+    public function paginate(array $params, bool $includeItAdmin): LengthAwarePaginator
     {
         return Role::query()
             ->withCount(['users', 'menus'])
-            ->unless($includeSuperAdmin, fn (Builder $query) => $query->whereKeyNot((int) config('merdeka.super_admin_role_id')))
+            ->unless($includeItAdmin, fn (Builder $query) => $query->whereKeyNot((int) config('merdeka.it_admin_role_id')))
             ->when($params['search'], fn (Builder $query, string $search) => $query->where('name', 'like', Apps::likePattern($search)))
             ->orderBy($params['order_by'], $params['order_dir'])
             ->when($params['order_by'] !== 'id', fn (Builder $query) => $query->orderBy('id'))

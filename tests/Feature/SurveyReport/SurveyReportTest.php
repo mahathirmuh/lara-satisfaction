@@ -46,7 +46,7 @@ class SurveyReportTest extends TestCase
     {
         $this->seedResponses();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertOk()
             ->assertViewHas('summary', fn (array $summary): bool => $summary['responses'] === 8
@@ -69,7 +69,7 @@ class SurveyReportTest extends TestCase
             $this->submitEvaluations([$recruitment->id => 3, $benefits->id => $rating]);
         }
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertOk()
             ->assertViewHas('sectionScores', fn ($scores): bool => $scores->pluck('name')->all() === ['Recruitment', 'Benefits']
@@ -97,7 +97,7 @@ class SurveyReportTest extends TestCase
         $this->submitEvaluations([$benefits->id => 4, $payroll->id => 1]);
         $this->submitEvaluations([$benefits->id => 4, $payroll->id => 1]);
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertOk()
             ->assertViewHas('sectionScores', function ($scores): bool {
@@ -126,7 +126,7 @@ class SurveyReportTest extends TestCase
             ]);
         }
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertOk()
             ->assertViewHas('summary', fn (array $summary): bool => $summary['average'] === 2.0
@@ -148,7 +148,7 @@ class SurveyReportTest extends TestCase
             $this->submitEvaluations([$recruitment->id => $rating, $benefits->id => 2]);
         }
 
-        $content = $this->actingAs($this->surveyAdmin())
+        $content = $this->actingAs($this->superAdmin())
             ->get(route('survey-report.export', $this->survey))
             ->streamedContent();
 
@@ -167,7 +167,7 @@ class SurveyReportTest extends TestCase
         User::factory()->count(2)->create(['company_id' => $this->mainCompany->id]);
         User::factory()->inactive()->create(['company_id' => $this->mainCompany->id]);
 
-        $this->actingAs($admin = $this->surveyAdmin())
+        $this->actingAs($admin = $this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertViewHas('summary', fn (array $summary): bool => $summary['participants'] === 8
                 && $summary['eligible'] === 11
@@ -180,7 +180,7 @@ class SurveyReportTest extends TestCase
     {
         $this->seedResponses();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', $this->survey))
             ->assertViewHas('companyBreakdown', fn ($rows): bool => $rows->count() === 2
                 && $rows[0]['company'] === 'PT Merdeka Battery Materials'
@@ -194,7 +194,7 @@ class SurveyReportTest extends TestCase
     public function test_results_stay_hidden_until_the_anonymity_threshold_is_reached(): void
     {
         $this->submit($this->mainCompany, 3, 4, 4, 'Too few to show');
-        $admin = $this->surveyAdmin();
+        $admin = $this->superAdmin();
 
         $this->actingAs($admin)
             ->get(route('survey-report.show', $this->survey))
@@ -237,7 +237,7 @@ class SurveyReportTest extends TestCase
             $otherDepartmentComment->id => 'General remark',
         ]);
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->getJson(route('survey-report.comments', ['survey' => $this->survey, 'department_id' => 'general']))
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
@@ -249,7 +249,7 @@ class SurveyReportTest extends TestCase
     {
         $this->seedResponses();
 
-        $response = $this->actingAs($this->surveyAdmin())->get(route('survey-report.export', $this->survey));
+        $response = $this->actingAs($this->superAdmin())->get(route('survey-report.export', $this->survey));
 
         $response->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
 
@@ -268,7 +268,7 @@ class SurveyReportTest extends TestCase
         $this->seedResponses();
         $this->submit($this->mainCompany, 1, 5, 5, '=HYPERLINK("http://evil.test","click")');
 
-        $content = $this->actingAs($this->surveyAdmin())
+        $content = $this->actingAs($this->superAdmin())
             ->get(route('survey-report.export', $this->survey))
             ->streamedContent();
 
@@ -278,7 +278,7 @@ class SurveyReportTest extends TestCase
 
     public function test_draft_surveys_have_no_report(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('survey-report.show', Survey::factory()->draft()->create()))
             ->assertNotFound();
     }
@@ -291,6 +291,53 @@ class SurveyReportTest extends TestCase
             ->get(route('survey-report.index'))
             ->assertOk()
             ->assertViewHas('surveys', fn ($surveys): bool => $surveys->sole()->responses_count === 2);
+    }
+
+    public function test_manager_only_sees_the_departments_their_job_title_manages(): void
+    {
+        $this->seedResponses();
+        $this->questions['SCM']->department->update(['manager_job_titles' => ['Supply Chain*Manager']]);
+        $manager = $this->manager(['job_title' => 'Supply Chain Management Manager']);
+
+        $this->actingAs($manager)
+            ->get(route('survey-report.show', $this->survey))
+            ->assertOk()
+            ->assertViewHas('summary', fn (array $summary): bool => $summary['average'] === 4.0 && $summary['comments'] === 0)
+            ->assertViewHas('departmentScores', fn ($scores): bool => $scores->pluck('name')->all() === ['Supply Chain'])
+            ->assertViewHas('questionBreakdown', fn ($questions): bool => $questions->pluck('number', 'department')->all() === ['Supply Chain' => 3])
+            ->assertViewHas('departments', fn ($departments): bool => $departments->pluck('name')->all() === ['Supply Chain'])
+            ->assertDontSee('Keep it up');
+
+        $this->actingAs($manager)
+            ->getJson(route('survey-report.comments', $this->survey))
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+
+        $rows = array_map('str_getcsv', array_filter(explode("\n", trim(substr(
+            $this->actingAs($manager)->get(route('survey-report.export', $this->survey))->streamedContent(),
+            3,
+        )))));
+        $this->assertCount(3, $rows[0]);
+        $this->assertStringStartsWith('Q3 [Supply Chain]', $rows[0][2]);
+
+        $this->actingAs($manager)
+            ->get(route('dashboard.index'))
+            ->assertViewHas('departmentScores', fn ($scores): bool => $scores->pluck('name')->all() === ['Supply Chain']);
+    }
+
+    public function test_manager_of_a_department_outside_the_survey_sees_no_results(): void
+    {
+        $this->seedResponses();
+        $manager = $this->manager(['job_title' => 'Maintenance Manager']);
+
+        $this->actingAs($manager)
+            ->get(route('survey-report.index'))
+            ->assertOk()
+            ->assertSee('Your job title is not set as the manager of a surveyed department.');
+
+        $this->actingAs($manager)->get(route('survey-report.show', $this->survey))->assertForbidden();
+        $this->actingAs($manager)->get(route('survey-report.export', $this->survey))->assertForbidden();
+        $this->actingAs($manager)->get(route('dashboard.index'))->assertViewHas('canViewReports', false);
     }
 
     /**
@@ -347,7 +394,7 @@ class SurveyReportTest extends TestCase
      */
     protected function reportViewerFor(array $companyIds): User
     {
-        $role = Role::query()->where('name', 'Survey Administrator')->sole();
+        $role = Role::query()->where('name', 'Super Admin')->sole();
         $role->update(['func_role' => 'COMPANY', 'setting_role' => $companyIds]);
 
         return User::factory()->withRole($role)->create(['company_id' => $companyIds[0]]);

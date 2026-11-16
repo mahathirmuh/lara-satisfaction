@@ -3,6 +3,7 @@
 namespace Modules\MasterData\Http\Requests;
 
 use App\Helpers\FileApps;
+use App\Helpers\JobTitles;
 use App\Models\Organization\Department;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -50,17 +51,22 @@ class DepartmentRequest extends FormRequest
             'is_active' => ['required', 'boolean'],
             'image' => FileApps::imageRules(),
             'remove_image' => ['boolean'],
+            'manager_job_titles' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
     /**
-     * Department attributes ready to persist (without the image fields).
+     * Department attributes ready to persist (without the image fields), with
+     * the manager job titles as rules (one per line).
      *
      * @return array<string, mixed>
      */
     public function departmentAttributes(): array
     {
-        return $this->safe()->except(['image', 'remove_image']);
+        return [
+            ...$this->safe()->except(['image', 'remove_image']),
+            'manager_job_titles' => JobTitles::parse($this->validated('manager_job_titles')) ?: null,
+        ];
     }
 
     /**

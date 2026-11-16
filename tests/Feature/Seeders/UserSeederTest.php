@@ -19,7 +19,7 @@ class UserSeederTest extends TestCase
         $this->seedAccessControl();
     }
 
-    public function test_first_super_admin_is_the_configured_company_email_without_a_password(): void
+    public function test_first_it_admin_is_the_configured_company_email_without_a_password(): void
     {
         config(['merdeka.seed.admin_email' => ' Budi.Santoso@MerdekaBattery.com ']);
 
@@ -27,19 +27,19 @@ class UserSeederTest extends TestCase
 
         $admin = User::query()->where('email', 'budi.santoso@merdekabattery.com')->sole();
         $this->assertSame('Budi Santoso', $admin->name);
-        $this->assertTrue($admin->isSuperAdmin());
+        $this->assertTrue($admin->isItAdmin());
         $this->assertFalse(Hash::check('', $admin->password));
         $this->assertFalse(Hash::check('password', $admin->password));
     }
 
-    public function test_existing_account_of_the_configured_email_becomes_super_admin(): void
+    public function test_existing_account_of_the_configured_email_becomes_it_admin(): void
     {
         $employee = $this->employee(['email' => 'budi.santoso@merdekabattery.com']);
         config(['merdeka.seed.admin_email' => 'budi.santoso@merdekabattery.com']);
 
         $this->seed(UserSeeder::class);
 
-        $this->assertSame(['Super Admin', 'Employee'], $employee->fresh()->roles->sortBy('id')->pluck('name')->values()->all());
+        $this->assertSame(['IT Admin', 'Employee'], $employee->fresh()->roles->sortBy('id')->pluck('name')->values()->all());
         $this->assertSame(1, User::query()->where('email', 'budi.santoso@merdekabattery.com')->count());
     }
 

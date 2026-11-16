@@ -8,6 +8,7 @@ use App\Helpers\Alert;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Organization\Company;
+use App\Models\Organization\Department;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyAnswer;
 use Illuminate\Http\JsonResponse;
@@ -23,11 +24,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Anonymous survey results for administrators, limited to the companies of
- * the user's role scope.
+ * Anonymous survey results, limited to the companies of the user's role scope
+ * and, for managers, to the departments their job title manages.
  */
 class SurveyReportController extends Controller
 {
+    /**
+     * Shown to a manager whose job title manages none of the surveyed departments.
+     */
+    public const NO_DEPARTMENT_MESSAGE = 'Your job title is not set as the manager of a surveyed department. Ask the IT Admin to add it in Master Data > Departments.';
+
     /**
      * Create a new controller instance.
      */
@@ -40,6 +46,7 @@ class SurveyReportController extends Controller
     {
         return view('SurveyReport::index', [
             'surveys' => $this->reports->reportableSurveys($request->user()->scopedCompanyIds()),
+            'noDepartmentMessage' => $request->user()->reportDepartmentIds() === [] ? self::NO_DEPARTMENT_MESSAGE : null,
         ]);
     }
 
@@ -64,7 +71,7 @@ class SurveyReportController extends Controller
             'trend' => $this->reports->participationTrend($scope),
             'companies' => $this->companyOptions($request),
             'selectedCompanyId' => $request->integer('company_id') ?: null,
-            'departments' => $survey->departments(),
+            'departments' => $survey->departments()->filter(fn (Department $department): bool => $scope->coversDepartment($department->id))->values(),
             'ratingScale' => QuestionType::Rating->scaleLabels(),
         ]);
     }
@@ -136,15 +143,19 @@ class SurveyReportController extends Controller
     }
 
     /**
-     * Report scope from the user's role scope and the optional company filter.
+     * Report scope from the user's role scope (companies and departments) and
+     * the optional company filter.
      */
     protected function scopeFor(Request $request, Survey $survey): ReportScope
     {
         $allowedCompanyIds = $request->user()->scopedCompanyIds();
+        $departmentIds = $request->user()->reportDepartmentIds();
         $companyId = $request->integer('company_id') ?: null;
 
+        abort_if($departmentIds === [], Response::HTTP_FORBIDDEN, self::NO_DEPARTMENT_MESSAGE);
+
         if ($companyId === null) {
-            return new ReportScope($survey, $allowedCompanyIds);
+            return new ReportScope($survey, $allowedCompanyIds, $departmentIds);
         }
 
         abort_if(
@@ -153,7 +164,7 @@ class SurveyReportController extends Controller
             'You may not view results of this company.'
         );
 
-        return new ReportScope($survey, [$companyId]);
+        return new ReportScope($survey, [$companyId], $departmentIds);
     }
 
     /**

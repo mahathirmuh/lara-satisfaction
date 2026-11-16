@@ -15,10 +15,12 @@ interface UserRegisteredInterface
      * @param  array<int, int>|null  $companyIds
      * @return LengthAwarePaginator<int, User>
      */
-    public function paginate(array $params, array $filters, ?array $companyIds, bool $includeSuperAdmins): LengthAwarePaginator;
+    public function paginate(array $params, array $filters, ?array $companyIds, bool $includeItAdmins): LengthAwarePaginator;
 
     /**
-     * Register a user (restoring a previously deleted account with the same email).
+     * Register a user (restoring a previously deleted account with the same
+     * email). The given roles are the ones assigned by hand; the roles given
+     * by job title are added from the user's job title.
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, int>  $roleIds
@@ -26,7 +28,8 @@ interface UserRegisteredInterface
     public function create(array $data, array $roleIds): User;
 
     /**
-     * Update a user and its roles.
+     * Update a user and the roles assigned by hand; the roles given by job
+     * title follow the user's job title.
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, int>  $roleIds

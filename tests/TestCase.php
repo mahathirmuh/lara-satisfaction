@@ -40,6 +40,18 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * The unrestricted role, only given by hand.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function itAdmin(array $attributes = []): User
+    {
+        return $this->userWithRole('IT Admin', $attributes);
+    }
+
+    /**
+     * Survey administration and every result.
+     *
      * @param  array<string, mixed>  $attributes
      */
     protected function superAdmin(array $attributes = []): User
@@ -48,11 +60,13 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * Fills in surveys; sees the results of the departments the job title manages.
+     *
      * @param  array<string, mixed>  $attributes
      */
-    protected function surveyAdmin(array $attributes = []): User
+    protected function manager(array $attributes = []): User
     {
-        return $this->userWithRole('Survey Administrator', $attributes);
+        return $this->userWithRole('Manager', $attributes);
     }
 
     /**

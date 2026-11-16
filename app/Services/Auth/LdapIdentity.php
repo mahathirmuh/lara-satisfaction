@@ -13,11 +13,13 @@ final readonly class LdapIdentity
      * @param  string  $username  Directory username (sAMAccountName), e.g. "budi.santoso".
      * @param  string  $distinguishedName  For the logs only, never shown to users.
      * @param  string|null  $email  Company email (mail, else userPrincipalName), lower case.
+     * @param  string|null  $jobTitle  Job title (title), which decides the roles.
      */
     public function __construct(
         public string $username,
         public string $distinguishedName,
         public ?string $email,
         public ?string $name,
+        public ?string $jobTitle = null,
     ) {}
 }

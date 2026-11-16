@@ -30,15 +30,27 @@ php artisan serve       # or: composer dev
 Uploaded images (department illustrations, landing page hero image) are re-encoded to WebP and
 stored on the `public` disk, so `php artisan storage:link` is required on every server.
 
-The first super admin is the company email in `SEED_ADMIN_EMAIL`: that person signs in with
+The first IT Admin is the company email in `SEED_ADMIN_EMAIL`: that person signs in with
 Microsoft SSO or their network account. Running `php artisan db:seed --class=UserSeeder` again
-also grants the role to an existing account, e.g. after its owner signed in once as Employee.
+also grants the role to an existing account, e.g. after its owner signed in once.
 Set `SEED_DEMO_DATA=true` (never in production) to seed demo employees and anonymous responses
 (they cannot sign in), then run `php artisan migrate:fresh --seed`.
 
-Built-in roles: **Super Admin** (everything), **Survey Administrator** (survey management,
-reports, user registration, master data) and **Employee** (dashboard
-and *My Survey*; default role of auto-registered SSO / LDAP users).
+### Roles
+
+| Role | Given | Access |
+| --- | --- | --- |
+| **IT Admin** | By hand only (User Management) | Everything, including Role & Permission and System Log |
+| **Super Admin** | Job title *Support Services Deputy General Manager* | Survey management, master data, users, every result |
+| **Manager** | Job titles `*Manager`, `Deputy GM` (not `Assistant of *`) | *My Survey*, the results of the departments they manage |
+| **Employee** | Any other job title (default role) | Dashboard and *My Survey* |
+
+The job title comes from the directory (LDAP `title`, Microsoft `jobTitle`) and is refreshed at
+every sign-in; the roles given by job title follow it, roles given by hand are kept. Rules are
+edited in Role & Permission (one per line, `*` any text, `!` excludes) and applied to every user
+at once. A manager sees the departments whose *Manager Job Titles* (Master Data > Departments)
+match their job title. After upgrading an existing install, run
+`php artisan migrate --force` then `php artisan db:seed --class=RoleSeeder --force`.
 
 ### Docker
 

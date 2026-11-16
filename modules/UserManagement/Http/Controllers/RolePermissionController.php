@@ -2,6 +2,7 @@
 
 namespace Modules\UserManagement\Http\Controllers;
 
+use App\Enums\DepartmentScope;
 use App\Enums\RoleScope;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
@@ -9,6 +10,7 @@ use App\Models\Organization\Company;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\Permission;
 use App\Models\UserManagement\Role;
+use App\Services\Auth\JobTitleRoles;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,14 +19,19 @@ use Modules\UserManagement\Repositories\RolePermissionInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Roles with menu access (ACCESS) and per-menu CRUD permissions.
+ * Roles with menu access (ACCESS), per-menu CRUD permissions, data scopes and
+ * the job title rules that give them. Changing the rules refreshes the roles
+ * of every user at once.
  */
 class RolePermissionController extends Controller
 {
     /**
      * Create a new controller instance.
      */
-    public function __construct(protected RolePermissionInterface $roles) {}
+    public function __construct(
+        protected RolePermissionInterface $roles,
+        protected JobTitleRoles $jobTitleRoles,
+    ) {}
 
     /**
      * Role & permission page.
@@ -41,6 +48,7 @@ class RolePermissionController extends Controller
             'permissions' => Permission::query()->orderBy('id')->get(['id', 'name']),
             'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
             'scopes' => RoleScope::options(),
+            'departmentScopes' => DepartmentScope::options(),
             'can' => $request->user()->menuAbilities('user-management.role-permission'),
         ]);
     }
@@ -54,7 +62,7 @@ class RolePermissionController extends Controller
         $params = Apps::tableParams($request, ['name', 'func_role', 'users_count'], 'id');
         $companyNames = Company::query()->pluck('name', 'id');
 
-        $roles = $this->roles->paginate($params, $actor->isSuperAdmin());
+        $roles = $this->roles->paginate($params, $actor->isItAdmin());
 
         return Apps::tableResponse($roles, fn (Role $role): array => [
             'id' => $role->id,
@@ -65,7 +73,9 @@ class RolePermissionController extends Controller
                 : collect($role->companyIds())->map(fn (int $id): string => $companyNames[$id] ?? '#'.$id)->implode(', '),
             'users_count' => $role->users_count,
             'menus_count' => $role->menus_count,
-            'is_protected' => $role->isSuperAdmin(),
+            'job_titles' => $role->isGivenByJobTitle() ? $role->job_titles : [],
+            'department_scope' => ($role->department_scope ?? DepartmentScope::All)->label(),
+            'is_protected' => $role->isItAdmin(),
             'is_default' => $role->id === (int) config('merdeka.default_role_id'),
         ]);
     }
@@ -75,7 +85,7 @@ class RolePermissionController extends Controller
      */
     public function show(Request $request, Role $role): JsonResponse
     {
-        abort_if($role->isSuperAdmin() && ! $request->user()->isSuperAdmin(), Response::HTTP_FORBIDDEN);
+        abort_if($role->isItAdmin() && ! $request->user()->isItAdmin(), Response::HTTP_FORBIDDEN);
 
         return response()->json([
             'data' => [
@@ -84,6 +94,9 @@ class RolePermissionController extends Controller
                 'func_role' => $role->func_role->value,
                 'setting_role' => $role->companyIds(),
                 'home_page' => $role->home_page,
+                'job_titles' => implode("\n", $role->job_titles ?? []),
+                'department_scope' => ($role->department_scope ?? DepartmentScope::All)->value,
+                'is_it_admin' => $role->isItAdmin(),
                 'menu_list' => $role->menus()->pluck('menu.id'),
                 'menu_permission' => $role->menuPermissions()
                     ->get(['menu_id', 'permission_id'])
@@ -104,6 +117,10 @@ class RolePermissionController extends Controller
             $request->validated('menu_permission') ?? [],
         );
 
+        if ($role->isGivenByJobTitle()) {
+            $this->jobTitleRoles->syncAll();
+        }
+
         return response()->json([
             'message' => 'Role created successfully.',
             'data' => ['id' => $role->id],
@@ -115,12 +132,18 @@ class RolePermissionController extends Controller
      */
     public function update(RolePermissionRequest $request, Role $role): JsonResponse
     {
+        $previousJobTitles = $role->job_titles;
+
         $this->roles->update(
             $role,
             $request->roleAttributes(),
             $request->validated('menu_list') ?? [],
             $request->validated('menu_permission') ?? [],
         );
+
+        if ($role->job_titles !== $previousJobTitles) {
+            $this->jobTitleRoles->syncAll();
+        }
 
         return response()->json(['message' => 'Role updated successfully.']);
     }
@@ -130,7 +153,7 @@ class RolePermissionController extends Controller
      */
     public function destroy(Role $role): JsonResponse
     {
-        if ($role->isSuperAdmin() || $role->id === (int) config('merdeka.default_role_id')) {
+        if ($role->isItAdmin() || $role->id === (int) config('merdeka.default_role_id')) {
             return response()->json(['message' => 'This built-in role cannot be deleted.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 

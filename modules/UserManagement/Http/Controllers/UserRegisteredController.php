@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Organization\Company;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
+use App\Services\Auth\JobTitleRoles;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,13 +19,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Registered users, limited to the companies of the administrator's role scope.
+ * Roles given by job title follow the user's job title; only the others are
+ * assigned here.
  */
 class UserRegisteredController extends Controller
 {
     /**
      * Create a new controller instance.
      */
-    public function __construct(protected UserRegisteredInterface $users) {}
+    public function __construct(
+        protected UserRegisteredInterface $users,
+        protected JobTitleRoles $jobTitleRoles,
+    ) {}
 
     /**
      * User page.
@@ -36,6 +42,7 @@ class UserRegisteredController extends Controller
         return view('UserManagement::user-registered.index', [
             'companies' => $this->companiesFor($actor),
             'roles' => $this->assignableRoles($actor),
+            'automaticRoleIds' => $this->jobTitleRoles->automaticRoleIds(),
             'can' => $actor->menuAbilities('user-management.user-registered'),
         ]);
     }
@@ -46,19 +53,20 @@ class UserRegisteredController extends Controller
     public function list(Request $request): JsonResponse
     {
         $actor = $request->user();
-        $params = Apps::tableParams($request, ['name', 'email', 'employee_id', 'is_active', 'last_login_at'], 'name');
+        $params = Apps::tableParams($request, ['name', 'email', 'employee_id', 'job_title', 'is_active', 'last_login_at'], 'name');
 
         $users = $this->users->paginate($params, [
             'company' => array_map('intval', Arr::wrap($request->query('company', []))),
             'role' => array_map('intval', Arr::wrap($request->query('role', []))),
             'is_active' => in_array($request->query('is_active'), ['0', '1'], true) ? $request->query('is_active') : null,
-        ], $actor->scopedCompanyIds(), $actor->isSuperAdmin());
+        ], $actor->scopedCompanyIds(), $actor->isItAdmin());
 
         return Apps::tableResponse($users, fn (User $user): array => [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'employee_id' => $user->employee_id,
+            'job_title' => $user->job_title,
             'company' => $user->company?->name,
             'role' => $user->roles->pluck('name')->implode(', '),
             'is_active' => $user->is_active,
@@ -80,6 +88,7 @@ class UserRegisteredController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'employee_id' => $user->employee_id,
+                'job_title' => $user->job_title,
                 'company_id' => $user->company_id,
                 'is_active' => $user->is_active,
                 'role_id' => $user->roles()->pluck('roles.id'),
@@ -93,8 +102,8 @@ class UserRegisteredController extends Controller
     public function store(UserRegisteredRequest $request): JsonResponse
     {
         $user = $this->users->create(
-            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'is_active']),
-            $request->validated('role_id'),
+            $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'is_active']),
+            $request->validated('role_id') ?? [],
         );
 
         return response()->json([
@@ -112,8 +121,8 @@ class UserRegisteredController extends Controller
 
         $this->users->update(
             $user,
-            $request->safe()->only(['name', 'email', 'employee_id', 'company_id', 'is_active']),
-            $request->validated('role_id'),
+            $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'is_active']),
+            $request->validated('role_id') ?? [],
         );
 
         return response()->json(['message' => 'User updated successfully.']);
@@ -141,13 +150,13 @@ class UserRegisteredController extends Controller
      */
     protected function ensureManageable(User $actor, User $user): void
     {
-        if ($actor->isSuperAdmin()) {
+        if ($actor->isItAdmin()) {
             return;
         }
 
         $allowedCompanyIds = $actor->scopedCompanyIds();
 
-        abort_if($user->isSuperAdmin(), Response::HTTP_FORBIDDEN, 'Only a super admin can manage this account.');
+        abort_if($user->isItAdmin(), Response::HTTP_FORBIDDEN, 'Only an IT admin can manage this account.');
         abort_if(
             $allowedCompanyIds !== null && ! in_array((int) $user->company_id, $allowedCompanyIds, true),
             Response::HTTP_FORBIDDEN,
@@ -178,7 +187,7 @@ class UserRegisteredController extends Controller
     protected function assignableRoles(User $actor): Collection
     {
         return Role::query()
-            ->unless($actor->isSuperAdmin(), fn ($query) => $query->whereKeyNot((int) config('merdeka.super_admin_role_id')))
+            ->unless($actor->isItAdmin(), fn ($query) => $query->whereKeyNot((int) config('merdeka.it_admin_role_id')))
             ->orderBy('id')
             ->get(['id', 'name', 'func_role']);
     }

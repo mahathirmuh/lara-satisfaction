@@ -2,6 +2,7 @@
 
 namespace App\Services\Auth;
 
+use App\Helpers\JobTitles;
 use App\Models\UserManagement\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -14,10 +15,31 @@ use Illuminate\Support\Str;
  * A person is matched on their company email. Someone without an account is
  * registered as an Employee on their first sign-in when automatic
  * registration is on (SSO_AUTO_REGISTER) and the email belongs to one of the
- * allowed domains (SSO_ALLOWED_DOMAINS).
+ * allowed domains (SSO_ALLOWED_DOMAINS). The job title the directory gives at
+ * sign-in is recorded and decides the roles (see JobTitleRoles).
  */
 class CompanyAccounts
 {
+    /**
+     * Create a new service instance.
+     */
+    public function __construct(protected JobTitleRoles $roles) {}
+
+    /**
+     * Record the job title from the directory and refresh the roles that
+     * follow it.
+     */
+    public function applyJobTitle(User $user, ?string $jobTitle): void
+    {
+        $jobTitle = JobTitles::normalize($jobTitle) ?: null;
+
+        if ($user->job_title !== $jobTitle) {
+            $user->forceFill(['job_title' => $jobTitle])->saveQuietly();
+        }
+
+        $this->roles->sync($user);
+    }
+
     /**
      * The account of a verified person, registered when allowed; null when
      * there is none.

@@ -81,6 +81,7 @@ class LdapAuthenticator
                 distinguishedName: $entry['dn'],
                 email: $email !== null ? Str::lower($email) : null,
                 name: $this->attribute($entry, (string) config('ldap.attributes.name', 'displayname')),
+                jobTitle: $this->attribute($entry, (string) config('ldap.attributes.job_title', 'title')),
             );
         } finally {
             @ldap_unbind($connection);

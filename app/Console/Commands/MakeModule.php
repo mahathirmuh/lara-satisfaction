@@ -76,7 +76,7 @@ class MakeModule extends Command
         $this->components->info("Module [{$module}] created in modules/{$module}.");
         $this->components->bulletList([
             "Register a menu with route \"{$slug}.index\" (database/seeders/MenuSeeder.php) and grant it in Role & Permission.",
-            'Routes use the permission middleware: until the menu exists only the super admin can open them.',
+            'Routes use the permission middleware: until the menu exists only the IT admin can open them.',
             "Add a migration for the \"{$replacements['{{ table }}']}\" table if the module stores data.",
         ]);
 

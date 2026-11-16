@@ -2,20 +2,27 @@
 
 namespace Database\Seeders;
 
+use App\Enums\DepartmentScope;
 use App\Enums\PermissionAction;
 use App\Enums\RoleScope;
 use App\Models\UserManagement\Menu;
 use App\Models\UserManagement\MenuRolePermission;
 use App\Models\UserManagement\Role;
+use App\Services\Auth\JobTitleRoles;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
 use RuntimeException;
 
 /**
- * Built-in roles with their menu access and CRUD matrix.
+ * Built-in roles with their menu access and CRUD matrix, highest first:
+ * IT Admin (everything, only given by hand), Super Admin (survey
+ * administration and every result), Manager (fills in the survey and sees the
+ * results of the departments they manage) and Employee (fills in the survey).
  *
- * Role ids 1 (Super Admin) and 3 (Employee, default SSO role) are referenced
- * by config/merdeka.php, so roles are created in this order on an empty table.
+ * Super Admin and Manager follow the job title from the directory; Employee
+ * is given when no rule matches. Role ids 1 (IT Admin) and 3 (Employee) are
+ * referenced by config/merdeka.php, so roles are created in this order on an
+ * empty table.
  */
 class RoleSeeder extends Seeder
 {
@@ -26,8 +33,8 @@ class RoleSeeder extends Seeder
      * @var array<string, array<string, array<int, PermissionAction>>|string>
      */
     protected const GRANTS = [
-        'Super Admin' => '*',
-        'Survey Administrator' => [
+        'IT Admin' => '*',
+        'Super Admin' => [
             'dashboard.index' => [PermissionAction::Read],
             'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
             'survey-management.survey.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
@@ -42,6 +49,11 @@ class RoleSeeder extends Seeder
             'dashboard.index' => [PermissionAction::Read],
             'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
         ],
+        'Manager' => [
+            'dashboard.index' => [PermissionAction::Read],
+            'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
+            'survey-report.index' => [PermissionAction::Read],
+        ],
     ];
 
     /**
@@ -54,9 +66,26 @@ class RoleSeeder extends Seeder
     ];
 
     /**
+     * Job title rules giving a role at sign-in (see App\Helpers\JobTitles).
+     *
+     * @var array<string, array<int, string>>
+     */
+    protected const JOB_TITLES = [
+        'Super Admin' => ['Support Services Deputy General Manager'],
+        'Manager' => ['*Manager', 'Deputy GM', '!Assistant of *'],
+    ];
+
+    /**
+     * Roles that only see the survey results of the departments they manage.
+     *
+     * @var array<int, string>
+     */
+    protected const MANAGED_DEPARTMENTS_ONLY = ['Manager'];
+
+    /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(JobTitleRoles $jobTitleRoles): void
     {
         $menus = Menu::query()->get();
 
@@ -64,12 +93,18 @@ class RoleSeeder extends Seeder
             $role = Role::query()->firstOrCreate(['name' => $roleName], ['func_role' => RoleScope::All]);
 
             $homeRoute = self::HOME_PAGES[$roleName] ?? null;
-            $role->update(['home_page' => $homeRoute ? $menus->firstWhere('route', $homeRoute)?->id : null]);
+            $role->update([
+                'home_page' => $homeRoute ? $menus->firstWhere('route', $homeRoute)?->id : null,
+                'job_titles' => self::JOB_TITLES[$roleName] ?? null,
+                'department_scope' => in_array($roleName, self::MANAGED_DEPARTMENTS_ONLY, true) ? DepartmentScope::Managed : DepartmentScope::All,
+            ]);
 
             $this->grant($role, $menus, $grants);
         }
 
         $this->assertBuiltInIds();
+
+        $jobTitleRoles->syncAll();
     }
 
     /**
@@ -125,7 +160,7 @@ class RoleSeeder extends Seeder
     protected function assertBuiltInIds(): void
     {
         $expected = [
-            (int) config('merdeka.super_admin_role_id') => 'Super Admin',
+            (int) config('merdeka.it_admin_role_id') => 'IT Admin',
             (int) config('merdeka.default_role_id') => 'Employee',
         ];
 

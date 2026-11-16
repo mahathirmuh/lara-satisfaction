@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\RateLimiter;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -68,6 +69,58 @@ class LoginTest extends TestCase
 
         $this->assertAuthenticatedAs($employee);
         $this->assertNotNull($employee->fresh()->last_login_at);
+    }
+
+    /**
+     * Job title from the directory => roles it gives.
+     *
+     * @return array<string, array{0: string|null, 1: array<int, string>}>
+     */
+    public static function jobTitleRoles(): array
+    {
+        return [
+            'owner of the survey' => ['Support Services Deputy General Manager', ['Super Admin', 'Manager']],
+            'department manager' => ['Finance Manager', ['Manager']],
+            'deputy general manager' => ['Deputy GM', ['Manager']],
+            'assistant of the general manager' => ['Assistant of General Manager', ['Employee']],
+            'officer' => ['IT Support Officer', ['Employee']],
+            'no job title' => [null, ['Employee']],
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     */
+    #[DataProvider('jobTitleRoles')]
+    public function test_job_title_from_the_directory_decides_the_roles(?string $jobTitle, array $roles): void
+    {
+        $user = $this->employee(['email' => 'budi.santoso@merdekabattery.com']);
+        $this->directory()->shouldReceive('authenticate')->once()
+            ->andReturn($this->identity('budi.santoso@merdekabattery.com', jobTitle: $jobTitle));
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password'])
+            ->assertRedirect();
+
+        $user->refresh();
+        $this->assertSame($jobTitle, $user->job_title);
+        $this->assertSame($roles, $user->roles->sortBy('id')->pluck('name')->values()->all());
+    }
+
+    public function test_a_changed_job_title_changes_the_roles_but_keeps_the_it_admin_role(): void
+    {
+        $manager = $this->manager(['email' => 'budi.santoso@merdekabattery.com', 'job_title' => 'Finance Manager']);
+        $itAdmin = $this->itAdmin(['email' => 'mahathir@merdekabattery.com']);
+        $this->directory()->shouldReceive('authenticate')->twice()->andReturn(
+            $this->identity('budi.santoso@merdekabattery.com', jobTitle: 'Finance Officer'),
+            $this->identity('mahathir@merdekabattery.com', jobTitle: 'IT Support Officer'),
+        );
+
+        $this->post(route('login.store'), ['username' => 'budi.santoso', 'password' => 'network-password']);
+        $this->post(route('logout'));
+        $this->post(route('login.store'), ['username' => 'mahathir', 'password' => 'network-password']);
+
+        $this->assertSame(['Employee'], $manager->fresh()->roles->pluck('name')->all());
+        $this->assertSame(['IT Admin', 'Employee'], $itAdmin->fresh()->roles->sortBy('id')->pluck('name')->values()->all());
     }
 
     public function test_wrong_network_password_gets_the_generic_message(): void
@@ -240,13 +293,14 @@ class LoginTest extends TestCase
     /**
      * A person verified by the directory.
      */
-    protected function identity(?string $email, ?string $name = 'Budi Santoso'): LdapIdentity
+    protected function identity(?string $email, ?string $name = 'Budi Santoso', ?string $jobTitle = null): LdapIdentity
     {
         return new LdapIdentity(
             username: 'budi.santoso',
             distinguishedName: 'CN=Budi Santoso,OU=Staff,DC=example,DC=com',
             email: $email,
             name: $name,
+            jobTitle: $jobTitle,
         );
     }
 

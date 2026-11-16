@@ -68,14 +68,16 @@ return [
     'ca_cert' => env('LDAP_CA_CERT'),
 
     /*
-    | Directory attributes holding the username, email and display name. The
-    | email falls back to userPrincipalName when the mail attribute is empty.
+    | Directory attributes holding the username, email, display name and job
+    | title (which decides the roles). The email falls back to
+    | userPrincipalName when the mail attribute is empty.
     */
 
     'attributes' => [
         'username' => env('LDAP_ATTR_USERNAME', 'samaccountname'),
         'mail' => env('LDAP_ATTR_MAIL', 'mail'),
         'name' => env('LDAP_ATTR_NAME', 'displayname'),
+        'job_title' => env('LDAP_ATTR_JOB_TITLE', 'title'),
     ],
 
 ];

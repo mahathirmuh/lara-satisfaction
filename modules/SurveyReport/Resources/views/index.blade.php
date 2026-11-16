@@ -4,6 +4,13 @@
 
 @section('content')
     <div class="row g-3">
+        @if ($noDepartmentMessage)
+            <div class="col-12">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="ti ti-info-circle me-1"></i>{{ $noDepartmentMessage }}
+                </div>
+            </div>
+        @endif
         <div class="col-12">
             <div class="card">
                 <div class="card-header p-2 px-3 d-flex justify-content-between align-items-center">

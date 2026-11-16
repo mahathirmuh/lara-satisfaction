@@ -70,6 +70,7 @@ class DepartmentController extends Controller
         return response()->json([
             'data' => [
                 ...$department->only(['id', 'code', 'name', 'description', 'icon', 'color', 'sort_order', 'is_active']),
+                'manager_job_titles' => implode("\n", $department->manager_job_titles ?? []),
                 'image_url' => $department->imageUrl(),
             ],
         ]);

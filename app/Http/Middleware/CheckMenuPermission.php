@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  *   4. ACCESS check (menu_role) + CRUD check (menu_role_permission) by HTTP verb
  *
  * Policy: DEFAULT CLOSED. A route guarded by this middleware that is not tied
- * to a registered menu is only reachable by the super admin, so a new module
+ * to a registered menu is only reachable by the IT admin, so a new module
  * cannot be exposed by forgetting to register its menu.
  */
 class CheckMenuPermission
@@ -36,7 +36,7 @@ class CheckMenuPermission
 
         abort_unless($user !== null, Response::HTTP_UNAUTHORIZED);
 
-        if ($user->isSuperAdmin()) {
+        if ($user->isItAdmin()) {
             return $next($request);
         }
 

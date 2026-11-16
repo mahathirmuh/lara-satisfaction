@@ -21,7 +21,7 @@ class DepartmentTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = $this->surveyAdmin();
+        $this->admin = $this->superAdmin();
     }
 
     public function test_admin_creates_a_department_with_a_normalised_code(): void
@@ -36,6 +36,23 @@ class DepartmentTest extends TestCase
             'image_path' => null,
             'is_active' => true,
         ]);
+    }
+
+    public function test_manager_job_titles_are_saved_one_per_line(): void
+    {
+        $this->actingAs($this->admin)
+            ->postJson(route('master-data.department.store'), $this->payload([
+                'manager_job_titles' => "OHS Manager\r\n  Occupational Health & Safety   Manager \n\n",
+            ]))
+            ->assertCreated();
+
+        $department = Department::query()->where('code', 'HSE')->sole();
+        $this->assertSame(['OHS Manager', 'Occupational Health & Safety Manager'], $department->manager_job_titles);
+
+        $this->actingAs($this->admin)
+            ->getJson(route('master-data.department.show', $department))
+            ->assertOk()
+            ->assertJsonPath('data.manager_job_titles', "OHS Manager\nOccupational Health & Safety Manager");
     }
 
     public function test_department_code_must_be_unique(): void

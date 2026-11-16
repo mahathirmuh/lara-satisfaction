@@ -2,9 +2,12 @@
 
 namespace App\Models\UserManagement;
 
+use App\Enums\DepartmentScope;
 use App\Enums\PermissionAction;
 use App\Enums\RoleScope;
+use App\Helpers\JobTitles;
 use App\Models\Organization\Company;
+use App\Models\Organization\Department;
 use App\Models\Survey\SurveyParticipation;
 use Database\Factories\UserManagement\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -26,9 +29,10 @@ use Illuminate\Support\Str;
  * Application user (employee or administrator).
  *
  * Access control follows the Merdeka RBAC matrix: a role is granted menus
- * (menu_role) and CRUD permissions per menu (menu_role_permission).
+ * (menu_role) and CRUD permissions per menu (menu_role_permission). Roles
+ * other than IT Admin follow the job title from the directory.
  */
-#[Fillable(['name', 'email', 'employee_id', 'company_id', 'password', 'is_active', 'last_login_at'])]
+#[Fillable(['name', 'email', 'employee_id', 'job_title', 'company_id', 'password', 'is_active', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -121,11 +125,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Whether the user holds the super admin role (bypasses RBAC).
+     * Whether the user holds the IT Admin role (unrestricted: bypasses RBAC).
      */
-    public function isSuperAdmin(): bool
+    public function isItAdmin(): bool
     {
-        return $this->roles->contains('id', (int) config('merdeka.super_admin_role_id'));
+        return $this->roles->contains('id', (int) config('merdeka.it_admin_role_id'));
     }
 
     /**
@@ -151,7 +155,7 @@ class User extends Authenticatable
      */
     public function grantedMenuIds(): array
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isItAdmin()) {
             return Menu::query()->pluck('id')->map(fn ($id): int => (int) $id)->all();
         }
 
@@ -168,7 +172,7 @@ class User extends Authenticatable
      */
     public function guardRole(int $menuId): bool
     {
-        return $this->isSuperAdmin() || in_array($menuId, $this->grantedMenuIds(), true);
+        return $this->isItAdmin() || in_array($menuId, $this->grantedMenuIds(), true);
     }
 
     /**
@@ -176,7 +180,7 @@ class User extends Authenticatable
      */
     public function hasMenuPermission(int $menuId, PermissionAction|int $permission): bool
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isItAdmin()) {
             return true;
         }
 
@@ -198,7 +202,7 @@ class User extends Authenticatable
      */
     public function canAccessMenu(string $menuKey, PermissionAction $action = PermissionAction::Read): bool
     {
-        if ($this->isSuperAdmin()) {
+        if ($this->isItAdmin()) {
             return true;
         }
 
@@ -248,11 +252,50 @@ class User extends Authenticatable
     }
 
     /**
+     * Department ids whose survey results the user may see; null means every
+     * department. Only the roles that open the survey report count: when all
+     * of them are limited to managed departments, those are the departments
+     * whose manager job title rules match the user's job title.
+     *
+     * @return array<int, int>|null
+     */
+    public function reportDepartmentIds(): ?array
+    {
+        if ($this->isItAdmin()) {
+            return null;
+        }
+
+        $reportMenuId = Menu::idForKey('survey-report');
+        $reportRoleIds = $reportMenuId === null ? [] : MenuRolePermission::query()
+            ->where('menu_id', $reportMenuId)
+            ->where('permission_id', PermissionAction::Read->value)
+            ->whereIn('role_id', $this->roles->modelKeys())
+            ->pluck('role_id')
+            ->all();
+
+        $reportRoles = $this->roles->whereIn('id', $reportRoleIds);
+
+        if ($reportRoles->contains(fn (Role $role): bool => $role->department_scope !== DepartmentScope::Managed)) {
+            return null;
+        }
+
+        if ($reportRoles->isEmpty() || blank($this->job_title)) {
+            return [];
+        }
+
+        return Department::query()
+            ->whereNotNull('manager_job_titles')
+            ->get(['id', 'manager_job_titles'])
+            ->filter(fn (Department $department): bool => JobTitles::matches($department->manager_job_titles ?? [], $this->job_title))
+            ->modelKeys();
+    }
+
+    /**
      * Landing page after sign in, based on the primary role's home menu.
      */
     public function homeUrl(): string
     {
-        $homeMenu = $this->getRole()?->homeMenu;
+        $homeMenu = $this->getRole()?->loadMissing('homeMenu')->homeMenu;
 
         if ($homeMenu?->route && Route::has($homeMenu->route) && $this->guardRole($homeMenu->id)) {
             return route($homeMenu->route);

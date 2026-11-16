@@ -124,6 +124,10 @@ class SsoController extends Controller
             return redirect()->route('login');
         }
 
+        if (($jobTitle = $this->jobTitleOf($socialUser)) !== null) {
+            $this->accounts->applyJobTitle($user, $jobTitle);
+        }
+
         if (! $user->is_active) {
             Alert::warning('Account inactive', 'Your account has been deactivated. Please contact the IT Helpdesk.');
 
@@ -167,5 +171,18 @@ class SsoController extends Controller
         $email = Str::lower(trim((string) (($raw['mail'] ?? null) ?: $socialUser->getEmail())));
 
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+    }
+
+    /**
+     * Job title of a Microsoft account (Graph jobTitle). Only a filled value
+     * is used: Entra may lack the titles the network directory has, and an
+     * empty one must not take roles away. Google shares no job title.
+     */
+    protected function jobTitleOf(SocialiteUser $socialUser): ?string
+    {
+        $raw = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : [];
+        $jobTitle = trim((string) ($raw['jobTitle'] ?? ''));
+
+        return $jobTitle !== '' ? $jobTitle : null;
     }
 }

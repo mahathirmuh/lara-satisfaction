@@ -21,7 +21,7 @@ class QuestionTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = $this->surveyAdmin();
+        $this->admin = $this->superAdmin();
     }
 
     public function test_new_question_is_appended_after_the_existing_ones(): void

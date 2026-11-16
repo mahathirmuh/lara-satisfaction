@@ -13,7 +13,7 @@ interface RolePermissionInterface
      * @param  array{per_page: int, search: string|null, order_by: string, order_dir: string}  $params
      * @return LengthAwarePaginator<int, Role>
      */
-    public function paginate(array $params, bool $includeSuperAdmin): LengthAwarePaginator;
+    public function paginate(array $params, bool $includeItAdmin): LengthAwarePaginator;
 
     /**
      * Create a role with its menu access and CRUD matrix.

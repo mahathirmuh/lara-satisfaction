@@ -69,7 +69,7 @@ class MenuPermissionTest extends TestCase
     /**
      * @return array<string, array{0: string, 1: int}>
      */
-    public static function surveyAdministratorPages(): array
+    public static function superAdminPages(): array
     {
         return [
             'survey period' => ['survey-management.survey.index', 200],
@@ -84,10 +84,10 @@ class MenuPermissionTest extends TestCase
         ];
     }
 
-    #[DataProvider('surveyAdministratorPages')]
-    public function test_survey_administrator_reaches_the_survey_menus_only(string $routeName, int $status): void
+    #[DataProvider('superAdminPages')]
+    public function test_super_admin_reaches_the_survey_menus_only(string $routeName, int $status): void
     {
-        $this->actingAs($this->surveyAdmin())->get(route($routeName))->assertStatus($status);
+        $this->actingAs($this->superAdmin())->get(route($routeName))->assertStatus($status);
     }
 
     public function test_menu_access_without_read_opens_the_page_but_not_its_data(): void
@@ -106,14 +106,14 @@ class MenuPermissionTest extends TestCase
         $this->actingAs($user)->postJson(route('survey-management.survey.store'), [])->assertForbidden();
     }
 
-    public function test_routes_not_registered_as_a_menu_are_closed_to_everyone_but_the_super_admin(): void
+    public function test_routes_not_registered_as_a_menu_are_closed_to_everyone_but_the_it_admin(): void
     {
         Route::middleware(['web', 'auth', 'permission'])
             ->get('unregistered-module', fn () => 'reachable')
             ->name('unregistered-module.index');
 
         $this->actingAs($this->employee())->get('unregistered-module')->assertForbidden();
-        $this->actingAs($this->superAdmin())->get('unregistered-module')->assertOk()->assertSee('reachable');
+        $this->actingAs($this->itAdmin())->get('unregistered-module')->assertOk()->assertSee('reachable');
     }
 
     public function test_sidebar_lists_only_the_menus_of_the_role(): void
@@ -146,19 +146,19 @@ class MenuPermissionTest extends TestCase
     }
 
     #[DataProvider('menuPages')]
-    public function test_super_admin_opens_every_menu_page(string $routeName): void
+    public function test_it_admin_opens_every_menu_page(string $routeName): void
     {
         $this->seed([CompanySeeder::class, DepartmentSeeder::class, SurveySeeder::class]);
 
-        $this->actingAs($this->superAdmin())
+        $this->actingAs($this->itAdmin())
             ->get(route($routeName))
             ->assertOk()
             ->assertSee('<title>', false);
     }
 
-    public function test_super_admin_sees_every_menu(): void
+    public function test_it_admin_sees_every_menu(): void
     {
-        $this->actingAs($this->superAdmin())
+        $this->actingAs($this->itAdmin())
             ->get(route('dashboard.index'))
             ->assertOk()
             ->assertSee('Survey Management')

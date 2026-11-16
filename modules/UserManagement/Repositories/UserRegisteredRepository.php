@@ -4,6 +4,7 @@ namespace Modules\UserManagement\Repositories;
 
 use App\Helpers\Apps;
 use App\Models\UserManagement\User;
+use App\Services\Auth\JobTitleRoles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -12,19 +13,24 @@ use Illuminate\Support\Str;
 class UserRegisteredRepository implements UserRegisteredInterface
 {
     /**
+     * Create a new repository instance.
+     */
+    public function __construct(protected JobTitleRoles $jobTitleRoles) {}
+
+    /**
      * {@inheritDoc}
      */
-    public function paginate(array $params, array $filters, ?array $companyIds, bool $includeSuperAdmins): LengthAwarePaginator
+    public function paginate(array $params, array $filters, ?array $companyIds, bool $includeItAdmins): LengthAwarePaginator
     {
-        $superAdminRoleId = (int) config('merdeka.super_admin_role_id');
+        $itAdminRoleId = (int) config('merdeka.it_admin_role_id');
         $isActive = $filters['is_active'] ?? null;
 
         return User::query()
             ->with(['company:id,name,code', 'roles:id,name'])
             ->when($companyIds !== null, fn (Builder $query) => $query->whereIn('company_id', $companyIds))
-            ->unless($includeSuperAdmins, fn (Builder $query) => $query->whereDoesntHave(
+            ->unless($includeItAdmins, fn (Builder $query) => $query->whereDoesntHave(
                 'roles',
-                fn (Builder $query) => $query->whereKey($superAdminRoleId)
+                fn (Builder $query) => $query->whereKey($itAdminRoleId)
             ))
             ->when($filters['company'] ?? [], fn (Builder $query, array $ids) => $query->whereIn('company_id', $ids))
             ->when($filters['role'] ?? [], fn (Builder $query, array $ids) => $query->whereHas(
@@ -37,6 +43,7 @@ class UserRegisteredRepository implements UserRegisteredInterface
                     ->where('name', 'like', Apps::likePattern($search))
                     ->orWhere('email', 'like', Apps::likePattern($search))
                     ->orWhere('employee_id', 'like', Apps::likePattern($search))
+                    ->orWhere('job_title', 'like', Apps::likePattern($search))
             ))
             ->orderBy($params['order_by'], $params['order_dir'])
             ->orderBy('id')
@@ -64,6 +71,7 @@ class UserRegisteredRepository implements UserRegisteredInterface
             }
 
             $user->roles()->sync($roleIds);
+            $this->jobTitleRoles->sync($user);
 
             return $user;
         });
@@ -79,7 +87,7 @@ class UserRegisteredRepository implements UserRegisteredInterface
 
             $user->update($data);
             $user->roles()->sync($roleIds);
-            $user->flushAccessCache();
+            $this->jobTitleRoles->sync($user);
 
             return $user;
         });

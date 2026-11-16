@@ -42,6 +42,7 @@
                                             <tr class="mdka-bg-gray-50">
                                                 <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="name">Role</th>
+                                                <th class="text-capitalize fs-5 py-3">Given By</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="func_role">Data Scope</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center">Menus</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="users_count">Users</th>
@@ -76,14 +77,25 @@
                 key: 'name',
                 sortable: true,
                 render: (item) => `<span class="fw-medium">${escapeHtml(item.name)}</span>
-                    ${item.is_protected ? '<span class="badge bg-red-lt ms-1">Super Admin</span>' : ''}
-                    ${item.is_default ? '<span class="badge bg-blue-lt ms-1">Default SSO role</span>' : ''}`,
+                    ${item.is_protected ? '<span class="badge bg-red-lt ms-1">Unrestricted</span>' : ''}
+                    ${item.is_default ? '<span class="badge bg-blue-lt ms-1">Default role</span>' : ''}`,
+            },
+            {
+                key: 'job_titles',
+                render: (item) => {
+                    if (item.job_titles.length) {
+                        return `<span class="text-secondary small text-wrap"><i class="ti ti-id-badge-2 me-1"></i>Job title: ${item.job_titles.map(escapeHtml).join(', ')}</span>`;
+                    }
+
+                    return `<span class="text-secondary small">${item.is_default ? 'Job title matching no rule' : 'By hand (User Management)'}</span>`;
+                },
             },
             {
                 key: 'func_role',
                 sortable: true,
                 render: (item) => `<span class="badge bg-secondary-lt me-1">${escapeHtml(item.func_role)}</span>
-                    <span class="text-secondary small text-wrap">${escapeHtml(item.scope)}</span>`,
+                    <span class="text-secondary small text-wrap">${escapeHtml(item.scope)}</span>
+                    <div class="text-secondary small">Results: ${escapeHtml(item.department_scope)}</div>`,
             },
             {
                 key: 'menus_count',

@@ -20,7 +20,7 @@ class SurveyPeriodTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = $this->surveyAdmin();
+        $this->admin = $this->superAdmin();
     }
 
     public function test_list_returns_surveys_with_question_and_response_counts(): void

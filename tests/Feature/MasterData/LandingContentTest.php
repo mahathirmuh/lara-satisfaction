@@ -14,7 +14,7 @@ class LandingContentTest extends TestCase
 
     public function test_form_shows_the_original_texts_until_content_is_saved(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('master-data.landing-content.index'))
             ->assertOk()
             ->assertSee('Your Voice Shapes Our Collective Future')
@@ -25,7 +25,7 @@ class LandingContentTest extends TestCase
 
     public function test_admin_saves_the_landing_texts(): void
     {
-        $admin = $this->surveyAdmin();
+        $admin = $this->superAdmin();
 
         $this->actingAs($admin)
             ->put(route('master-data.landing-content.update'), $this->payload())
@@ -43,7 +43,7 @@ class LandingContentTest extends TestCase
 
     public function test_main_texts_are_required(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->put(route('master-data.landing-content.update'), [])
             ->assertSessionHasErrors([
                 'hero_title' => 'The headline field is required.',
@@ -62,7 +62,7 @@ class LandingContentTest extends TestCase
         Storage::disk('public')->put('landing/previous.webp', 'image');
         LandingContent::factory()->withHeroImage('landing/previous.webp')->create();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->put(route('master-data.landing-content.update'), $this->payload([
                 'hero_image' => UploadedFile::fake()->image('site.jpg', 1600, 900),
             ]))
@@ -81,7 +81,7 @@ class LandingContentTest extends TestCase
         Storage::disk('public')->put('landing/custom.webp', 'image');
         LandingContent::factory()->withHeroImage('landing/custom.webp')->create();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->put(route('master-data.landing-content.update'), $this->payload(['remove_hero_image' => 1]))
             ->assertRedirect(route('master-data.landing-content.index'));
 
@@ -95,7 +95,7 @@ class LandingContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->put(route('master-data.landing-content.update'), $this->payload([
                 'hero_image' => UploadedFile::fake()->create('brochure.pdf', 100, 'application/pdf'),
             ]))

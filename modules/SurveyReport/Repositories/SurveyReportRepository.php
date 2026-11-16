@@ -219,6 +219,7 @@ class SurveyReportRepository implements SurveyReportInterface
             ->pluck('total', 'survey_question_id');
 
         return $scope->survey->orderedQuestions()
+            ->filter(fn (SurveyQuestion $question): bool => $scope->coversDepartment($question->department_id))
             ->map(fn (SurveyQuestion $question, int $index): array => [
                 'number' => $index + 1,
                 'id' => $question->id,
@@ -231,7 +232,8 @@ class SurveyReportRepository implements SurveyReportInterface
                 'color' => $question->department?->color ?? 'gray',
                 'comments' => (int) ($commentCounts[$question->id] ?? 0),
                 ...$this->scoreFromDistribution($this->distribution($ratingRows->get($question->id, collect()))),
-            ]);
+            ])
+            ->values();
     }
 
     /**
@@ -252,6 +254,7 @@ class SurveyReportRepository implements SurveyReportInterface
             ->join('survey_responses', 'survey_responses.id', '=', 'survey_answers.survey_response_id')
             ->where('survey_responses.survey_id', $scope->survey->getKey())
             ->when($scope->isRestricted(), fn ($query) => $query->whereIn('survey_responses.company_id', $scope->companyIds))
+            ->when($scope->isDepartmentRestricted(), fn ($query) => $query->whereIn('survey_answers.department_id', $scope->departmentIds))
             ->whereNotNull('survey_answers.rating')
             ->selectRaw(
                 'survey_responses.company_id as company_id, COUNT(*) as total, SUM(survey_answers.rating) as rating_sum, '.
@@ -379,13 +382,16 @@ class SurveyReportRepository implements SurveyReportInterface
     }
 
     /**
-     * Answers belonging to the responses inside the scope.
+     * Answers belonging to the responses inside the scope, about the
+     * departments of the scope.
      *
      * @return Builder<SurveyAnswer>
      */
     protected function answerQuery(ReportScope $scope): Builder
     {
-        return SurveyAnswer::query()->whereIn('survey_response_id', $this->responseQuery($scope)->select('id'));
+        return SurveyAnswer::query()
+            ->whereIn('survey_response_id', $this->responseQuery($scope)->select('id'))
+            ->when($scope->isDepartmentRestricted(), fn (Builder $query) => $query->whereIn('department_id', $scope->departmentIds));
     }
 
     /**

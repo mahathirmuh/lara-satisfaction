@@ -101,6 +101,18 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <label for="departmentManagerJobTitles" class="col-md-3 col-form-label">Manager Job Titles</label>
+                                <div class="col-md-9">
+                                    <textarea id="departmentManagerJobTitles" class="form-control font-monospace" rows="2"
+                                        maxlength="1000" placeholder="OHS Manager"></textarea>
+                                    <small class="form-hint">One job title per line (<code>*</code> any text,
+                                        <code>!</code> excludes). Managers with these job titles see this department's
+                                        survey results.</small>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-12 mt-3 d-flex justify-content-between align-items-center gap-2">
                             <span class="text-secondary small"><i class="ti ti-info-circle me-1"></i>Sections are managed in
                                 Master Data &rsaquo; Sections.</span>
@@ -162,6 +174,7 @@
                     form.find(`input[name="departmentColor"][value="${CSS.escape(data.color)}"]`).prop('checked', true);
                     form.find('#departmentOrder').val(data.sort_order);
                     form.find('#departmentActive').prop('checked', !!data.is_active);
+                    form.find('#departmentManagerJobTitles').val(data.manager_job_titles || '');
 
                     if (data.image_url) {
                         form.find('#departmentImagePreview').attr('src', data.image_url).removeClass('d-none');
@@ -191,6 +204,7 @@
             data.append('color', $('input[name="departmentColor"]:checked').val() || '');
             data.append('sort_order', $('#departmentOrder').val());
             data.append('is_active', $('#departmentActive').is(':checked') ? 1 : 0);
+            data.append('manager_job_titles', $('#departmentManagerJobTitles').val());
             data.append('remove_image', $('#departmentRemoveImage').is(':checked') ? 1 : 0);
 
             const image = $('#departmentImage')[0].files[0];

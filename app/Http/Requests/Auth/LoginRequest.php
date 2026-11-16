@@ -93,6 +93,8 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $accounts->applyJobTitle($user, $identity->jobTitle);
+
         if (! $user->is_active) {
             throw ValidationException::withMessages([
                 'username' => 'Your account is inactive. Please contact the IT Helpdesk.',

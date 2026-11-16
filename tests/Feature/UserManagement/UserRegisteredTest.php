@@ -25,7 +25,7 @@ class UserRegisteredTest extends TestCase
 
     public function test_admin_registers_an_employee_without_a_usable_password(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload())
             ->assertCreated();
 
@@ -39,18 +39,44 @@ class UserRegisteredTest extends TestCase
 
     public function test_a_submitted_password_is_ignored_as_users_only_sign_in_with_sso_or_ldap(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload(['password' => 'Merdeka2026']))
             ->assertCreated();
 
         $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
         $this->assertFalse(Hash::check('Merdeka2026', $user->password));
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->putJson(route('user-management.user-registered.update', $user), $this->payload(['password' => 'Merdeka2027']))
             ->assertOk();
 
         $this->assertFalse(Hash::check('Merdeka2027', $user->fresh()->password));
+    }
+
+    public function test_roles_given_by_job_title_follow_the_job_title_while_other_roles_are_kept(): void
+    {
+        $auditor = Role::factory()->create(['name' => 'Auditor']);
+        $employeeRoleId = (int) config('merdeka.default_role_id');
+
+        $this->actingAs($this->superAdmin())
+            ->postJson(route('user-management.user-registered.store'), $this->payload([
+                'job_title' => '  OHS   Manager ',
+                'role_id' => [$employeeRoleId, $auditor->id],
+            ]))
+            ->assertCreated();
+
+        $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
+        $this->assertSame('OHS Manager', $user->job_title);
+        $this->assertSame(['Manager', 'Auditor'], $user->roles->sortBy('id')->pluck('name')->values()->all());
+
+        $this->actingAs($this->superAdmin())
+            ->putJson(route('user-management.user-registered.update', $user), $this->payload([
+                'job_title' => 'Safety Officer',
+                'role_id' => [],
+            ]))
+            ->assertOk();
+
+        $this->assertSame(['Employee'], $user->fresh()->roles->pluck('name')->all());
     }
 
     public function test_registering_the_email_of_a_deleted_account_restores_it(): void
@@ -58,7 +84,7 @@ class UserRegisteredTest extends TestCase
         $deleted = User::factory()->create(['email' => 'siti@merdekabattery.com']);
         $deleted->delete();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload())
             ->assertCreated()
             ->assertJsonPath('data.id', $deleted->id);
@@ -67,29 +93,29 @@ class UserRegisteredTest extends TestCase
         $this->assertSame(1, User::withTrashed()->where('email', 'siti@merdekabattery.com')->count());
     }
 
-    public function test_only_a_super_admin_can_assign_the_super_admin_role(): void
+    public function test_only_a_it_admin_can_assign_the_it_admin_role(): void
     {
-        $payload = $this->payload(['role_id' => [(int) config('merdeka.super_admin_role_id')]]);
-
-        $this->actingAs($this->surveyAdmin())
-            ->postJson(route('user-management.user-registered.store'), $payload)
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['role_id.0' => 'Only a super admin can assign the Super Admin role.']);
+        $payload = $this->payload(['role_id' => [(int) config('merdeka.it_admin_role_id')]]);
 
         $this->actingAs($this->superAdmin())
+            ->postJson(route('user-management.user-registered.store'), $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['role_id.0' => 'Only an IT admin can assign the IT Admin role.']);
+
+        $this->actingAs($this->itAdmin())
             ->postJson(route('user-management.user-registered.store'), $payload)
             ->assertCreated();
     }
 
-    public function test_non_super_admin_cannot_edit_a_super_admin_account(): void
+    public function test_non_it_admin_cannot_edit_a_it_admin_account(): void
     {
-        $superAdmin = $this->superAdmin();
+        $superAdmin = $this->itAdmin();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->getJson(route('user-management.user-registered.show', $superAdmin))
             ->assertForbidden();
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->putJson(route('user-management.user-registered.update', $superAdmin), $this->payload())
             ->assertForbidden();
     }
@@ -121,7 +147,7 @@ class UserRegisteredTest extends TestCase
 
     public function test_admin_cannot_delete_their_own_account(): void
     {
-        $admin = $this->superAdmin();
+        $admin = $this->itAdmin();
 
         $this->actingAs($admin)
             ->deleteJson(route('user-management.user-registered.destroy', $admin))
@@ -134,7 +160,7 @@ class UserRegisteredTest extends TestCase
     {
         $employee = $this->employee();
 
-        $this->actingAs($this->superAdmin())
+        $this->actingAs($this->itAdmin())
             ->deleteJson(route('user-management.user-registered.destroy', $employee))
             ->assertOk();
 
@@ -177,11 +203,11 @@ class UserRegisteredTest extends TestCase
     }
 
     /**
-     * Survey administrator limited to the test company.
+     * Super admin limited to the test company.
      */
     protected function companyScopedAdmin(): User
     {
-        $role = Role::query()->where('name', 'Survey Administrator')->sole();
+        $role = Role::query()->where('name', 'Super Admin')->sole();
         $role->update(['func_role' => 'COMPANY', 'setting_role' => [$this->company->id]]);
 
         return User::factory()->withRole($role)->create(['company_id' => $this->company->id]);

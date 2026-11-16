@@ -22,7 +22,7 @@ class SectionTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = $this->surveyAdmin();
+        $this->admin = $this->superAdmin();
     }
 
     public function test_new_section_is_appended_to_its_department(): void

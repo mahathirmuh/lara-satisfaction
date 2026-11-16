@@ -27,12 +27,15 @@ return [
     | Role Based Access Control
     |--------------------------------------------------------------------------
     |
-    | The super admin role bypasses every menu/permission check. The default
-    | role is assigned to accounts created automatically through SSO.
+    | Roles, highest first: IT Admin > Super Admin > Manager > Employee. The IT
+    | Admin role bypasses every menu/permission check and is only given
+    | manually. The other roles follow the job title from the directory at
+    | every sign-in (role job title rules); the default role is given when no
+    | rule matches and to accounts registered automatically.
     |
     */
 
-    'super_admin_role_id' => 1,
+    'it_admin_role_id' => 1,
 
     'default_role_id' => (int) env('MERDEKA_DEFAULT_ROLE_ID', 3),
 
@@ -89,9 +92,10 @@ return [
     | Database Seeding
     |--------------------------------------------------------------------------
     |
-    | Initial super admin: the company email of a real person, who signs in
-    | with SSO or their network account. Demo data (employees and anonymous
-    | responses) is only seeded when enabled, never in production.
+    | First IT admin (the highest role, only given by hand): the company email
+    | of a real person, who signs in with SSO or their network account. Demo
+    | data (employees and anonymous responses) is only seeded when enabled,
+    | never in production.
     |
     */
 

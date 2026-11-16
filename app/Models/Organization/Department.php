@@ -16,9 +16,10 @@ use Illuminate\Support\Collection;
 /**
  * Department whose services are assessed by the satisfaction survey
  * (the support service departments, e.g. Supply Chain, Finance, Interface).
- * Each department is split into sections (focus areas).
+ * Each department is split into sections (focus areas). Managers whose job
+ * title matches manager_job_titles see the department's survey results.
  */
-#[Fillable(['code', 'name', 'description', 'icon', 'color', 'image_path', 'sort_order', 'is_active'])]
+#[Fillable(['code', 'name', 'description', 'icon', 'color', 'image_path', 'manager_job_titles', 'sort_order', 'is_active'])]
 class Department extends Model
 {
     /** @use HasFactory<DepartmentFactory> */
@@ -44,6 +45,7 @@ class Department extends Model
         return [
             'sort_order' => 'integer',
             'is_active' => 'boolean',
+            'manager_job_titles' => 'array',
         ];
     }
 

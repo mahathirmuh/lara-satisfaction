@@ -59,6 +59,7 @@ class SurveyResultExporter
      * One column per question and evaluated section, in display order, e.g.
      * "Q1 [External Affairs / Asset Protection] Please rate … of Asset Protection …".
      * A question answered per section gets a column for every section with answers.
+     * Only the departments of the scope are exported (a manager's own).
      *
      * @return array<int, array{key: string, header: string, is_rating: bool}>
      */
@@ -80,6 +81,10 @@ class SurveyResultExporter
         $columns = [];
 
         foreach ($scope->survey->orderedQuestions() as $index => $question) {
+            if (! $scope->coversDepartment($question->department_id)) {
+                continue;
+            }
+
             $sectionIds = $answeredSections->where('survey_question_id', $question->id)->pluck('department_section_id');
             $targets = $sections->whereIn('id', $sectionIds->filter())->values()->all();
 

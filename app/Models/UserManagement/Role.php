@@ -2,7 +2,9 @@
 
 namespace App\Models\UserManagement;
 
+use App\Enums\DepartmentScope;
 use App\Enums\RoleScope;
+use App\Helpers\JobTitles;
 use Database\Factories\UserManagement\RoleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,9 +15,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Role with menu access (menu_role), CRUD permissions per menu
- * (menu_role_permission) and a data scope (func_role + setting_role).
+ * (menu_role_permission), a company scope (func_role + setting_role) and a
+ * department scope for survey results. A role with job title rules is given
+ * automatically at sign-in to the people whose job title matches them.
  */
-#[Fillable(['name', 'func_role', 'setting_role', 'home_page'])]
+#[Fillable(['name', 'func_role', 'setting_role', 'home_page', 'job_titles', 'department_scope'])]
 class Role extends Model
 {
     /** @use HasFactory<RoleFactory> */
@@ -32,6 +36,8 @@ class Role extends Model
             'func_role' => RoleScope::class,
             'setting_role' => 'array',
             'home_page' => 'integer',
+            'job_titles' => 'array',
+            'department_scope' => DepartmentScope::class,
         ];
     }
 
@@ -68,11 +74,27 @@ class Role extends Model
     }
 
     /**
-     * Whether this is the built-in super admin role.
+     * Whether this is the built-in IT Admin role (unrestricted, only given manually).
      */
-    public function isSuperAdmin(): bool
+    public function isItAdmin(): bool
     {
-        return $this->getKey() === (int) config('merdeka.super_admin_role_id');
+        return $this->getKey() === (int) config('merdeka.it_admin_role_id');
+    }
+
+    /**
+     * Whether the role is given by job title rules (never the IT Admin role).
+     */
+    public function isGivenByJobTitle(): bool
+    {
+        return ! $this->isItAdmin() && filled($this->job_titles);
+    }
+
+    /**
+     * Whether a job title earns this role.
+     */
+    public function matchesJobTitle(?string $jobTitle): bool
+    {
+        return $this->isGivenByJobTitle() && JobTitles::matches($this->job_titles, $jobTitle);
     }
 
     /**

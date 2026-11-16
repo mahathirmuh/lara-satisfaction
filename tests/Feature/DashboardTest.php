@@ -25,7 +25,7 @@ class DashboardTest extends TestCase
             ->assertDontSee('Survey Insights');
     }
 
-    public function test_survey_administrator_sees_insights_compared_with_the_previous_survey(): void
+    public function test_super_admin_sees_insights_compared_with_the_previous_survey(): void
     {
         $department = Department::factory()->create(['name' => 'Human Resources']);
         [$previous, $previousQuestions] = $this->openSurveyFor([$department], [
@@ -38,7 +38,7 @@ class DashboardTest extends TestCase
         [$current, $currentQuestions] = $this->openSurveyFor([$department], ['title' => 'Operational Audit 2026']);
         $this->respond($current, $currentQuestions[$department->code], 4, 6);
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('dashboard.index'))
             ->assertOk()
             ->assertSee('Survey Insights')
@@ -61,7 +61,7 @@ class DashboardTest extends TestCase
             ]);
         }
 
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->get(route('dashboard.index'))
             ->assertOk()
             ->assertSee('&lt;img src=x onerror=alert(1)&gt;', false)

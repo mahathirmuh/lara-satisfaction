@@ -31,7 +31,8 @@ class DashboardController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        $canViewReports = $user->canAccessMenu('survey-report', PermissionAction::Read);
+        $departmentIds = $user->reportDepartmentIds();
+        $canViewReports = $user->canAccessMenu('survey-report', PermissionAction::Read) && $departmentIds !== [];
 
         $data = [
             'openSurveys' => $this->surveyForm->availableFor($user),
@@ -45,7 +46,7 @@ class DashboardController extends Controller
         }
 
         $companyIds = $user->scopedCompanyIds();
-        $scope = new ReportScope($featuredSurvey, $companyIds);
+        $scope = new ReportScope($featuredSurvey, $companyIds, $departmentIds);
         $summary = $this->reports->summary($scope);
         $previousSurvey = $this->reports->previousSurvey($featuredSurvey);
 
@@ -54,7 +55,7 @@ class DashboardController extends Controller
             'featuredSurvey' => $featuredSurvey,
             'summary' => $summary,
             'previousSurvey' => $previousSurvey,
-            'previousSummary' => $previousSurvey ? $this->reports->summary(new ReportScope($previousSurvey, $companyIds)) : null,
+            'previousSummary' => $previousSurvey ? $this->reports->summary(new ReportScope($previousSurvey, $companyIds, $departmentIds)) : null,
             'departmentScores' => $summary['is_reportable'] ? $this->reports->departmentScores($scope) : collect(),
             'trend' => $this->reports->participationTrend($scope),
             'latestComments' => $summary['is_reportable'] ? $this->reports->comments($scope, [], 5)->getCollection() : collect(),

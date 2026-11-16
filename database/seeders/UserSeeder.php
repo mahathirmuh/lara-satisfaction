@@ -8,10 +8,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * The first super admin: the company email of a real person (SEED_ADMIN_EMAIL),
- * who signs in with Microsoft SSO or their network account (LDAP) as there are
- * no local passwords. Running it again grants the role to that email's
- * account, e.g. after its owner signed in once and was registered as Employee.
+ * The first IT Admin (the highest role, only given by hand): the company email
+ * of a real person (SEED_ADMIN_EMAIL), who signs in with Microsoft SSO or
+ * their network account (LDAP) as there are no local passwords. Running it
+ * again grants the role to that email's account, e.g. after its owner signed
+ * in once and got the role of their job title.
  */
 class UserSeeder extends Seeder
 {
@@ -23,7 +24,7 @@ class UserSeeder extends Seeder
         $email = Str::lower(trim((string) config('merdeka.seed.admin_email')));
 
         if ($email === '') {
-            $this->command?->warn('No super admin seeded: set SEED_ADMIN_EMAIL to the company email (Microsoft / network account) of the first administrator.');
+            $this->command?->warn('No IT admin seeded: set SEED_ADMIN_EMAIL to the company email (Microsoft / network account) of the first administrator.');
 
             return;
         }
@@ -31,7 +32,7 @@ class UserSeeder extends Seeder
         $admin = User::withTrashed()->where('email', $email)->first();
 
         if ($admin?->trashed()) {
-            $this->command?->warn("Super admin [{$email}] is a deleted account: restore it in User Management or set another SEED_ADMIN_EMAIL.");
+            $this->command?->warn("IT admin [{$email}] is a deleted account: restore it in User Management or set another SEED_ADMIN_EMAIL.");
 
             return;
         }
@@ -44,8 +45,8 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $admin->roles()->syncWithoutDetaching([(int) config('merdeka.super_admin_role_id')]);
+        $admin->roles()->syncWithoutDetaching([(int) config('merdeka.it_admin_role_id')]);
 
-        $this->command?->info("Super admin: {$email} (signs in with Microsoft SSO or the network account that has this email).");
+        $this->command?->info("IT admin: {$email} (signs in with Microsoft SSO or the network account that has this email).");
     }
 }

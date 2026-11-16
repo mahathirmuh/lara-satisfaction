@@ -14,9 +14,9 @@ class SystemLogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_super_admin_browses_the_activity_log(): void
+    public function test_it_admin_browses_the_activity_log(): void
     {
-        $superAdmin = $this->superAdmin(['name' => 'Root Admin']);
+        $superAdmin = $this->itAdmin(['name' => 'Root Admin']);
         $this->actingAs($superAdmin)->post(route('logout'));
 
         $this->actingAs($superAdmin)
@@ -51,7 +51,7 @@ class SystemLogTest extends TestCase
 
     public function test_error_log_is_restricted_to_granted_roles(): void
     {
-        $this->actingAs($this->surveyAdmin())
+        $this->actingAs($this->superAdmin())
             ->getJson(route('system-log.error.list'))
             ->assertForbidden();
     }

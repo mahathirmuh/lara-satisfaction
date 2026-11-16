@@ -53,6 +53,7 @@
                                                 <th class="text-capitalize fs-5 py-3 text-center" width="30">No</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="name">Name</th>
                                                 <th class="text-capitalize fs-5 py-3" data-key="employee_id">Employee ID</th>
+                                                <th class="text-capitalize fs-5 py-3" data-key="job_title">Job Title</th>
                                                 <th class="text-capitalize fs-5 py-3">Company</th>
                                                 <th class="text-capitalize fs-5 py-3">Role</th>
                                                 <th class="text-capitalize fs-5 py-3 text-center" data-key="is_active">Status</th>
@@ -93,6 +94,11 @@
                 key: 'employee_id',
                 sortable: true,
                 render: (item) => escapeHtml(item.employee_id || '-'),
+            },
+            {
+                key: 'job_title',
+                sortable: true,
+                render: (item) => `<span class="text-wrap">${escapeHtml(item.job_title || '-')}</span>`,
             },
             {
                 key: 'company',

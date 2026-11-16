@@ -38,6 +38,17 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
+                                <label for="userJobTitle" class="col-md-3 col-form-label">Job Title</label>
+                                <div class="col-md-9">
+                                    <input type="text" id="userJobTitle" class="form-control" maxlength="255"
+                                        placeholder="e.g. OHS Manager">
+                                    <small class="form-hint">Refreshed from the directory at every sign-in. The roles marked
+                                        "by job title" follow it.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
                                 <label for="companySelect" class="col-md-3 col-form-label required">Company</label>
                                 <div class="col-md-9">
                                     <select id="companySelect" class="form-select" required>
@@ -62,7 +73,7 @@
                         </div>
                         <div class="col-12">
                             <div class="row">
-                                <label class="col-md-3 col-form-label required">Role</label>
+                                <label class="col-md-3 col-form-label">Role</label>
                                 <div class="col-md-9">
                                     <div class="table-responsive border rounded">
                                         <table class="table table-sm table-vcenter mb-0">
@@ -78,18 +89,27 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($roles as $role)
+                                                    @php($isByJobTitle = in_array($role->id, $automaticRoleIds, true))
                                                     <tr>
                                                         <td class="text-center">
                                                             <input class="form-check-input user-role-checkbox" type="checkbox"
-                                                                value="{{ $role->id }}" aria-label="{{ $role->name }}" />
+                                                                value="{{ $role->id }}" aria-label="{{ $role->name }}"
+                                                                @disabled($isByJobTitle) />
                                                         </td>
-                                                        <td>{{ $role->name }}</td>
+                                                        <td>
+                                                            {{ $role->name }}
+                                                            @if ($isByJobTitle)
+                                                                <span class="badge bg-azure-lt ms-1">by job title</span>
+                                                            @endif
+                                                        </td>
                                                         <td>{{ $role->func_role->value }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
                                     </div>
+                                    <small class="form-hint">Roles "by job title" are given from the job title at every
+                                        sign-in (Role &amp; Permission); only the others are given here.</small>
                                 </div>
                             </div>
                         </div>
@@ -125,7 +145,7 @@
             });
 
             $('#selectAllRoles').on('click', function() {
-                $('.user-role-checkbox').prop('checked', $(this).prop('checked'));
+                $('.user-role-checkbox:not(:disabled)').prop('checked', $(this).prop('checked'));
             });
 
             $('#userModal').on('hidden.bs.modal', resetUserForm);
@@ -162,6 +182,7 @@
                     modal.find('#userName').val(data.name);
                     modal.find('#userEmail').val(data.email);
                     modal.find('#userEmployeeId').val(data.employee_id);
+                    modal.find('#userJobTitle').val(data.job_title);
                     modal.find('#companySelect').val(data.company_id).trigger('change');
                     modal.find('#userActive').prop('checked', !!data.is_active);
                     (data.role_id || []).forEach((roleId) => {
@@ -179,9 +200,10 @@
                 name: $('#userName').val().trim(),
                 email: $('#userEmail').val().trim(),
                 employee_id: $('#userEmployeeId').val().trim(),
+                job_title: $('#userJobTitle').val().trim(),
                 company_id: $('#companySelect').val(),
                 is_active: $('#userActive').is(':checked') ? 1 : 0,
-                role_id: $('.user-role-checkbox:checked').map((_, element) => element.value).get(),
+                role_id: $('.user-role-checkbox:checked:not(:disabled)').map((_, element) => element.value).get(),
             };
 
             const errors = [];
@@ -196,10 +218,6 @@
 
             if (!data.company_id) {
                 errors.push('Company must be selected.');
-            }
-
-            if (!data.role_id.length) {
-                errors.push('At least one role must be selected.');
             }
 
             if (errors.length) {

@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Restricts a route to users holding one of the given role names,
- * e.g. ->middleware('role:Super Admin,Survey Administrator').
+ * e.g. ->middleware('role:Super Admin,Manager').
  */
 class RoleMiddleware
 {
@@ -21,7 +21,7 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        abort_unless($user !== null && ($user->isSuperAdmin() || $user->hasAnyRole(...$roles)), Response::HTTP_FORBIDDEN);
+        abort_unless($user !== null && ($user->isItAdmin() || $user->hasAnyRole(...$roles)), Response::HTTP_FORBIDDEN);
 
         return $next($request);
     }

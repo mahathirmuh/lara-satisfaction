@@ -103,6 +103,33 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <label for="roleDepartmentScopeSelect" class="col-md-3 col-form-label required">Survey Results</label>
+                                <div class="col-md-6">
+                                    <select id="roleDepartmentScopeSelect" class="form-select" required>
+                                        @foreach ($departmentScopes as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="form-hint">With "managed" departments, the report only shows the
+                                        departments whose manager job titles (Master Data &gt; Departments) match the
+                                        user's job title.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="row">
+                                <label for="roleJobTitles" class="col-md-3 col-form-label">Job Titles</label>
+                                <div class="col-md-9">
+                                    <textarea id="roleJobTitles" class="form-control font-monospace" rows="3" maxlength="2000"
+                                        placeholder="*Manager&#10;Deputy GM&#10;!Assistant of *"></textarea>
+                                    <small class="form-hint" id="roleJobTitlesHint">One job title per line: people whose
+                                        directory job title matches get this role at every sign-in. <code>*</code> stands
+                                        for any text, <code>!</code> excludes. Leave empty to give the role by hand.</small>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-12">
                             <div class="row">
@@ -249,6 +276,7 @@
         function resetRoleForm() {
             const form = $('#roleForm');
             form[0].reset();
+            form.find('#roleJobTitles').prop('disabled', false);
             form.find('#roleCompanySelect').val(null).trigger('change');
             form.find('#selectAllMenus, .menu-access-checkbox, .menu-permission-checkbox').prop('checked', false);
             form.find('.menu-access-checkbox').each(function() {
@@ -281,6 +309,8 @@
                     modal.find('#roleTypeSelect').val(data.func_role);
                     modal.find('#roleCompanySelect').val((data.setting_role || []).map(String)).trigger('change');
                     modal.find('#homePageSelect').val(data.home_page ?? '');
+                    modal.find('#roleDepartmentScopeSelect').val(data.department_scope);
+                    modal.find('#roleJobTitles').val(data.job_titles || '').prop('disabled', !!data.is_it_admin);
                     toggleCompanyColumn();
 
                     (data.menu_list || []).forEach((menuId) => {
@@ -318,6 +348,8 @@
                 func_role: $('#roleTypeSelect').val(),
                 setting_role: $('#roleCompanySelect').val() || [],
                 home_page: $('#homePageSelect').val() || null,
+                department_scope: $('#roleDepartmentScopeSelect').val(),
+                job_titles: $('#roleJobTitles').prop('disabled') ? '' : $('#roleJobTitles').val(),
                 menu_list: $('.menu-access-checkbox:checked').map((_, element) => element.value).get(),
                 menu_permission: menuPermission,
             };

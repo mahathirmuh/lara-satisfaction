@@ -19,9 +19,10 @@ use Illuminate\Database\Seeder;
 class DepartmentSeeder extends Seeder
 {
     /**
-     * Departments with their sections (section name => role overview).
+     * Departments with the job titles of their managers (who see the
+     * department's results) and their sections (section name => role overview).
      *
-     * @var array<int, array{code: string, name: string, description: string, icon: string, color: string, sections: array<string, string>}>
+     * @var array<int, array{code: string, name: string, description: string, icon: string, color: string, manager_job_titles: array<int, string>, sections: array<string, string>}>
      */
     public const DEPARTMENTS = [
         [
@@ -30,6 +31,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Logistic & distribution, heavy equipment, inventory and expediting.',
             'icon' => 'truck',
             'color' => 'orange',
+            'manager_job_titles' => ['Supply Chain*Manager'],
             'sections' => [
                 'Logistic & Distribution' => 'Logistic & Distribution manages logistics administration and the distribution of materials, with warehouse and logistics assistants handling the goods on site.',
                 'Heavy Equipment' => 'Heavy Equipment operates the transport and lifting equipment, such as cranes and forklifts, used to move materials on site.',
@@ -42,6 +44,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Emergency response, plant safety, OHS system and training, occupational health, industrial hygiene and process safety.',
             'icon' => 'shield-check',
             'color' => 'red',
+            'manager_job_titles' => ['OHS Manager', 'Occupational Health & Safety Manager'],
             'sections' => [
                 'Emergency Response' => 'Emergency Response prepares for and responds to emergencies in all plants.',
                 'Plant OHS' => 'Plant OHS supervises occupational health and safety in the Acid, Chloride, Copper Cathode and Pyrite plants.',
@@ -59,6 +62,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Environmental monitoring, waste management, environmental system, studies and projects.',
             'icon' => 'leaf',
             'color' => 'green',
+            'manager_job_titles' => ['Environmental Manager', 'Environment Manager'],
             'sections' => [
                 'Environmental Monitoring' => 'Environmental Monitoring monitors the air and water quality around the operation.',
                 'Waste Management' => 'Waste Management handles the hazardous and non-hazardous waste.',
@@ -72,6 +76,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Community relations, compliance & corporate communications and asset protection.',
             'icon' => 'speakerphone',
             'color' => 'blue',
+            'manager_job_titles' => ['External Affair* Manager'],
             'sections' => [
                 'Community Relations' => 'Community Relations maintains the relations with the surrounding communities.',
                 'Compliance & Corporate Communications' => 'Compliance & Corporate Communications handles compliance matters and the corporate communications.',
@@ -84,6 +89,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Sales support, cost control, finance and financial analysis & forecasting.',
             'icon' => 'report-money',
             'color' => 'purple',
+            'manager_job_titles' => ['Finance Manager'],
             'sections' => [
                 'Sales Support' => 'Sales Support provides the administrative support for sales.',
                 'Cost Control' => 'Cost Control monitors and controls the costs against the budget.',
@@ -97,6 +103,7 @@ class DepartmentSeeder extends Seeder
             'description' => 'Interface management and contract management.',
             'icon' => 'arrows-exchange',
             'color' => 'yellow',
+            'manager_job_titles' => ['Interface Manager'],
             'sections' => [
                 'Interface Management' => 'Interface Management coordinates the interfaces between the parties involved in the operation.',
                 'Contract Management' => 'Contract Management administers the contracts and follows up their execution.',
