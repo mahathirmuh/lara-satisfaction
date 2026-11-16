@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SsoController;
+use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationController;
@@ -45,6 +46,9 @@ Route::middleware('auth')->group(function () {
 
     /** The signed-in user's own profile */
     Route::get('profile', ProfileController::class)->name('profile.show');
+
+    /** What changed in each version (the version in the footer opens it) */
+    Route::get('changelog', ChangelogController::class)->name('changelog');
 
     /** Employee photos (own, or everyone's for user management and survey progress) */
     Route::get('users/{user}/photo', UserPhotoController::class)->whereNumber('user')->name('users.photo');

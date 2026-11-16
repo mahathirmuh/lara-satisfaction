@@ -157,6 +157,32 @@ Survey drafts ("Save as Draft") are the only answers stored with a user: they ar
 3. People type their network username (an email works too: the part before "@" is used). Their
    account here is found by the directory email (`mail`, else `userPrincipalName`).
 
+## Versions
+
+The version follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`, e.g. `1.8.0`) and is kept in
+one place, the file `VERSION` at the project root: `config('merdeka.app_version')` reads it, and the footer of every
+page shows it. What changed in each version, and what to do on the server (migrations, seeders, new settings), is in
+[CHANGELOG.md](CHANGELOG.md) (Indonesian, [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), as in MTI Radio
+Management). The version in the footer opens **Version history** for everyone signed in: a timeline of CHANGELOG.md
+without its **Deploy** lines, newest first, each series (`1.8`, `1.7`, …) a node with its patches branching below it,
+each version coloured by its kind of change. The headings are one of the six of Keep a Changelog: `Ditambahkan`,
+`Diubah`, `Diperbaiki`, `Dihapus`, `Keamanan`, `Ditinggalkan` (another heading shows grey); the legend and the labels
+stay in English (Minor release, Added, Changed, …). In English and Chinese the notes come from
+[CHANGELOG.en.md](CHANGELOG.en.md) (headings `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Deprecated`, no
+Deploy lines).
+
+| Bump | When |
+| --- | --- |
+| MAJOR (`2.0.0`) | Something others rely on breaks unless they adapt: a `.env` setting renamed without the old one still being read, the Docker setup changed incompatibly |
+| MINOR (`1.x.0`) | A new feature that breaks nothing: a new menu or page, a new optional setting, a new migration |
+| PATCH (`1.x.y`) | A bug fix, no new feature |
+
+Changes that only touch the README or tests do not bump the version. Releasing a version is one commit that raises
+`VERSION` and adds its part on top of `CHANGELOG.md` and, in English, `CHANGELOG.en.md`. `VersionTest` checks that
+`VERSION` and CHANGELOG.md agree; `ChangelogDialogTest` checks the headings and that CHANGELOG.en.md has every version
+with the same kinds of change. There is no "Unreleased" part: every change pushed to `main` is a version. Versions
+1.0.0 to 1.7.0 were numbered afterwards, when numbering started at 1.8.0.
+
 ## Architecture
 
 ```text
@@ -176,6 +202,9 @@ modules/{Module}/    Http/Controllers, Http/Requests, Repositories (Interface + 
   UserManagement     Registered users, roles & menu/CRUD permission matrix
   SystemLog          Activity log and error log viewers
 resources/views/     main/ (layout, sidebar, navbar), auth/, components/global/ (x-global.*)
+public/assets/css/   merdeka-ui.css: the design layer taken from MTI Radio Management (sidebar
+                     and icon rail, top bar, path to the page, sign-in page, version history,
+                     the rm-* recipes); custom.css: the Merdeka theme
 ```
 
 - **RBAC**: every module route uses the `permission` middleware. A route maps to the menu whose

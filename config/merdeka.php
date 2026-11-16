@@ -16,7 +16,9 @@ return [
 
     'app_tagline' => env('MERDEKA_APP_TAGLINE', 'Your Voice Shapes Our Collective Future'),
 
-    'app_version' => env('MERDEKA_APP_VERSION', '1.0.0'),
+    // The version (Semantic Versioning) is kept in one place, the file VERSION; what changed in each one is in
+    // CHANGELOG.md. The footer shows it and opens the version history.
+    'app_version' => is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : env('MERDEKA_APP_VERSION', '1.0.0'),
 
     'company_name' => env('MERDEKA_COMPANY_NAME', 'Merdeka Group'),
 
