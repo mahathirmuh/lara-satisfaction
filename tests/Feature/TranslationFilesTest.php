@@ -54,7 +54,9 @@ class TranslationFilesTest extends TestCase
     {
         $this->post(route('locale.update'), ['locale' => 'id']);
 
-        $this->get(route('login'))->assertOk()->assertSee($this->translations('id')['Change language']);
+        $this->get(route('login'))->assertOk()
+            ->assertSee($this->translations('id')['Sign in with Network Account (LDAP)'])
+            ->assertSee('aria-pressed="true">ID</button>', false);
     }
 
     /**
