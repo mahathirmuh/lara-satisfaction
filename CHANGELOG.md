@@ -14,6 +14,16 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.10.2] - 2026-11-16
+
+### Diperbaiki
+
+- Pencarian orang di **Survey Management > Reminders** (Orang yang dipilih) tidak lagi besar dan berantakan: hurufnya
+  seukuran isian lain, setiap orang dua baris (nama, lalu email dan ID karyawan), yang sudah mengisi tampil redup dengan
+  tanda "selesai", dan daftarnya bergulir setelah sekitar enam orang. Yang sudah dipilih cukup tampil namanya.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.10.1] - 2026-11-16
 
 ### Diperbaiki

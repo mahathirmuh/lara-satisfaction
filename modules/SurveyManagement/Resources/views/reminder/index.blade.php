@@ -3,6 +3,43 @@
 @push('style')
     <link rel="stylesheet" href="{{ asset('assets/libs/select2/select2.min.css') }}?v=4.1.0-rc.0" />
     <link rel="stylesheet" href="{{ asset('assets/libs/select2/select2-bootstrap.min.css') }}" />
+    <style>
+        /* The people search: the size of the other fields, a person on two lines (name, then e-mail and employee ID). */
+        /* (As specific as the theme's own rules, which set 1rem.) */
+        .select2-container--bootstrap-5 .people-selection.select2-selection--multiple .select2-search .select2-search__field,
+        .select2-container--bootstrap-5 .people-dropdown.select2-dropdown .select2-search .select2-search__field {
+            font-size: .8125rem;
+        }
+
+        .select2-container--bootstrap-5 .people-selection.select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
+            font-size: .75rem;
+        }
+
+        .select2-container--bootstrap-5 .people-dropdown.select2-dropdown .select2-results__options {
+            max-height: 264px;
+        }
+
+        .select2-container--bootstrap-5 .people-dropdown.select2-dropdown .select2-results__options .select2-results__option {
+            padding: .4rem .65rem;
+            font-size: .8125rem;
+            line-height: 1.35;
+        }
+
+        .people-option-name {
+            font-weight: 500;
+        }
+
+        .people-option-meta {
+            font-size: .72rem;
+            color: var(--tblr-secondary);
+            overflow-wrap: anywhere;
+        }
+
+        .select2-results__option--highlighted .people-option-meta {
+            color: inherit;
+            opacity: .8;
+        }
+    </style>
 @endpush
 
 @section('page-title', __('Reminders'))
@@ -131,6 +168,7 @@
             searching: @json(__('Searching…')),
             noResults: @json(__('No people found')),
             maximumSelected: @json(__('You can choose up to :count people.')),
+            completed: @json(__('completed')),
         };
 
         $(function() {
@@ -141,9 +179,27 @@
             }
 
             const surveySelect = $('#reminderSurvey');
+            // A person in the list: the name, and under it the e-mail and employee ID (as text, never as markup).
+            function personOption(person) {
+                if (!person.id || !person.name) {
+                    return person.text;
+                }
+
+                const meta = [person.email, person.employee_id].filter(Boolean).join(' · ');
+                const option = $('<div>').append($('<div class="people-option-name">').text(person.name));
+
+                option.append($('<div class="people-option-meta">').text(meta + (person.disabled ? ' · ' + reminderTexts.completed : '')));
+
+                return option;
+            }
+
             const people = $('#reminderUsers').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
+                selectionCssClass: 'people-selection',
+                dropdownCssClass: 'people-dropdown',
+                templateResult: personOption,
+                templateSelection: (person) => person.name || person.text,
                 placeholder: reminderTexts.placeholder,
                 closeOnSelect: false,
                 maximumSelectionLength: @json($maxChosen),

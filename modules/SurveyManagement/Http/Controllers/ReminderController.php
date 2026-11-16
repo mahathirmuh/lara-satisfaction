@@ -74,7 +74,7 @@ class ReminderController extends Controller
             ))
             ->orderBy('name')
             ->limit(20)
-            ->get(['id', 'name', 'email']);
+            ->get(['id', 'name', 'email', 'employee_id']);
 
         $survey = filled($filters['survey_id'] ?? null) ? Survey::query()->find($filters['survey_id']) : null;
         $completedIds = $survey === null ? [] : $survey->participations()
@@ -90,6 +90,9 @@ class ReminderController extends Controller
                 return [
                     'id' => $user->id,
                     'text' => $user->name.' — '.$user->email.($hasCompleted ? ' ('.__('completed').')' : ''),
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'employee_id' => $user->employee_id,
                     'disabled' => $hasCompleted,
                 ];
             })->values(),

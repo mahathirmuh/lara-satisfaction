@@ -4,6 +4,14 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.10.2] - 2026-11-16
+
+### Fixed
+
+- The people search of **Survey Management > Reminders** (Chosen people) is no longer oversized: its text is the size of
+  the other fields, each person takes two lines (the name, then the e-mail and employee ID), those who completed the
+  survey show dimmed with "completed", and the list scrolls after about six people. A chosen person shows by name only.
+
 ## [0.10.1] - 2026-11-16
 
 ### Fixed

@@ -122,16 +122,19 @@ class ReminderTest extends TestCase
 
     public function test_the_people_search_shows_who_completed_the_survey_already(): void
     {
-        $pending = $this->departmentEmployee(['name' => 'Budi Santoso', 'email' => 'budi.santoso@merdekabattery.com']);
-        $completed = $this->completedEmployee(attributes: ['name' => 'Budi Hartono', 'email' => 'budi.hartono@merdekabattery.com']);
+        $pending = $this->departmentEmployee(['name' => 'Budi Santoso', 'email' => 'budi.santoso@merdekabattery.com', 'employee_id' => 'MTI1002']);
+        $completed = $this->completedEmployee(attributes: ['name' => 'Budi Hartono', 'email' => 'budi.hartono@merdekabattery.com', 'employee_id' => 'MTI1001']);
         $this->departmentEmployee(['name' => 'Budi Nonaktif', 'is_active' => false]);
 
+        // The name, e-mail and employee ID apart, for the two lines of a person in the list.
         $this->actingAs($this->admin)
             ->getJson(route('survey-management.reminder.recipients', ['search' => 'budi', 'survey_id' => $this->survey->id]))
             ->assertOk()
             ->assertExactJson(['data' => [
-                ['id' => $completed->id, 'text' => 'Budi Hartono — budi.hartono@merdekabattery.com (completed)', 'disabled' => true],
-                ['id' => $pending->id, 'text' => 'Budi Santoso — budi.santoso@merdekabattery.com', 'disabled' => false],
+                ['id' => $completed->id, 'text' => 'Budi Hartono — budi.hartono@merdekabattery.com (completed)', 'name' => 'Budi Hartono',
+                    'email' => 'budi.hartono@merdekabattery.com', 'employee_id' => 'MTI1001', 'disabled' => true],
+                ['id' => $pending->id, 'text' => 'Budi Santoso — budi.santoso@merdekabattery.com', 'name' => 'Budi Santoso',
+                    'email' => 'budi.santoso@merdekabattery.com', 'employee_id' => 'MTI1002', 'disabled' => false],
             ]]);
     }
 
