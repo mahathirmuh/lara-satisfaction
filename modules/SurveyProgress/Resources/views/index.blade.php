@@ -25,9 +25,9 @@
                                 @endforeach
                             </select>
                         </form>
-                        @if ($canSendReminders && $survey->isOpen())
+                        @if ($canSendReminders)
                             <x-global.btn-detail :label="__('Send Reminder')" color="blue" size="sm" outline="true"
-                                :href="route('survey-management.reminder.index')">
+                                id="progressRemindEveryone" :disabled="$pendingCount === 0">
                                 <x-slot:icon><i class="ti ti-send"></i></x-slot:icon>
                             </x-global.btn-detail>
                         @endif
@@ -96,6 +96,9 @@
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Company') }}</th>
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Status') }}</th>
                                                     <th class="text-capitalize fs-5 py-3">{{ __('Last Update') }}</th>
+                                                    @if ($canSendReminders)
+                                                        <th class="text-capitalize fs-5 py-3 text-center">{{ __('Action') }}</th>
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -114,6 +117,37 @@
             </div>
         @endif
     </div>
+
+    @if ($canSendReminders)
+        {{-- A reminder about the open survey, to everyone who has not completed it or to one person, the ways chosen. --}}
+        <div class="modal fade" id="progressReminderModal" tabindex="-1" aria-labelledby="progressReminderTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-3">
+                    <button type="button" class="btn-close btn-pinned" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+                    <div class="modal-body p-0">
+                        <h3 class="modal-title mb-3" id="progressReminderTitle">{{ __('Send Reminder') }}</h3>
+                        <form id="progressReminderForm" novalidate>
+                            <div class="mb-3">
+                                <div class="form-label">{{ __('Recipients') }}</div>
+                                <div class="fw-medium" id="progressReminderWho"></div>
+                                <div class="small text-secondary" id="progressReminderWhoMeta"></div>
+                            </div>
+                            <x-global.reminder-channels :channels="$reminderChannels" :email-sender="$emailSender" id-prefix="progressReminder" />
+                            <div class="small text-secondary mb-3">
+                                {{ __('Each person gets the reminder in their own language, with a link to the survey. People who completed the survey already are left out.') }}
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-sm px-3" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                                <x-global.btn-detail :label="__('Send Reminder')" color="blue" size="sm" type="submit">
+                                    <x-slot:icon><i class="ti ti-send"></i></x-slot:icon>
+                                </x-global.btn-detail>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('javascript')
@@ -121,6 +155,19 @@
         <script>
             const progressSurveyId = @json($survey->id);
             const progressSavedDraft = @json(__('Saved as draft'));
+            const progressReminder = {
+                url: @json(route('survey-management.reminder.store')),
+                pending: @json($pendingCount),
+                person: null,
+                texts: {
+                    everyone: @json(__('Everyone who has not completed it')),
+                    people: @json(__(':count people')),
+                    remindPerson: @json(__('Send a reminder to this person')),
+                    chooseChannel: @json(__('Choose at least one way to remind.')),
+                    confirmEveryone: @json(__('This will remind :count people who have not completed the survey.')),
+                    confirmPerson: @json(__('This will remind :name.')),
+                },
+            };
 
             const progressTable = initTablePage({
                 container: '#progressTable',
@@ -161,6 +208,17 @@
                         key: 'last_activity',
                         render: (item) => escapeHtml(item.last_activity || '-'),
                     },
+                    @if ($canSendReminders)
+                        {
+                            key: 'action',
+                            className: 'text-center',
+                            render: (item) => item.status === 'completed' ? '' :
+                                `<button type="button" class="btn btn-sm btn-icon btn-outline-blue progress-remind" data-id="${escapeHtml(item.id)}"
+                                    data-name="${escapeHtml(item.name)}" data-email="${escapeHtml(item.email)}"
+                                    title="${escapeHtml(progressReminder.texts.remindPerson)}" aria-label="${escapeHtml(progressReminder.texts.remindPerson)}">
+                                    <i class="ti ti-send" aria-hidden="true"></i></button>`,
+                        },
+                    @endif
                 ],
                 searchInput: '#progressSearch',
                 resetButton: '#progressResetButton',
@@ -180,6 +238,52 @@
             $(function() {
                 $('#progressStatusFilter, #progressDepartmentFilter, #progressCompanyFilter').on('change', () => progressTable.applyFilters());
                 progressTable.reload();
+
+                /** The reminder dialog, for everyone who has not completed the survey (no person) or for one person. */
+                function openReminder(person) {
+                    progressReminder.person = person;
+                    $('#progressReminderWho').text(person ? person.name : progressReminder.texts.everyone);
+                    $('#progressReminderWhoMeta').text(person ? person.email : progressReminder.texts.people.replace(':count', progressReminder.pending));
+                    $('#progressReminderForm input[name="channels[]"]').prop('checked', true);
+                    $('#progressReminderModal').modal('show');
+                }
+
+                $('#progressRemindEveryone').on('click', () => openReminder(null));
+                $('#progressTable').on('click', '.progress-remind', function() {
+                    openReminder({
+                        id: $(this).data('id'),
+                        name: String($(this).data('name')),
+                        email: String($(this).data('email')),
+                    });
+                });
+
+                $('#progressReminderForm').on('submit', function(event) {
+                    event.preventDefault();
+
+                    const person = progressReminder.person;
+                    const channels = $(this).find('input[name="channels[]"]:checked').map((index, input) => input.value).get();
+
+                    if (!channels.length) {
+                        showError([progressReminder.texts.chooseChannel]);
+
+                        return;
+                    }
+
+                    saveRecord({
+                        url: progressReminder.url,
+                        method: 'POST',
+                        data: {
+                            survey_id: progressSurveyId,
+                            audience: person ? 'custom' : 'all',
+                            user_ids: person ? [person.id] : [],
+                            channels: channels,
+                        },
+                        confirmText: person ?
+                            progressReminder.texts.confirmPerson.replace(':name', person.name) :
+                            progressReminder.texts.confirmEveryone.replace(':count', progressReminder.pending),
+                        onSuccess: () => $('#progressReminderModal').modal('hide'),
+                    });
+                });
             });
         </script>
     @endif

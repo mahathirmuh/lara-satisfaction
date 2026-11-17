@@ -25,8 +25,18 @@ class SurveyManualReminderFactory extends Factory
             'audience' => SurveyManualReminder::AUDIENCE_ALL,
             'recipients' => fake()->numberBetween(1, 300),
             'skipped' => 0,
+            'via_app' => true,
+            'via_email' => true,
             'sent_at' => now(),
         ];
+    }
+
+    /**
+     * Sent by e-mail only.
+     */
+    public function emailOnly(): static
+    {
+        return $this->state(['via_app' => false, 'via_email' => true]);
     }
 
     /**

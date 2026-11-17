@@ -14,6 +14,25 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.13.0] - 2026-11-17
+
+### Ditambahkan
+
+- Kirim pengingat langsung dari **Survey Progress**: tombol **Send Reminder** di atas untuk semua yang belum mengisi
+  survei yang sedang dibuka, dan tombol kirim di setiap baris yang belum selesai (kolom **Action**) untuk orang itu
+  saja. Untuk yang boleh mengirim pengingat (izin Create di menu Reminders).
+- Pengingat yang dikirim manual bisa dipilih salurannya: **notifikasi di aplikasi**, **email**, atau keduanya (di
+  Survey Progress maupun di **Survey Management > Reminders**). Riwayat pengingat dan Audit Log mencatat salurannya;
+  pengingat otomatis tetap lewat keduanya.
+
+### Diperbaiki
+
+- Pesan setelah mengirim pengingat ke satu orang berbunyi "Reminder sent to 1 person." (dalam English), bukan "1
+  people".
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`
+(saluran pengingat manual).
+
 ## [0.12.0] - 2026-11-17
 
 ### Ditambahkan

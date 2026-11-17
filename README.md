@@ -141,7 +141,9 @@ active users whose role may fill in surveys and who have not submitted yet, as a
 notification (navbar bell) and an email. Each reminder day is sent once per survey. The same
 reminder can be sent by hand from **Survey Management > Reminders**, to everyone who has not
 completed an open survey or to chosen people (e.g. yourself, to test), with a history of every
-send. Only people with an account here are reminded: accounts are created at the first sign-in
+send, and from **Survey Progress**: to everyone who has not completed the survey shown, or to one person (the send
+button of their row). A reminder sent by hand goes as a notification in the application, by email or both, as chosen
+in its dialog (`App\Enums\ReminderChannel`); whoever may send reminders (Create on the Reminders menu) sees them. Only people with an account here are reminded: accounts are created at the first sign-in
 (or in User Management). Reminders are queued (`App\Services\Survey\SurveyReminders`).
 
 The automatic reminders are switched off and on again on the same page (**Automatic Reminders**, for whoever has the

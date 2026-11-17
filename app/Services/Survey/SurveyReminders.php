@@ -3,6 +3,7 @@
 namespace App\Services\Survey;
 
 use App\Enums\PermissionAction;
+use App\Enums\ReminderChannel;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Models\UserManagement\Menu;
@@ -53,20 +54,22 @@ class SurveyReminders
     }
 
     /**
-     * Remind every given user (in-app notification and e-mail, queued) and
-     * return how many were reminded. A failure for one person is reported
-     * and does not stop the others.
+     * Remind every given user (in-app notification and e-mail by default,
+     * queued) and return how many were reminded. A failure for one person is
+     * reported and does not stop the others.
      *
      * @param  Builder<User>  $users
+     * @param  array<int, ReminderChannel>  $channels
      */
-    public function remind(Survey $survey, Builder $users): int
+    public function remind(Survey $survey, Builder $users, array $channels = [ReminderChannel::App, ReminderChannel::Email]): int
     {
         $daysLeft = $survey->daysLeft();
+        $notificationChannels = ReminderChannel::notificationChannels($channels);
         $reminded = 0;
 
         foreach ($users->lazyById(200) as $user) {
             try {
-                $user->notify(new SurveyDeadlineReminder($survey, $daysLeft));
+                $user->notify(new SurveyDeadlineReminder($survey, $daysLeft, $notificationChannels));
                 $reminded++;
             } catch (Throwable $exception) {
                 report($exception);
@@ -96,12 +99,14 @@ class SurveyReminders
 
     /**
      * Remind by hand everyone who has not completed the survey (no ids), or
-     * the chosen people among them, and record it. Chosen people who
-     * completed it already, are inactive or do not take surveys are skipped.
+     * the chosen people among them, the chosen ways, and record it. Chosen
+     * people who completed it already, are inactive or do not take surveys
+     * are skipped.
      *
      * @param  array<int, int>|null  $userIds
+     * @param  array<int, ReminderChannel>  $channels
      */
-    public function sendManually(Survey $survey, User $sender, ?array $userIds = null): SurveyManualReminder
+    public function sendManually(Survey $survey, User $sender, ?array $userIds = null, array $channels = [ReminderChannel::App, ReminderChannel::Email]): SurveyManualReminder
     {
         $recipients = $this->pendingFor($survey)
             ->when($userIds !== null, fn (Builder $query) => $query->whereKey($userIds));
@@ -111,8 +116,10 @@ class SurveyReminders
             'survey_id' => $survey->id,
             'sent_by' => $sender->id,
             'audience' => $userIds === null ? SurveyManualReminder::AUDIENCE_ALL : SurveyManualReminder::AUDIENCE_CUSTOM,
-            'recipients' => $this->remind($survey, $recipients),
+            'recipients' => $this->remind($survey, $recipients, $channels),
             'skipped' => $userIds === null ? 0 : max(0, count(array_unique($userIds)) - $eligible),
+            'via_app' => in_array(ReminderChannel::App, $channels, true),
+            'via_email' => in_array(ReminderChannel::Email, $channels, true),
             'sent_at' => now(),
         ]);
     }

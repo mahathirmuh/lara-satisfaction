@@ -2,6 +2,7 @@
 
 namespace Modules\SurveyManagement\Http\Requests;
 
+use App\Enums\ReminderChannel;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Services\Survey\SurveyReminders;
@@ -12,7 +13,8 @@ use Illuminate\Validation\Validator;
 
 /**
  * Remind by hand, about an open survey, everyone who has not completed it
- * ("all") or chosen people ("custom", handy for a test send to oneself).
+ * ("all") or chosen people ("custom", handy for a test send to oneself), as a
+ * notification in the application, by e-mail or both (at least one way).
  */
 class SendReminderRequest extends FormRequest
 {
@@ -47,6 +49,8 @@ class SendReminderRequest extends FormRequest
                 'max:'.self::MAX_CHOSEN,
             ],
             'user_ids.*' => ['integer', 'distinct', Rule::exists('users', 'id')->whereNull('deleted_at')],
+            'channels' => ['required', 'array'],
+            'channels.*' => ['distinct', Rule::enum(ReminderChannel::class)],
         ];
     }
 
@@ -96,7 +100,19 @@ class SendReminderRequest extends FormRequest
             'audience' => __('recipients'),
             'user_ids' => __('people'),
             'user_ids.*' => __('person'),
+            'channels' => __('ways to remind'),
+            'channels.*' => __('way to remind'),
         ];
+    }
+
+    /**
+     * The ways the reminder goes: the notification in the application, the e-mail or both.
+     *
+     * @return array<int, ReminderChannel>
+     */
+    public function channels(): array
+    {
+        return array_map(fn (string $channel): ReminderChannel => ReminderChannel::from($channel), $this->validated('channels'));
     }
 
     /**

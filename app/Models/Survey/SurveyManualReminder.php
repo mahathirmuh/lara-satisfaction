@@ -2,6 +2,7 @@
 
 namespace App\Models\Survey;
 
+use App\Enums\ReminderChannel;
 use App\Models\UserManagement\User;
 use Database\Factories\Survey\SurveyManualReminderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -11,10 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * A reminder sent by hand (Survey Management > Reminders) to everyone who has
- * not completed a survey, or to chosen people.
+ * A reminder sent by hand (Survey Management > Reminders, Survey Progress) to
+ * everyone who has not completed a survey, or to chosen people, as a
+ * notification in the application, by e-mail or both.
  */
-#[Fillable(['survey_id', 'sent_by', 'audience', 'recipients', 'skipped', 'sent_at'])]
+#[Fillable(['survey_id', 'sent_by', 'audience', 'recipients', 'skipped', 'via_app', 'via_email', 'sent_at'])]
 #[WithoutTimestamps]
 class SurveyManualReminder extends Model
 {
@@ -43,8 +45,23 @@ class SurveyManualReminder extends Model
             'sent_by' => 'integer',
             'recipients' => 'integer',
             'skipped' => 'integer',
+            'via_app' => 'boolean',
+            'via_email' => 'boolean',
             'sent_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The ways it went out.
+     *
+     * @return array<int, ReminderChannel>
+     */
+    public function channels(): array
+    {
+        return array_values(array_filter([
+            $this->via_app ? ReminderChannel::App : null,
+            $this->via_email ? ReminderChannel::Email : null,
+        ]));
     }
 
     /**

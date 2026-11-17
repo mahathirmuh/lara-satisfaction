@@ -120,9 +120,11 @@
                                 <small class="form-hint">{{ __('Search by name, email or employee ID. Choose yourself to try it out.') }}</small>
                             </div>
 
+                            <x-global.reminder-channels :channels="$channels" :email-sender="$emailSender" id-prefix="reminder" />
+
                             <div class="alert alert-info py-2 small mb-2" role="alert">
                                 <i class="ti ti-info-circle me-1"></i>
-                                {{ __('Each person gets a notification in the application and an e-mail, in their own language, with a link to the survey. People who completed the survey already are left out.') }}
+                                {{ __('Each person gets the reminder in their own language, with a link to the survey. People who completed the survey already are left out.') }}
                             </div>
                             <div class="text-secondary small mb-3">
                                 {{ __('Reminders go to the employees of the assessed departments, imported every day from Active Directory.') }}
@@ -162,7 +164,10 @@
                                 <tr>
                                     <td>{{ $send['sent_at']->translatedFormat(__('d M Y H:i')) }}</td>
                                     <td>{{ $send['survey'] ?? '-' }}</td>
-                                    <td>{{ $send['audience'] }}</td>
+                                    <td>
+                                        {{ $send['audience'] }}
+                                        <div class="text-secondary small">{{ $send['channels'] }}</div>
+                                    </td>
                                     <td class="text-center">
                                         {{ $send['recipients'] }}
                                         @if ($send['skipped'] > 0)
@@ -225,6 +230,7 @@
         });
         const reminderTexts = {
             chooseSomeone: @json(__('Choose at least one person.')),
+            chooseChannel: @json(__('Choose at least one way to remind.')),
             confirmAll: @json(__('This will remind :count people who have not completed the survey.')),
             confirmCustom: @json(__('This will remind the :count chosen people.')),
             placeholder: @json(__('Search people…')),
@@ -310,9 +316,16 @@
 
                 const chosen = people.val() || [];
                 const isCustom = audience() === 'custom';
+                const channels = form.find('input[name="channels[]"]:checked').map((index, input) => input.value).get();
 
                 if (isCustom && !chosen.length) {
                     showError([reminderTexts.chooseSomeone]);
+
+                    return;
+                }
+
+                if (!channels.length) {
+                    showError([reminderTexts.chooseChannel]);
 
                     return;
                 }
@@ -324,6 +337,7 @@
                         survey_id: surveySelect.val(),
                         audience: audience(),
                         user_ids: isCustom ? chosen : [],
+                        channels: channels,
                     },
                     confirmText: (isCustom ? reminderTexts.confirmCustom : reminderTexts.confirmAll)
                         .replace(':count', isCustom ? chosen.length : pendingCount()),

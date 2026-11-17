@@ -4,6 +4,21 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.13.0] - 2026-11-17
+
+### Added
+
+- Send reminders straight from **Survey Progress**: **Send Reminder** at the top for everyone who has not completed
+  the open survey, and a send button on every row that is not completed (column **Action**) for that person only. For
+  whoever may send reminders (Create on the Reminders menu).
+- A reminder sent by hand goes the ways chosen: **notification in the application**, **e-mail** or both (in Survey
+  Progress and in **Survey Management > Reminders**). The reminder history and the Audit Log record them; the
+  automatic reminders still go both ways.
+
+### Fixed
+
+- The message after reminding one person reads "Reminder sent to 1 person.", not "1 people".
+
 ## [0.12.0] - 2026-11-17
 
 ### Added

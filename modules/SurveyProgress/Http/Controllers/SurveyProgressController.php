@@ -3,12 +3,15 @@
 namespace Modules\SurveyProgress\Http\Controllers;
 
 use App\Enums\ParticipationStatus;
+use App\Enums\PermissionAction;
+use App\Enums\ReminderChannel;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Organization\Company;
 use App\Models\Organization\Department;
 use App\Models\Survey\Survey;
 use App\Models\UserManagement\User;
+use App\Services\Survey\SurveyReminders;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -19,14 +22,16 @@ use Modules\SurveyProgress\Repositories\SurveyProgressInterface;
 /**
  * Where every employee stands with a survey: Not Started, In Progress (opened
  * the form, possibly with a saved draft) or Completed. Only the filling
- * status: answers stay anonymous and are never linked to a person.
+ * status: answers stay anonymous and are never linked to a person. Whoever
+ * may send reminders (Create on Survey Management > Reminders) reminds
+ * everyone who has not completed an open survey, or one person, from here.
  */
 class SurveyProgressController extends Controller
 {
     /**
      * Create a new controller instance.
      */
-    public function __construct(protected SurveyProgressInterface $surveyProgress) {}
+    public function __construct(protected SurveyProgressInterface $surveyProgress, protected SurveyReminders $reminders) {}
 
     /**
      * Progress page of the chosen survey (?survey=id), the latest by default.
@@ -35,15 +40,20 @@ class SurveyProgressController extends Controller
     {
         $surveys = $this->surveyProgress->surveys();
         $survey = $surveys->firstWhere('id', $request->integer('survey')) ?? $surveys->first();
+        $summary = $survey === null ? null : $this->surveyProgress->summary($survey);
 
         return view('SurveyProgress::index', [
             'surveys' => $surveys,
             'survey' => $survey,
-            'summary' => $survey === null ? null : $this->surveyProgress->summary($survey),
+            'summary' => $summary,
             'statuses' => ParticipationStatus::options(),
             'companies' => Company::query()->orderBy('name')->get(['id', 'code', 'name']),
             'departments' => Department::query()->ordered()->get(['id', 'name']),
-            'canSendReminders' => $request->user()->canAccessMenu('survey-management.reminder'),
+            'canSendReminders' => $survey !== null && $survey->isOpen()
+                && $request->user()->canAccessMenu('survey-management.reminder', PermissionAction::Create),
+            'pendingCount' => $summary === null ? 0 : $summary['not_started'] + $summary['in_progress'],
+            'reminderChannels' => ReminderChannel::options(),
+            'emailSender' => $this->reminders->emailSender(),
         ]);
     }
 

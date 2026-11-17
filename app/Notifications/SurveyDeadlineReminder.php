@@ -13,7 +13,8 @@ use Illuminate\Notifications\Notification;
  * date is near (in-app notification and email). The texts are written in the
  * recipient's language (User::preferredLocale()). Queued, so reminding a few
  * hundred people from the Reminders page does not wait for each e-mail; the
- * "queue" container (docker-compose.yml) delivers them.
+ * "queue" container (docker-compose.yml) delivers them. A reminder sent by
+ * hand may go one way only (ReminderChannel).
  */
 class SurveyDeadlineReminder extends Notification implements ShouldQueue
 {
@@ -21,8 +22,10 @@ class SurveyDeadlineReminder extends Notification implements ShouldQueue
 
     /**
      * Create a new notification instance.
+     *
+     * @param  array<int, string>  $channels  the notification channels, by default the in-app notification and e-mail
      */
-    public function __construct(public Survey $survey, public int $daysLeft) {}
+    public function __construct(public Survey $survey, public int $daysLeft, public array $channels = ['database', 'mail']) {}
 
     /**
      * Get the notification's delivery channels.
@@ -31,7 +34,7 @@ class SurveyDeadlineReminder extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->channels;
     }
 
     /**

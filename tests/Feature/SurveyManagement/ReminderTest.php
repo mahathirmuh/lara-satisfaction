@@ -3,6 +3,7 @@
 namespace Tests\Feature\SurveyManagement;
 
 use App\Enums\PermissionAction;
+use App\Enums\ReminderChannel;
 use App\Models\Log\AuditLog;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
@@ -47,7 +48,7 @@ class ReminderTest extends TestCase
         Notification::fake();
 
         $this->actingAs($this->admin)
-            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $this->survey->id, 'audience' => 'all'])
+            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $this->survey->id, 'audience' => 'all', 'channels' => ['app', 'email']])
             ->assertOk()
             ->assertJsonPath('message', 'Reminder sent to 2 people.');
 
@@ -64,6 +65,8 @@ class ReminderTest extends TestCase
             'audience' => 'all',
             'recipients' => 2,
             'skipped' => 0,
+            'via_app' => true,
+            'via_email' => true,
         ]);
     }
 
@@ -79,6 +82,7 @@ class ReminderTest extends TestCase
                 'survey_id' => $this->survey->id,
                 'audience' => 'custom',
                 'user_ids' => [$chosen->id, $completed->id],
+                'channels' => ['app', 'email'],
             ])
             ->assertOk()
             ->assertJsonPath('data', ['recipients' => 1, 'skipped' => 1]);
@@ -86,6 +90,44 @@ class ReminderTest extends TestCase
         Notification::assertSentTo($chosen, SurveyDeadlineReminder::class);
         Notification::assertNotSentTo([$notChosen, $completed, $this->admin], SurveyDeadlineReminder::class);
         $this->assertDatabaseHas('survey_manual_reminders', ['audience' => 'custom', 'recipients' => 1, 'skipped' => 1]);
+    }
+
+    /**
+     * @return array<string, array{0: ReminderChannel, 1: array<int, string>}>
+     */
+    public static function singleWays(): array
+    {
+        return [
+            'the notification in the application only' => [ReminderChannel::App, ['database']],
+            'the e-mail only' => [ReminderChannel::Email, ['mail']],
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $notificationChannels
+     */
+    #[DataProvider('singleWays')]
+    public function test_a_reminder_goes_only_the_way_chosen(ReminderChannel $way, array $notificationChannels): void
+    {
+        $employee = $this->departmentEmployee();
+        Notification::fake();
+
+        $this->actingAs($this->admin)
+            ->postJson(route('survey-management.reminder.store'), [
+                'survey_id' => $this->survey->id,
+                'audience' => 'custom',
+                'user_ids' => [$employee->id],
+                'channels' => [$way->value],
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Reminder sent to 1 person.');
+
+        Notification::assertSentTo($employee, SurveyDeadlineReminder::class, fn (SurveyDeadlineReminder $notification, array $channels): bool => $channels === $notificationChannels);
+        $this->assertDatabaseHas('survey_manual_reminders', [
+            'recipients' => 1,
+            'via_app' => $way === ReminderChannel::App,
+            'via_email' => $way === ReminderChannel::Email,
+        ]);
     }
 
     /**
@@ -99,6 +141,8 @@ class ReminderTest extends TestCase
             'everyone completed it' => ['open', ['audience' => 'all'], 'audience'],
             'survey not open' => ['closed', ['audience' => 'all'], 'survey_id'],
             'unknown audience' => ['open', ['audience' => 'managers'], 'audience'],
+            'no way to remind' => ['open', ['audience' => 'all', 'channels' => []], 'channels'],
+            'an unknown way to remind' => ['open', ['audience' => 'all', 'channels' => ['sms']], 'channels.0'],
         ];
     }
 
@@ -118,7 +162,7 @@ class ReminderTest extends TestCase
         Notification::fake();
 
         $this->actingAs($this->admin)
-            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $survey->id, ...$payload])
+            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $survey->id, 'channels' => ['app', 'email'], ...$payload])
             ->assertUnprocessable()
             ->assertJsonValidationErrors([$invalidField]);
 
@@ -147,14 +191,15 @@ class ReminderTest extends TestCase
     public function test_the_history_lists_reminders_sent_by_hand_and_scheduled_ones(): void
     {
         $this->departmentEmployee();
-        SurveyManualReminder::factory()->for($this->survey)->custom(recipients: 1)->create(['sent_by' => $this->admin->id]);
+        SurveyManualReminder::factory()->for($this->survey)->custom(recipients: 1)->emailOnly()->create(['sent_by' => $this->admin->id]);
         SurveyReminder::create(['survey_id' => $this->survey->id, 'days_before' => 14, 'recipients' => 120, 'sent_at' => now()->subDay()]);
 
         $this->actingAs($this->admin)
             ->get(route('survey-management.reminder.index'))
             ->assertOk()
             ->assertViewHas('pendingCounts', fn ($counts): bool => $counts->all() === [$this->survey->id => 1])
-            ->assertSeeInOrder(['Chosen people', 'Admin Survei', 'Scheduled (14 days before the end)', '120', 'System']);
+            ->assertViewHas('history', fn ($history): bool => $history->pluck('channels')->all() === ['E-mail', 'Notification in the application · E-mail'])
+            ->assertSeeInOrder(['Chosen people', 'E-mail', 'Admin Survei', 'Scheduled (14 days before the end)', 'Notification in the application · E-mail', '120', 'System']);
     }
 
     public function test_the_automatic_reminders_are_turned_off_and_on_again(): void
@@ -252,7 +297,7 @@ class ReminderTest extends TestCase
 
         $this->actingAs($employee)->get(route('survey-management.reminder.index'))->assertForbidden();
         $this->actingAs($this->manager())
-            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $this->survey->id, 'audience' => 'all'])
+            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $this->survey->id, 'audience' => 'all', 'channels' => ['app']])
             ->assertForbidden();
     }
 

@@ -3,6 +3,7 @@
 namespace Modules\SurveyManagement\Http\Controllers;
 
 use App\Console\Commands\SendSurveyDeadlineReminders;
+use App\Enums\ReminderChannel;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Survey\Survey;
@@ -54,6 +55,7 @@ class ReminderController extends Controller
             ]),
             'history' => $this->history(),
             'maxChosen' => SendReminderRequest::MAX_CHOSEN,
+            'channels' => ReminderChannel::options(),
             'automatic' => $automatic->automatic,
             'automaticChanged' => $this->lastChanged($automatic),
             'reminderDays' => collect(config('survey.reminder_days', []))->sortDesc()->implode(', '),
@@ -145,15 +147,16 @@ class ReminderController extends Controller
     public function store(SendReminderRequest $request, AuditLogger $audit): JsonResponse
     {
         $survey = $request->survey();
-        $send = $this->reminders->sendManually($survey, $request->user(), $request->recipientIds());
+        $send = $this->reminders->sendManually($survey, $request->user(), $request->recipientIds(), $request->channels());
         $audit->log(AuditLogger::REMINDER_SENT, $send, new: [
             'Survey' => $survey->title,
             'Recipients' => $send->audience === SurveyManualReminder::AUDIENCE_ALL ? 'Everyone who has not completed it' : 'Chosen people',
+            'Channels' => implode(', ', array_map(fn (ReminderChannel $channel): string => $channel->auditLabel(), $send->channels())),
             'Reminded' => $send->recipients,
             'Left out' => $send->skipped,
         ], label: $survey->title);
 
-        $message = __('Reminder sent to :count people.', ['count' => $send->recipients]);
+        $message = trans_choice('Reminder sent to :count person.|Reminder sent to :count people.', $send->recipients, ['count' => $send->recipients]);
 
         if ($send->skipped > 0) {
             $message .= ' '.__(':count chosen people were left out: they completed the survey already, are inactive or do not fill in surveys.', ['count' => $send->skipped]);
@@ -184,7 +187,7 @@ class ReminderController extends Controller
     /**
      * The latest sends, by hand and scheduled, newest first.
      *
-     * @return Collection<int, array{sent_at: Carbon, survey: string|null, audience: string, recipients: int, skipped: int, sent_by: string}>
+     * @return Collection<int, array{sent_at: Carbon, survey: string|null, audience: string, channels: string, recipients: int, skipped: int, sent_by: string}>
      */
     protected function history(): Collection
     {
@@ -199,6 +202,7 @@ class ReminderController extends Controller
                 'audience' => $send->audience === SurveyManualReminder::AUDIENCE_ALL
                     ? __('Everyone who has not completed it')
                     : __('Chosen people'),
+                'channels' => implode(' · ', array_map(fn (ReminderChannel $channel): string => $channel->label(), $send->channels())),
                 'recipients' => $send->recipients,
                 'skipped' => $send->skipped,
                 'sent_by' => $send->sender?->name ?? '-',
@@ -213,6 +217,7 @@ class ReminderController extends Controller
                 'sent_at' => $send->sent_at,
                 'survey' => $send->survey?->title,
                 'audience' => __('Scheduled (:days days before the end)', ['days' => $send->days_before]),
+                'channels' => implode(' · ', array_map(fn (ReminderChannel $channel): string => $channel->label(), ReminderChannel::cases())),
                 'recipients' => $send->recipients,
                 'skipped' => 0,
                 'sent_by' => __('System'),

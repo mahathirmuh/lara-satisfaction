@@ -2,11 +2,15 @@
 
 namespace Tests\Feature\SurveyProgress;
 
+use App\Enums\PermissionAction;
 use App\Models\Organization\Department;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyDraft;
 use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyStart;
+use App\Models\UserManagement\Menu;
+use App\Models\UserManagement\MenuRolePermission;
+use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -116,6 +120,43 @@ class SurveyProgressTest extends TestCase
             ->assertOk()
             ->assertViewHas('survey', fn (Survey $survey): bool => $survey->is($closed))
             ->assertViewHas('summary', fn (array $summary): bool => $summary['completed'] === 1 && $summary['in_progress'] === 0);
+    }
+
+    public function test_those_who_send_reminders_remind_from_the_progress_of_an_open_survey(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('survey-progress.index'))
+            ->assertOk()
+            ->assertViewHas('canSendReminders', true)
+            ->assertViewHas('pendingCount', 3)
+            ->assertSee('id="progressReminderModal"', false)
+            ->assertSeeInOrder(['Send by', 'Notification in the application', 'E-mail']);
+    }
+
+    public function test_no_reminder_is_offered_for_a_survey_that_is_not_open(): void
+    {
+        $closed = Survey::factory()->closed()->create();
+
+        $this->actingAs($this->admin)
+            ->get(route('survey-progress.index', ['survey' => $closed->id]))
+            ->assertOk()
+            ->assertViewHas('canSendReminders', false)
+            ->assertDontSee('id="progressReminderModal"', false);
+    }
+
+    public function test_no_reminder_is_offered_to_those_who_may_not_send_one(): void
+    {
+        MenuRolePermission::query()
+            ->where('role_id', Role::query()->where('name', 'Super Admin')->value('id'))
+            ->where('menu_id', Menu::idForKey('survey-management.reminder'))
+            ->where('permission_id', PermissionAction::Create->value)
+            ->delete();
+
+        $this->actingAs($this->admin)
+            ->get(route('survey-progress.index'))
+            ->assertOk()
+            ->assertViewHas('canSendReminders', false)
+            ->assertDontSee('id="progressReminderModal"', false);
     }
 
     public function test_only_survey_administrators_see_the_progress_of_others(): void
