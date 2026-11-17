@@ -4,6 +4,7 @@ namespace Tests\Feature\Console;
 
 use App\Enums\SurveyStatus;
 use App\Models\Survey\Survey;
+use App\Models\Survey\SurveyDraft;
 use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyReminderSetting;
 use App\Models\UserManagement\Role;
@@ -182,6 +183,39 @@ class SurveyDeadlineReminderTest extends TestCase
             'survey_id' => $survey->id,
             'days_left' => 14,
         ], $notification->toArray($employee));
+    }
+
+    public function test_the_reminder_e_mail_greets_by_name_and_shows_the_survey_at_a_glance(): void
+    {
+        config(['mail.from.name' => 'MTI Employee Communication']);
+        $survey = Survey::factory()->create(['title' => 'Operational Audit 2026', 'estimated_minutes' => 25]);
+        $employee = $this->departmentEmployee(['name' => 'Budi Santoso [MTI]']);
+        SurveyDraft::factory()->for($survey)->for($employee)->create();
+
+        $html = (string) (new SurveyDeadlineReminder($survey, 14))->toMail($employee)->render();
+
+        $this->assertStringContainsString('Hello Budi Santoso,', $html);
+        $this->assertStringNotContainsString('[MTI]', $html);
+        $this->assertStringContainsString('Time needed: about 25 minutes', $html);
+        $this->assertStringContainsString('Your status: In Progress, saved as draft', $html);
+        $this->assertStringContainsString('MTI Employee Communication', $html);
+        $this->assertStringContainsString('This e-mail was sent automatically by', $html);
+    }
+
+    public function test_the_sent_reminder_carries_the_company_logos_inside(): void
+    {
+        $survey = Survey::factory()->create();
+
+        Notification::sendNow($this->departmentEmployee(), new SurveyDeadlineReminder($survey, 14), ['mail']);
+
+        $email = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages()->last()->getOriginalMessage();
+        $logos = array_values(array_filter($email->getAttachments(), fn ($part): bool => $part->hasContentId()));
+
+        $this->assertCount(2, $logos);
+
+        foreach ($logos as $logo) {
+            $this->assertStringContainsString('cid:'.$logo->getContentId(), (string) $email->getHtmlBody());
+        }
     }
 
     #[TestWith([0, 'today'])]

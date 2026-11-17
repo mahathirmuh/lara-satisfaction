@@ -127,7 +127,7 @@ changing `.env`, run `docker compose up -d --force-recreate`.
 | `SEED_ADMIN_EMAIL` | Company email of the first super admin |
 | `SURVEY_MIN_GROUP_SIZE` | Anonymity threshold for showing results (default 5) |
 | `SURVEY_REMINDER_DAYS` | Deadline reminder days before the end date (default `14`, e.g. `14,7,1`) |
-| `MAIL_FROM_ADDRESS`, `MAIL_MAILER` | Reminder emails come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
+| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MAILER` | Reminder emails come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`, a shared mailbox) and are signed `MAIL_FROM_NAME` (`MTI Employee Communication`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
 | `MAIL_GRAPH_*` | App registration of the Graph mailer (`TENANT_ID`, `CLIENT_ID`, `CLIENT_SECRET`); empty ones use `MS_GRAPH_*`. `MAIL_GRAPH_SAVE_TO_SENT_ITEMS=true` keeps a copy in the Sent Items of the mailbox |
 | `APP_URL` | Used for the links in emails |
 | `LOG_ACTIVITY_ENABLED`, `LOG_ERRORS_TO_DATABASE` | Merdeka internal monitoring |
@@ -182,6 +182,9 @@ Reminder emails come from the Exchange Online mailbox in `MAIL_FROM_ADDRESS`
    reason from Microsoft (e.g. `ErrorAccessDenied` while the permission is missing); see `php artisan queue:failed`.
 
 The Reminders page says where the emails come from, or that they are only written to the log (`MAIL_MAILER=log`).
+The reminder email is `resources/views/mail/survey-reminder.blade.php` in Laravel's mail layout, published to
+`resources/views/vendor/mail` (only the changed files: the logos in the header, the footer, the blue theme); the company
+logos are embedded in each email.
 
 ### Activating network sign-in (LDAP)
 

@@ -2,7 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Enums\ParticipationStatus;
 use App\Models\Survey\Survey;
+use App\Models\UserManagement\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -50,15 +52,39 @@ class SurveyDeadlineReminder extends Notification implements ShouldQueue
                 __('Reminder: :survey closes tomorrow', $replace),
                 __('Reminder: :survey closes in :days days', $replace),
             ))
-            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable instanceof User ? $notifiable->plainName() : $notifiable->name]))
             ->line($this->forDeadline(
                 __('The :survey closes today (:date) and you have not completed it yet.', $replace),
                 __('The :survey closes tomorrow (:date) and you have not completed it yet.', $replace),
                 __('The :survey closes in :days days (:date) and you have not completed it yet.', $replace),
             ))
-            ->line(__('It takes about :minutes minutes and your answers are anonymous. If you saved a draft, you can continue where you left off.', ['minutes' => $this->survey->estimated_minutes]))
             ->action(__('Complete the Survey'), route('survey-form.show', $this->survey))
-            ->line(__('Thank you for helping us improve our support services.'));
+            ->line(__('Thank you for helping us improve our support services.'))
+            ->markdown('mail.survey-reminder', [
+                'surveyTitle' => $this->survey->title,
+                'details' => [
+                    __('Time needed: about :minutes minutes', ['minutes' => $this->survey->estimated_minutes]),
+                    __('Your status: :status', ['status' => $this->statusOf($notifiable)]),
+                    __('Your answers are anonymous: they are never linked to your name.'),
+                ],
+                'signature' => config('mail.from.name'),
+            ]);
+    }
+
+    /**
+     * Where the person stands with the survey (it is not completed: they are
+     * reminded), with the draft they saved, if any.
+     */
+    protected function statusOf(object $notifiable): string
+    {
+        if (! $notifiable instanceof User || ! $notifiable->exists) {
+            return ParticipationStatus::NotStarted->label();
+        }
+
+        $savedDraft = $notifiable->surveyDrafts()->whereBelongsTo($this->survey)->exists();
+        $status = ParticipationStatus::resolve(false, $savedDraft, $savedDraft || $notifiable->surveyStarts()->whereBelongsTo($this->survey)->exists());
+
+        return $savedDraft ? __(':status, saved as draft', ['status' => $status->label()]) : $status->label();
     }
 
     /**

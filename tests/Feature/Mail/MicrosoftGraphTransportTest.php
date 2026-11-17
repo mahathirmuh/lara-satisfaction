@@ -71,7 +71,11 @@ class MicrosoftGraphTransportTest extends TestCase
                 && $message['from'] === ['emailAddress' => ['address' => self::SENDER, 'name' => 'Employee Satisfaction Survey']]
                 && $message['toRecipients'] === [['emailAddress' => ['address' => 'ani@merdekabattery.com']]]
                 && $message['body']['contentType'] === 'HTML'
-                && str_contains($message['body']['content'], route('survey-form.show', 7));
+                && str_contains($message['body']['content'], route('survey-form.show', 7))
+                // The company logos go inside the e-mail, as inline pictures of its text.
+                && count($message['attachments']) === 2
+                && collect($message['attachments'])->every(fn (array $logo): bool => $logo['isInline'] === true
+                    && str_contains($message['body']['content'], 'cid:'.$logo['contentId']));
         });
     }
 

@@ -4,6 +4,16 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.16.0] - 2026-11-17
+
+### Changed
+
+- The reminder e-mail has a new look: the Merdeka Copper Gold and Merdeka Battery Materials logos at the top (inside the
+  e-mail, so they show without downloading pictures), a greeting without the company tag ("Hello Budi Santoso,"), a box
+  with the survey, the time needed, the recipient's status (e.g. "In Progress, saved as draft") and the promise of
+  anonymity, a blue button as in the application, the signature **MTI Employee Communication**, and a footer saying the
+  e-mail was sent automatically.
+
 ## [0.15.0] - 2026-11-17
 
 ### Added

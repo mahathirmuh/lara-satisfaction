@@ -97,6 +97,16 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * The name without a "[MTI]"-like company tag, e.g. to greet the person; the name as it is when nothing else is left.
+     */
+    public function plainName(): string
+    {
+        $plain = trim((string) preg_replace('/\s+/', ' ', (string) preg_replace('/\[[^\]]*\]/', '', (string) $this->name)));
+
+        return $plain !== '' ? $plain : (string) $this->name;
+    }
+
+    /**
      * Up to two initials of the name, without a "[MTI]"-like company tag.
      */
     public function initials(): string
