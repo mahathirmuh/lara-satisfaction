@@ -94,7 +94,8 @@ class SurveyProgressTest extends TestCase
         );
         $this->assertSame([$this->respondentDepartment()->name], collect($rows)->pluck('department')->unique()->values()->all());
         $this->assertNull(collect($rows)->firstWhere('name', 'Ani Belum')['last_activity']);
-        $this->assertNotNull(collect($rows)->firstWhere('name', 'Dedi Selesai')['last_activity']);
+        // The day and the time, e.g. "17 Nov 2026 10:32".
+        $this->assertMatchesRegularExpression('/^\d{2} \w{3} \d{4} \d{2}:\d{2}$/', (string) collect($rows)->firstWhere('name', 'Dedi Selesai')['last_activity']);
     }
 
     public function test_each_person_shows_with_their_photo_or_initials(): void

@@ -94,7 +94,7 @@ class SurveyProgressController extends Controller
                     'status_label' => $status->label(),
                     'status_color' => $status->color(),
                     'saved_draft' => $status === ParticipationStatus::InProgress && $user->draft_saved_at !== null,
-                    'last_activity' => $lastActivity === null ? null : Carbon::parse($lastActivity)->translatedFormat(__('d M Y')),
+                    'last_activity' => $lastActivity === null ? null : Carbon::parse($lastActivity)->translatedFormat(__('d M Y H:i')),
                 ];
             },
         );
