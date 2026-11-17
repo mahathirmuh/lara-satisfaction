@@ -14,6 +14,17 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.17.0] - 2026-11-17
+
+### Dihapus
+
+- Halaman depan publik: membuka alamat aplikasi (`https://survey.merdekabattery.com`) langsung menampilkan halaman
+  masuk; yang sudah masuk langsung ke halaman awalnya. Tautan "Back to survey overview" di halaman masuk ikut hilang.
+- Menu **Master Data > Landing Page** (isi halaman depan), dengan tabel isinya.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`
+(menghapus menu Landing Page beserta izinnya, dan tabel `landing_contents`).
+
 ## [0.16.1] - 2026-11-17
 
 ### Diubah

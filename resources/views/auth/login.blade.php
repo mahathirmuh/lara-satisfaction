@@ -332,20 +332,6 @@
             text-align: center;
         }
 
-        .rm-login-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
-            color: var(--rm-brand-600);
-            font-size: 13px;
-            text-decoration: none;
-        }
-
-        .rm-login-back:hover {
-            color: var(--rm-brand-700);
-        }
-
         /* The language of the page, under the copyright: three of them do not fit beside it. */
         .rm-login-lang {
             display: flex;
@@ -567,9 +553,6 @@
                 </div>
 
                 <div class="rm-login-foot">
-                    <a href="{{ route('landing') }}" class="rm-login-back">
-                        <i class="ti ti-arrow-left" aria-hidden="true"></i> {{ __('Back to survey overview') }}
-                    </a>
                     <div>&copy; {{ config('merdeka.company_name') }} {{ date('Y') }}</div>
                     {{-- The language of the page: EN | ID | 中文. --}}
                     <form method="POST" action="{{ route('locale.update') }}" class="rm-login-lang" aria-label="{{ __('Language') }}">

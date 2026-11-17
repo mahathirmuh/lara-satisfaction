@@ -56,7 +56,6 @@ class MenuPermissionTest extends TestCase
             'role permission' => ['user-management.role-permission.index', 403],
             'activity log' => ['system-log.activity.index', 403],
             'departments' => ['master-data.department.index', 403],
-            'landing page' => ['master-data.landing-content.index', 403],
         ];
     }
 
@@ -78,7 +77,6 @@ class MenuPermissionTest extends TestCase
             'user registered' => ['user-management.user-registered.index', 200],
             'departments' => ['master-data.department.index', 200],
             'sections' => ['master-data.section.index', 200],
-            'landing page' => ['master-data.landing-content.index', 200],
             'role permission' => ['user-management.role-permission.index', 403],
             'error log' => ['system-log.error.index', 403],
         ];

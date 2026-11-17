@@ -4,6 +4,15 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.17.0] - 2026-11-17
+
+### Removed
+
+- The public landing page: the address of the application (`https://survey.merdekabattery.com`) opens the sign-in
+  page; whoever is signed in goes on to their home page. The "Back to survey overview" link of the sign-in page goes
+  too.
+- The **Master Data > Landing Page** menu (the texts of the landing page), with its table.
+
 ## [0.16.1] - 2026-11-17
 
 ### Changed

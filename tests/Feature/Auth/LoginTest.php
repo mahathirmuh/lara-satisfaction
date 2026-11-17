@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Enums\PermissionAction;
 use App\Helpers\LogApps;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Log\LogActivity;
 use App\Models\Organization\Department;
+use App\Models\UserManagement\Menu;
+use App\Models\UserManagement\MenuRolePermission;
+use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use App\Services\Auth\DirectoryUnavailableException;
 use App\Services\Auth\LdapAuthenticator;
@@ -13,6 +17,7 @@ use App\Services\Auth\LdapIdentity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -20,6 +25,35 @@ use Tests\TestCase;
 class LoginTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_the_address_of_the_application_opens_the_sign_in_page(): void
+    {
+        $this->get('/')->assertRedirect(route('login'));
+    }
+
+    public function test_signed_in_people_go_on_to_their_home_page(): void
+    {
+        $employee = $this->employee();
+
+        $this->actingAs($employee)->get('/')->assertRedirect(route('login'));
+        $this->actingAs($employee)->get(route('login'))->assertRedirect($employee->homeUrl());
+    }
+
+    public function test_the_landing_page_and_its_menu_are_gone_after_the_upgrade(): void
+    {
+        $this->seedAccessControl();
+        $masterData = Menu::query()->where('title', 'Master Data')->value('id');
+        $landing = Menu::query()->create(['title' => 'Landing Page', 'route' => 'master-data.landing-content.index', 'parent_id' => $masterData, 'sort_order' => 3]);
+        $superAdmin = Role::query()->where('name', 'Super Admin')->firstOrFail();
+        $superAdmin->menus()->attach($landing->id);
+        MenuRolePermission::query()->create(['menu_id' => $landing->id, 'role_id' => $superAdmin->id, 'permission_id' => PermissionAction::Read->value]);
+
+        (require database_path('migrations/2026_11_17_093604_remove_the_landing_page.php'))->up();
+
+        $this->assertDatabaseMissing('menu', ['route' => 'master-data.landing-content.index']);
+        $this->assertDatabaseMissing('menu_role_permission', ['menu_id' => $landing->id]);
+        $this->assertFalse(Schema::hasTable('landing_contents'));
+    }
 
     public function test_login_page_offers_sso_and_the_network_account_only(): void
     {

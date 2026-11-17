@@ -48,7 +48,6 @@ class MenuSeeder extends Seeder
             'children' => [
                 ['title' => 'Departments', 'route' => 'master-data.department.index'],
                 ['title' => 'Sections', 'route' => 'master-data.section.index'],
-                ['title' => 'Landing Page', 'route' => 'master-data.landing-content.index'],
             ],
         ],
         // Who signed in and who changed what (IT Admin: every menu; other roles get it in Role & Permission).

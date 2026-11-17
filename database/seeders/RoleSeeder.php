@@ -44,7 +44,6 @@ class RoleSeeder extends Seeder
             'user-management.user-registered.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
             'master-data.department.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
             'master-data.section.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
-            'master-data.landing-content.index' => [PermissionAction::Read, PermissionAction::Update],
         ],
         'Employee' => [
             'dashboard.index' => [PermissionAction::Read],

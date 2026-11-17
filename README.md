@@ -38,7 +38,7 @@ php artisan serve       # http://localhost:26113 (SERVER_PORT); or: composer dev
 `php artisan serve` and Docker use the same port (26113), so the Microsoft redirect URI is the
 same for both: run one of them at a time, and open the app at `http://localhost:26113`.
 
-Uploaded images (department illustrations, landing page hero image) are re-encoded to WebP and
+Uploaded images (department illustrations, section pictures) are re-encoded to WebP and
 stored on the `public` disk, so `php artisan storage:link` is required on every server.
 
 The first IT Admin is the company email in `SEED_ADMIN_EMAIL`: that person signs in with
@@ -246,7 +246,7 @@ app/                 Core: models (UserManagement, Organization, Survey, Content
 modules/{Module}/    Http/Controllers, Http/Requests, Repositories (Interface + Repository),
                      Services, Providers, Resources/views ("{Module}::"), Routes/web
   Dashboard          Open surveys + insights of the featured survey
-  MasterData         Departments (with image), sections (with overview), landing page content
+  MasterData         Departments (with image), sections (with overview)
   SurveyForm         Employee wizard (one step per department, every section evaluated) and
                      anonymous submission; each survey shows Not Started -> In Progress
                      (opened, or "Saved as draft") -> Completed
@@ -285,7 +285,7 @@ public/assets/css/   merdeka-ui.css: the design layer taken from MTI Radio Manag
   wrap every new text in `__('…')` and add it to both files (`TranslationFilesTest` checks they
   match). Date formats are keys too (`translatedFormat(__('d M Y'))`). Data typed by admins
   (department/section names and descriptions, survey titles, custom questions) is shown as typed;
-  the standard questions and the default landing page texts are translated.
+  the standard questions are translated.
 
 ## New module
 

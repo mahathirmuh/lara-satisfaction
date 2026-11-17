@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\ChangelogController;
-use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -16,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| Application-wide routes (landing page, authentication, notifications).
+| Application-wide routes (authentication, notifications).
 | Sign in is SSO or the network account (LDAP) only: there are no local
 | passwords, so there is no password page either.
 | Module routes live in modules/{Module}/Routes/web and are loaded by each
@@ -24,7 +23,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', LandingController::class)->name('landing');
+/** The address of the application opens the sign-in page (signed in: the home page, see bootstrap/app.php) */
+Route::redirect('/', '/login')->name('home');
 
 /** Interface language (signed in or not) */
 Route::post('locale', LocaleController::class)->name('locale.update');
