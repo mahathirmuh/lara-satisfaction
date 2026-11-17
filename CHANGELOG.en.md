@@ -4,6 +4,18 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.19.0] - 2026-11-17
+
+### Added
+
+- The user guide in **简体中文** (Simplified Chinese): **用户指南** in the user menu opens it when the application is in
+  中文, with screenshots in Chinese.
+
+### Changed
+
+- The user guide (Bahasa Indonesia, English, 中文) is brought up to this version: the Inbox page, the ⓘ tooltips, and
+  the landing page that is gone (the address of the application opens the sign-in page).
+
 ## [0.18.0] - 2026-11-17
 
 ### Added

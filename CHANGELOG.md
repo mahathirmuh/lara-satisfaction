@@ -14,6 +14,20 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.19.0] - 2026-11-17
+
+### Ditambahkan
+
+- Panduan pengguna dalam **简体中文** (Simplified Chinese): **用户指南** di menu pengguna membukanya bila aplikasi sedang
+  dalam 中文, dengan screenshot berbahasa Mandarin.
+
+### Diubah
+
+- Panduan pengguna (Bahasa Indonesia, English, 中文) diperbarui untuk versi ini: halaman Kotak Masuk, tooltip ⓘ, dan
+  halaman depan yang sudah tidak ada (alamat aplikasi langsung membuka halaman masuk).
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.18.0] - 2026-11-17
 
 ### Ditambahkan

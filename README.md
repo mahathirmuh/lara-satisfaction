@@ -14,13 +14,13 @@ picture, work summary, role overview) and evaluate each one with the department'
 (criticality, service quality, feedback). Answers are anonymous by design and administrators
 analyse the results per department, section, question and company.
 
-Documents are in the `docs/` folder, in Bahasa Indonesia (`-ID`) and English (`-EN`), for the version written on their
-cover (as in MTI Radio Management):
+Documents are in the `docs/` folder, in Bahasa Indonesia (`-ID`), English (`-EN`) and Simplified Chinese (`-ZH`), for
+the version written on their cover (as in MTI Radio Management):
 
 - **Panduan Pengguna / User Guide**, for the users of the application:
-  [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf).
-  The user menu opens it too (**User Guide**, `/user-guide`), in the language of the page (English for 中文), so the
-  Docker image keeps these PDFs.
+  [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf) ·
+  [中文](docs/User-Guide-Employee-Satisfaction-Survey-ZH.pdf). The user menu opens it too (**User Guide**, `/user-guide`),
+  in the language of the page, so the Docker image keeps these PDFs.
 
 ## Requirements
 

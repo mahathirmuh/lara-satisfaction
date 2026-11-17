@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
- * The user guide that the user menu opens (User Guide): the PDF in docs/ in the language of the page, Indonesian in
- * Bahasa Indonesia and English otherwise (there is no Chinese guide). Open to everyone signed in.
+ * The user guide that the user menu opens (User Guide): the PDF in docs/ in the language of the page (Bahasa
+ * Indonesia, English or Simplified Chinese), English for any other. Open to everyone signed in.
  */
 class UserGuideController extends Controller
 {
@@ -18,6 +18,7 @@ class UserGuideController extends Controller
     public const GUIDES = [
         'id' => 'docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf',
         'en' => 'docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf',
+        'zh_CN' => 'docs/User-Guide-Employee-Satisfaction-Survey-ZH.pdf',
     ];
 
     /**

@@ -16,7 +16,7 @@ class UserGuideTest extends TestCase
 
     #[TestWith(['id', 'User-Guide-Employee-Satisfaction-Survey-ID.pdf'])]
     #[TestWith(['en', 'User-Guide-Employee-Satisfaction-Survey-EN.pdf'])]
-    #[TestWith(['zh_CN', 'User-Guide-Employee-Satisfaction-Survey-EN.pdf'])]
+    #[TestWith(['zh_CN', 'User-Guide-Employee-Satisfaction-Survey-ZH.pdf'])]
     public function test_the_guide_opens_in_the_language_of_the_page(string $locale, string $guide): void
     {
         $response = $this->actingAs($this->employee(['locale' => $locale]))->get(route('user-guide'));
