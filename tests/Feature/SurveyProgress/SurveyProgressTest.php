@@ -97,6 +97,20 @@ class SurveyProgressTest extends TestCase
         $this->assertNotNull(collect($rows)->firstWhere('name', 'Dedi Selesai')['last_activity']);
     }
 
+    public function test_each_person_shows_with_their_photo_or_initials(): void
+    {
+        $this->people['not_started']->forceFill(['photo_path' => 'user-photos/'.$this->people['not_started']->id.'.webp', 'photo_updated_at' => now()])->save();
+
+        $rows = collect($this->actingAs($this->admin)
+            ->getJson(route('survey-progress.list', ['survey_id' => $this->survey->id]))
+            ->assertOk()
+            ->json('data'))->keyBy('name');
+
+        $this->assertSame($this->people['not_started']->fresh()->photoUrl(), $rows['Ani Belum']['photo_url']);
+        $this->assertNull($rows['Budi Buka']['photo_url']);
+        $this->assertSame('BB', $rows['Budi Buka']['initials']);
+    }
+
     public function test_the_list_can_be_narrowed_to_one_status(): void
     {
         $this->actingAs($this->admin)

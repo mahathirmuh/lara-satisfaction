@@ -14,6 +14,26 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.14.0] - 2026-11-17
+
+### Ditambahkan
+
+- Foto karyawan di daftar **Survey Progress**, di samping nama (dari sistem kartu akses, seperti di User Registered);
+  yang tidak punya foto tampil dengan inisialnya.
+
+### Dihapus
+
+- Ikon di kartu sambutan **Dashboard** ("Welcome back, …"): kartunya cukup berisi sapaan, tanggal dan tombol My Survey.
+
+### Diperbaiki
+
+- **User Guide** juga ada di menu ponsel (di bawah My Profile), seperti di menu pengguna pada layar lebar.
+- Panduan pengguna (PDF, Bahasa Indonesia dan English) diperbarui untuk versi ini: pengingat otomatis dan pengirim
+  emailnya, kirim pengingat dari Survey Progress dengan pilihan notifikasi atau email, foto di Survey Progress, dan menu
+  User Guide.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.13.0] - 2026-11-17
 
 ### Ditambahkan

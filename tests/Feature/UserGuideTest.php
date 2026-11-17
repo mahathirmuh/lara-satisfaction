@@ -28,13 +28,12 @@ class UserGuideTest extends TestCase
         $this->assertSame(realpath(base_path('docs/'.$guide)), $response->baseResponse->getFile()->getRealPath());
     }
 
-    public function test_the_user_menu_links_to_the_guide(): void
+    public function test_the_user_menu_and_the_phone_menu_link_to_the_guide(): void
     {
-        $this->actingAs($this->employee())
-            ->get(route('profile.show'))
-            ->assertOk()
-            ->assertSee('href="'.route('user-guide').'"', false)
-            ->assertSeeInOrder(['My Profile', 'User Guide', 'Logout']);
+        $page = $this->actingAs($this->employee())->get(route('profile.show'))->assertOk();
+
+        $this->assertSame(2, substr_count($page->getContent(), 'href="'.route('user-guide').'"'));
+        $page->assertSeeInOrder(['My Profile', 'User Guide', 'Logout']);
     }
 
     public function test_guests_sign_in_first(): void

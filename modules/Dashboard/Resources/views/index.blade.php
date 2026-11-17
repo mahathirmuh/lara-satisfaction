@@ -12,15 +12,10 @@
         <div class="col-12">
             <div class="card rounded-3 overflow-hidden">
                 <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="avatar avatar-lg rounded-3 mdka-bg-brand-50 mdka-text-brand-500">
-                            <i class="ti ti-message-heart fs-1"></i>
-                        </span>
-                        <div>
-                            <h2 class="mb-1">{{ __('Welcome back, :name!', ['name' => auth()->user()->name]) }}</h2>
-                            <div class="text-secondary">{{ config('merdeka.app_tagline') }} &middot;
-                                {{ now()->translatedFormat(__('l, d F Y')) }}</div>
-                        </div>
+                    <div>
+                        <h2 class="mb-1">{{ __('Welcome back, :name!', ['name' => auth()->user()->name]) }}</h2>
+                        <div class="text-secondary">{{ config('merdeka.app_tagline') }} &middot;
+                            {{ now()->translatedFormat(__('l, d F Y')) }}</div>
                     </div>
                     @if ($canTakeSurveys)
                         <x-global.btn-detail :label="__('My Survey')" color="blue" size="md" :href="route('survey-form.index')">

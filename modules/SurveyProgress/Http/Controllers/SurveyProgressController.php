@@ -84,6 +84,8 @@ class SurveyProgressController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'photo_url' => $user->photoUrl(),
+                    'initials' => $user->initials(),
                     'employee_id' => $user->employee_id,
                     'job_title' => $user->job_title,
                     'company' => $user->company?->name,

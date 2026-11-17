@@ -4,6 +4,25 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.14.0] - 2026-11-17
+
+### Added
+
+- Employee photos in the list of **Survey Progress**, beside the name (from the access card system, as in User
+  Registered); people without one show their initials.
+
+### Removed
+
+- The icon of the welcome card of the **Dashboard** ("Welcome back, …"): the card holds the greeting, the date and the
+  My Survey button.
+
+### Fixed
+
+- **User Guide** is in the phone menu too (under My Profile), as in the user menu on a wide screen.
+- The user guide (PDF, Bahasa Indonesia and English) is brought up to this version: the automatic reminders and their
+  e-mail sender, sending reminders from Survey Progress by notification or e-mail, the photos in Survey Progress, and
+  the User Guide menu.
+
 ## [0.13.0] - 2026-11-17
 
 ### Added
