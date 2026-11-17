@@ -14,6 +14,16 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.19.2] - 2026-11-17
+
+### Diubah
+
+- Tata letak **My Profile** dirapikan: kartu identitas selebar halaman (foto, nama, email, jabatan, status), lalu
+  Account Details di kiri serta Access dan Language di kanan dengan tinggi yang sejajar. Pilihan bahasa memakai kontrol
+  yang sama seperti EN | ID | 中文 di bar atas, dan catatan tentang direktori pindah ke bagian bawah kartu.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.19.1] - 2026-11-17
 
 ### Diperbaiki

@@ -4,6 +4,14 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.19.2] - 2026-11-17
+
+### Changed
+
+- **My Profile** has a tidier layout: an identity card across the page (photo, name, e-mail, job title, status), then
+  Account Details on the left and Access and Language on the right, of the same height. The language choice uses the
+  control of EN | ID | 中文 in the top bar, and the note about the directory moved to the foot of its card.
+
 ## [0.19.1] - 2026-11-17
 
 ### Fixed
