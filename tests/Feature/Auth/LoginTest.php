@@ -62,9 +62,35 @@ class LoginTest extends TestCase
 
         $this->get(route('login'))
             ->assertOk()
-            ->assertSeeInOrder(['Sign In with SSO', route('sso.redirect', 'microsoft'), 'Coming soon', 'Sign in with Network Account (LDAP)', 'name="username"', 'name="password"'], false)
+            ->assertSeeInOrder(['Sign in with SSO', route('sso.redirect', 'microsoft'), 'Coming soon', 'Sign in with Merdeka Account', 'Email or username', 'name="username"', 'name="password"'], false)
             ->assertDontSee('Email or Employee ID')
             ->assertDontSee(route('sso.redirect', 'google'));
+    }
+
+    public function test_the_account_form_asks_only_the_email_or_username_and_the_password(): void
+    {
+        $this->directory();
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSeeInOrder(['<form id="loginForm"', 'name="username"', 'name="password"', 'id="loginSubmit"', '</form>'], false)
+            ->assertDontSee('name="remember"', false)
+            ->assertDontSee('id="togglePassword"', false);
+    }
+
+    public function test_signing_in_lasts_the_session_only_even_when_remembering_is_asked(): void
+    {
+        $employee = $this->employee(['email' => 'budi.santoso@merdekabattery.com']);
+        $this->directory()->shouldReceive('authenticate')->once()->andReturn($this->identity('budi.santoso@merdekabattery.com'));
+
+        $this->post(route('login.store'), [
+            'username' => 'budi.santoso',
+            'password' => 'network-password',
+            'remember' => '1',
+        ])->assertRedirect(route('survey-form.index'))
+            ->assertCookieMissing(auth()->guard('web')->getRecallerName());
+
+        $this->assertAuthenticatedAs($employee);
     }
 
     public function test_network_sign_in_is_shown_as_coming_soon_until_ldap_is_configured(): void
@@ -74,7 +100,7 @@ class LoginTest extends TestCase
 
         $this->get(route('login'))
             ->assertOk()
-            ->assertSeeInOrder(['Sign in with Network Account (LDAP)', 'Coming soon', '<fieldset disabled>'], false);
+            ->assertSeeInOrder(['Sign in with Merdeka Account', 'Coming soon', '<fieldset disabled>'], false);
     }
 
     public function test_configured_sign_in_methods_are_offered_without_the_coming_soon_label(): void

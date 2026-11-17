@@ -53,8 +53,9 @@ return [
         | Microsoft Graph (App\Services\Mail\MicrosoftGraphTransport): sends from
         | the Exchange Online mailbox in "sender" (by default MAIL_FROM_ADDRESS,
         | e.g. mti.communication@merdekabattery.com) with an Entra app
-        | registration that has the Mail.Send application permission, without
-        | a mailbox password. Empty MAIL_GRAPH_* use the MS_GRAPH_* registration.
+        | registration allowed to send from that mailbox only (Exchange RBAC
+        | for Applications, see README), without a mailbox password. Empty
+        | MAIL_GRAPH_* use the MS_GRAPH_* registration.
         */
         'microsoft-graph' => [
             'transport' => 'microsoft-graph',

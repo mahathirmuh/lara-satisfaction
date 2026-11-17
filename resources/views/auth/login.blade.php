@@ -4,8 +4,9 @@
 
 @push('style')
     <style>
-        /* The sign-in of MTI Radio Management: a card on the darkened photo (the photo is the body's,
-           auth.components.style), the photos at the left (7/12), the sign-in at the right (5/12). */
+        /* The sign-in of MTI Radio Management (D:\Apps\Laravel\radio-management, auth.login), as its production has it:
+           a card on the darkened photo (the photo is the body's, auth.components.style), the photos at the left (7/12),
+           the sign-in at the right (5/12). */
         .rm-login {
             display: flex;
             align-items: center;
@@ -84,8 +85,8 @@
             }
         }
 
-        /* The sign-in side, from the top: the logos, the title, the SSO buttons, the network account form, the guide; the
-           footer at the foot. The font is the system one, Tabler's own stack. */
+        /* The sign-in side, from the top: the logos, the title, Microsoft, the account form, the guide; the footer at the
+           foot. The font is the system one, Tabler's own stack. */
         .rm-login-side {
             display: flex;
             flex-direction: column;
@@ -125,7 +126,7 @@
         .rm-login-body {
             display: flex;
             flex-direction: column;
-            margin-top: 40px;
+            margin-top: 56px;
         }
 
         .rm-login-title {
@@ -151,6 +152,7 @@
             text-align: center;
         }
 
+        /* The yellow badge beside a way in that is not set up yet. */
         .rm-login-hint .rm-badge,
         .rm-ms-button .rm-badge {
             margin-left: 4px;
@@ -172,7 +174,6 @@
             gap: 8px;
             min-width: 120px;
             height: 58px;
-            padding: 0 16px;
             border-radius: 8px;
             background: #fff;
             box-shadow: inset 0 0 0 1px var(--rm-gray-300);
@@ -182,6 +183,10 @@
             font-weight: 600;
             text-decoration: none;
             transition: background-color .12s ease-out, box-shadow .12s ease-out;
+        }
+
+        .rm-ms-button.is-pending {
+            padding: 0 12px;
         }
 
         .rm-ms-button:hover {
@@ -256,7 +261,7 @@
             margin-top: 16.5px;
         }
 
-        /* The network account form, 16px narrower than the rest at either side. */
+        /* The account form, 16px narrower than the rest at either side. */
         #loginForm {
             margin-top: 16px;
             padding: 0 16px;
@@ -280,15 +285,6 @@
             font-size: 14px;
         }
 
-        #loginForm .form-hint {
-            margin-top: 6px;
-            font-size: 12px;
-        }
-
-        #loginForm .form-check-label {
-            font-size: 13px;
-        }
-
         .rm-login-submit {
             width: 100%;
             height: 36px;
@@ -300,7 +296,7 @@
             align-items: center;
             justify-content: center;
             gap: 4px;
-            margin-top: 28px;
+            margin-top: 36px;
             color: var(--rm-gray-700);
             font-size: 14px;
             line-height: 24px;
@@ -324,6 +320,7 @@
 
         /* At the foot of the side, 16px below the guide at the least. */
         .rm-login-foot {
+            position: relative;
             margin-top: auto;
             padding-top: 16px;
             color: var(--tblr-secondary);
@@ -332,13 +329,24 @@
             text-align: center;
         }
 
-        /* The language of the page, under the copyright: three of them do not fit beside it. */
+        /* The language of the page, at the right end of the foot (the copyright stays in the middle). */
         .rm-login-lang {
+            position: absolute;
+            right: 0;
+            bottom: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 2px;
-            margin-top: 6px;
+        }
+
+        /* Under the copyright where the three of them do not fit beside it: the narrower card (992 to 1399 wide) and a
+           phone. */
+        @media (min-width: 992px) and (max-width: 1399.98px), (max-width: 575.98px) {
+            .rm-login-lang {
+                position: static;
+                justify-content: center;
+                margin-top: 6px;
+            }
         }
 
         .rm-login-lang button {
@@ -372,7 +380,7 @@
             color: var(--rm-gray-300);
         }
 
-        /* The guide: 440 wide, a cross at the top right, a ringed box for each way in. */
+        /* The guide: 440 wide, a cross at the top right, the logos and the words in a ringed box. */
         #accessLoginGuide .modal-dialog {
             max-width: 440px;
         }
@@ -402,7 +410,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 32px 24px;
+            padding: 40px 24px;
             border-radius: 8px;
             box-shadow: inset 0 0 0 1px var(--rm-gray-200);
             color: var(--rm-gray-900);
@@ -426,12 +434,6 @@
         .rm-guide-sso {
             color: var(--rm-sky-700);
             font-weight: 700;
-        }
-
-        .rm-guide-note {
-            color: var(--rm-gray-600);
-            font-size: 13px;
-            line-height: 20px;
         }
 
         .rm-guide-logos > .rm-guide-pipe {
@@ -486,10 +488,11 @@
                     <div class="rm-login-rule"></div>
 
                     @if ($ssoProviders !== [])
-                        <div class="rm-login-hint">{{ __('Sign In with SSO') }}</div>
+                        <div class="rm-login-hint">{{ __('Sign in with SSO') }}</div>
                         <div class="rm-login-sso">
                             @foreach ($ssoProviders as $provider => $isConfigured)
-                                <a href="{{ route('sso.redirect', $provider) }}" id="sso-{{ $provider }}" class="rm-ms-button">
+                                <a href="{{ route('sso.redirect', $provider) }}" id="sso-{{ $provider }}"
+                                    @class(['rm-ms-button', 'is-pending' => ! $isConfigured])>
                                     <img src="{{ asset('assets/img/logo/'.$provider.'.png') }}" width="24" height="24" alt="">
                                     {{ $provider === 'microsoft' ? 'Microsoft' : 'Google' }}
                                     @unless ($isConfigured)
@@ -502,46 +505,34 @@
                     @endif
 
                     <div class="rm-login-hint">
-                        {{ __('Sign in with Network Account (LDAP)') }}
+                        {{ __('Sign in with Merdeka Account') }}
                         @unless ($isNetworkSignInConfigured)
                             <span class="rm-badge yellow">{{ __('Coming soon') }}</span>
                         @endunless
                     </div>
 
+                    {{-- The Merdeka account is the network (Active Directory) one: its username, or the company e-mail, whose
+                         "@domain" part LoginRequest drops. --}}
                     <form id="loginForm" method="POST" action="{{ route('login.store') }}" novalidate>
                         @csrf
                         <fieldset @disabled(! $isNetworkSignInConfigured)>
                             <div class="rm-field">
-                                <label for="username" class="form-label required">{{ __('Username') }}</label>
+                                <label for="username" class="form-label">{{ __('Email or username') }}</label>
                                 <input type="text" class="form-control @error('username') is-invalid @enderror" id="username"
-                                    name="username" value="{{ old('username') }}" placeholder="{{ __('firstname.lastname') }}"
-                                    autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+                                    name="username" value="{{ old('username') }}" placeholder="{{ __('Email or username') }}"
+                                    autocomplete="username" autocapitalize="none" spellcheck="false" required>
                                 @error('username')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="form-hint">{{ __('Your network (Windows) username and password.') }}</small>
                             </div>
                             <div class="rm-field">
-                                <label for="password" class="form-label required">{{ __('Password') }}</label>
-                                <div class="input-group input-group-flat">
-                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                        id="password" name="password" placeholder="{{ __('Password') }}"
-                                        autocomplete="current-password" required>
-                                    <span class="input-group-text">
-                                        <a href="#" class="link-secondary" id="togglePassword" title="{{ __('Show password') }}"
-                                            aria-label="{{ __('Show password') }}">
-                                            <i class="ti ti-eye"></i>
-                                        </a>
-                                    </span>
-                                </div>
+                                <label for="password" class="form-label">{{ __('Password') }}</label>
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
+                                    name="password" placeholder="{{ __('Password') }}" autocomplete="current-password" required>
                                 @error('password')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <label class="form-check mb-0">
-                                <input type="checkbox" class="form-check-input" name="remember" value="1" @checked(old('remember'))>
-                                <span class="form-check-label">{{ __('Remember me on this device') }}</span>
-                            </label>
                             <button type="submit" class="btn-rm primary rm-login-submit" id="loginSubmit">{{ __('Login') }}</button>
                         </fieldset>
                     </form>
@@ -553,7 +544,7 @@
                 </div>
 
                 <div class="rm-login-foot">
-                    <div>&copy; {{ config('merdeka.company_name') }} {{ date('Y') }}</div>
+                    &copy; {{ config('merdeka.company_name') }} {{ date('Y') }}
                     {{-- The language of the page: EN | ID | 中文. --}}
                     <form method="POST" action="{{ route('locale.update') }}" class="rm-login-lang" aria-label="{{ __('Language') }}">
                         @csrf
@@ -571,7 +562,7 @@
         </div>
     </section>
 
-    {{-- How each kind of account signs in: Microsoft, Google when it is offered, and the network account. --}}
+    {{-- How to sign in with Microsoft, and with Google when it is offered. --}}
     <div class="modal fade" id="accessLoginGuide" tabindex="-1" aria-labelledby="accessLoginGuideTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -587,7 +578,7 @@
                         </div>
                         <div>
                             Merdeka Battery Materials Group
-                            <br><span class="rm-guide-domain">@merdekabattery.com, @scmnickel.com</span>
+                            <br><span class="rm-guide-domain">@merdekabattery.com</span>
                             <br>{{ __('access via') }}
                             <br><span class="rm-guide-sso">Microsoft SSO</span>
                             @unless ($ssoProviders['microsoft'] ?? false)
@@ -610,15 +601,6 @@
                             </div>
                         </div>
                     @endisset
-                    <div class="rm-guide-box">
-                        <div class="rm-guide-sso">{{ __('Login by Network Account (LDAP)') }}</div>
-                        <div class="rm-guide-note">
-                            {{ __('Sign in with the username and password of your company network (Windows) account. This application has no passwords of its own: please contact the IT Helpdesk if you do not have a network or Microsoft account.') }}
-                            @unless ($isNetworkSignInConfigured)
-                                <br><span class="rm-badge yellow mt-1">{{ __('Coming soon') }}</span>
-                            @endunless
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -627,17 +609,8 @@
 
 @push('javascript')
     <script>
+        // While the sign-in is sent: a spinner in the button, and no second click.
         $(function() {
-            $('#togglePassword').on('click', function(event) {
-                event.preventDefault();
-                const input = $('#password');
-                const isHidden = input.attr('type') === 'password';
-
-                input.attr('type', isHidden ? 'text' : 'password');
-                $(this).find('i').toggleClass('ti-eye', !isHidden).toggleClass('ti-eye-off', isHidden);
-            });
-
-            // While the sign-in is sent: a spinner in the button, and no second click.
             $('#loginForm').on('submit', function() {
                 $('#loginSubmit').addClass('is-busy').prop('disabled', true).attr('aria-busy', 'true').text(@json(__('Signing in…')));
             });

@@ -170,17 +170,30 @@ Reminder emails come from the Exchange Online mailbox in `MAIL_FROM_ADDRESS`
 (`mti.communication@merdekabattery.com`), sent through Microsoft Graph without a mailbox password
 (`App\Services\Mail\MicrosoftGraphTransport`).
 
-1. In Microsoft Entra ID, give an app registration the **application** permission Microsoft Graph `Mail.Send` and grant
-   admin consent: the one in `MS_GRAPH_CLIENT_ID` ("Apps Internal ICT", shared with trilingual-docon), or a separate
-   one whose ids and secret go in `MAIL_GRAPH_TENANT_ID`, `MAIL_GRAPH_CLIENT_ID` and `MAIL_GRAPH_CLIENT_SECRET`.
-2. `Mail.Send` lets the app send as any mailbox of the tenant, so limit it to this one, in Exchange Online PowerShell:
-   `New-ApplicationAccessPolicy -AppId <client id> -PolicyScopeGroupId mti.communication@merdekabattery.com
-   -AccessRight RestrictAccess -Description "Employee Satisfaction Survey reminders"`, then check it with
-   `Test-ApplicationAccessPolicy -Identity mti.communication@merdekabattery.com -AppId <client id>`.
+1. Take an app registration of Microsoft Entra ID: the one in `MS_GRAPH_CLIENT_ID` ("Apps Internal ICT", shared with
+   trilingual-docon), or a separate one whose ids and secret go in `MAIL_GRAPH_TENANT_ID`, `MAIL_GRAPH_CLIENT_ID` and
+   `MAIL_GRAPH_CLIENT_SECRET`. Give it **no** Microsoft Graph `Mail.Send` permission in Entra: that one sends as any
+   mailbox of the tenant.
+2. Allow it to send from this mailbox only with RBAC for Applications, in Exchange Online PowerShell. The object id is
+   the one of the app under **Enterprise applications** (the `oid` of its token), not the one of App registrations:
+
+   ```powershell
+   New-ServicePrincipal -AppId <client id> -ObjectId <service principal object id> -DisplayName "<app name>"
+   New-ManagementScope -Name "Survey Mail Sender Scope" -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'mti.communication@merdekabattery.com'"
+   New-ManagementRoleAssignment -App <client id> -Role "Application Mail.Send" -CustomResourceScope "Survey Mail Sender Scope"
+   Test-ServicePrincipalAuthorization -Identity <client id> -Resource mti.communication@merdekabattery.com
+   ```
+
+   The test says `InScope` True for this mailbox and False for any other. Exchange applies it after 30 minutes to 2
+   hours. Do not use Application Access Policies (`New-ApplicationAccessPolicy`): Microsoft replaced them with RBAC for
+   Applications, and on 2026-11-17 one blocked even the allowed mailbox for hours ("[RAOP] Blocked by tenant configured
+   AppOnly AccessPolicy settings") while its test said Granted.
 3. Set `MAIL_MAILER=microsoft-graph` and `MAIL_FROM_ADDRESS=mti.communication@merdekabattery.com`, then
    `docker compose up -d --force-recreate` (or `php artisan config:cache`).
-4. Try it: **Survey Management > Reminders**, Chosen people, yourself. A refused email fails its queued job with the
-   reason from Microsoft (e.g. `ErrorAccessDenied` while the permission is missing); see `php artisan queue:failed`.
+4. Try it: **Survey Management > Reminders**, Chosen people, yourself. With the queue worker of `docker-compose.yml` a
+   refused email fails its queued job with the reason from Microsoft (e.g. `ErrorAccessDenied` while the permission is
+   missing or not applied yet; see `php artisan queue:failed`); with `QUEUE_CONNECTION=sync` the send dialog counts it
+   and the reason is in `storage/logs/laravel.log`.
 
 The Reminders page says where the emails come from, or that they are only written to the log (`MAIL_MAILER=log`).
 The reminder email is `resources/views/mail/survey-reminder.blade.php` in Laravel's mail layout, published to

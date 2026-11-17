@@ -17,8 +17,9 @@ use Symfony\Component\Mime\MessageConverter;
 /**
  * Sends the e-mail of the application through Microsoft Graph (POST /users/{mailbox}/sendMail) from one Exchange
  * Online mailbox, e.g. mti.communication@merdekabattery.com, with the app-only token of an Entra app registration that
- * has the Mail.Send application permission. No mailbox password is kept, and it keeps working where Exchange Online no
- * longer accepts passwords over SMTP. The mailer "microsoft-graph" of config/mail.php, registered by
+ * Exchange allows to send from that mailbox (RBAC for Applications, "Application Mail.Send" in a scope of that mailbox;
+ * see README). No mailbox password is kept, and it keeps working where Exchange Online no longer accepts passwords over
+ * SMTP. The mailer "microsoft-graph" of config/mail.php, registered by
  * AppServiceProvider.
  */
 class MicrosoftGraphTransport extends AbstractTransport

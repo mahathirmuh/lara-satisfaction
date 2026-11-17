@@ -4,6 +4,21 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.22.0] - 2026-11-17
+
+### Changed
+
+- The sign-in page is the one of MTI Radio Management: "Sign in with SSO" and "Sign in with Merdeka Account", the
+  fields **Email or username** (the company e-mail or the network username, either works) and **Password** without the
+  required marks and the hint under them, the spacing of Radio Management, and the languages at the right end of the
+  copyright line (under it where they do not fit). **Click here** at Access Login Guide only shows Microsoft SSO for
+  @merdekabattery.com. The user guide follows.
+
+### Removed
+
+- **Remember me on this device** and the button that shows the password, on the sign-in page. A sign-in ends after 2
+  hours without activity.
+
 ## [0.21.2] - 2026-11-17
 
 ### Changed

@@ -14,6 +14,23 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.22.0] - 2026-11-17
+
+### Diubah
+
+- Halaman masuk kini sama dengan MTI Radio Management: tulisan "Masuk dengan SSO" dan "Masuk dengan Akun Merdeka",
+  kolom **Email atau nama pengguna** (email kantor atau username jaringan, keduanya bisa) dan **Kata sandi** tanpa
+  tanda wajib dan tanpa keterangan di bawahnya, jarak antarbagian seperti Radio Management, dan pilihan bahasa di ujung
+  kanan baris hak cipta (di bawahnya bila tidak muat). **Klik di sini** di Panduan Akses Masuk hanya menampilkan
+  Microsoft SSO untuk @merdekabattery.com. Panduan pengguna ikut diperbarui.
+
+### Dihapus
+
+- Pilihan **Remember me on this device** dan tombol lihat kata sandi di halaman masuk. Setelah masuk, sesi berakhir
+  setelah 2 jam tanpa aktivitas.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.21.2] - 2026-11-17
 
 ### Diubah

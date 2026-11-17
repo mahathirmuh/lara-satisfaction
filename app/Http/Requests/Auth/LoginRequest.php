@@ -43,7 +43,6 @@ class LoginRequest extends FormRequest
         return [
             'username' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'max:255'],
-            'remember' => ['nullable', 'boolean'],
         ];
     }
 
@@ -109,7 +108,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        Auth::guard('web')->login($user, $this->boolean('remember'));
+        Auth::guard('web')->login($user);
     }
 
     /**
