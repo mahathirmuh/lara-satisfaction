@@ -66,7 +66,7 @@ class EmployeeDirectorySyncTest extends TestCase
         $this->assertSame(['Budi Santoso', 'MTI240001', 'Supply Chain Manager', $this->supplyChain->id, $this->mti->id, true], [
             $budi->name, $budi->employee_id, $budi->job_title, $budi->department_id, $budi->company_id, $budi->is_active,
         ]);
-        $this->assertSame(['Manager'], $budi->roles->pluck('name')->all());
+        $this->assertSame(['Employee'], $budi->roles->pluck('name')->all());
         $this->assertNotNull($budi->directory_synced_at);
 
         $citra = User::query()->where('email', 'citra@merdekabattery.com')->sole();

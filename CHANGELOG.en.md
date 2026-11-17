@@ -4,6 +4,16 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.20.0] - 2026-11-17
+
+### Removed
+
+- The **Manager** role: three roles are left, IT Admin > Super Admin > Employee. Whoever was a Manager (job titles
+  `*Manager`, `Deputy GM`) is an Employee. A role of your own that only sees the results of the departments its people
+  manage can still be made in Role & Permission (Data Scope).
+- The companies other than **PT Merdeka Tsingshan Indonesia (MTI)** and **PT Merdeka Battery Materials (MBM)**: the
+  lists and filters of companies only hold these two.
+
 ## [0.19.3] - 2026-11-17
 
 ### Fixed

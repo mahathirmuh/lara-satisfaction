@@ -114,9 +114,9 @@ class LoginTest extends TestCase
     public static function jobTitleRoles(): array
     {
         return [
-            'owner of the survey' => ['Support Services Deputy General Manager', ['Super Admin', 'Manager']],
-            'department manager' => ['Finance Manager', ['Manager']],
-            'deputy general manager' => ['Deputy GM', ['Manager']],
+            'owner of the survey' => ['Support Services Deputy General Manager', ['Super Admin']],
+            'department manager' => ['Finance Manager', ['Employee']],
+            'deputy general manager' => ['Deputy GM', ['Employee']],
             'assistant of the general manager' => ['Assistant of General Manager', ['Employee']],
             'officer' => ['IT Support Officer', ['Employee']],
             'no job title' => [null, ['Employee']],
@@ -219,7 +219,7 @@ class LoginTest extends TestCase
 
     public function test_a_changed_job_title_changes_the_roles_but_keeps_the_it_admin_role(): void
     {
-        $manager = $this->manager(['email' => 'budi.santoso@merdekabattery.com', 'job_title' => 'Finance Manager']);
+        $manager = $this->superAdmin(['email' => 'budi.santoso@merdekabattery.com', 'job_title' => 'Support Services Deputy General Manager']);
         $itAdmin = $this->itAdmin(['email' => 'mahathir@merdekabattery.com']);
         $this->directory()->shouldReceive('authenticate')->twice()->andReturn(
             $this->identity('budi.santoso@merdekabattery.com', jobTitle: 'Finance Officer'),

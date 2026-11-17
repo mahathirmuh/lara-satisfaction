@@ -14,6 +14,19 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.20.0] - 2026-11-17
+
+### Dihapus
+
+- Role **Manager**: tinggal tiga role, IT Admin > Super Admin > Employee. Yang sebelumnya Manager (jabatan
+  `*Manager`, `Deputy GM`) menjadi Employee. Role sendiri yang hanya melihat hasil departemen yang dikelolanya masih bisa
+  dibuat di Role & Permission (Data Scope).
+- Perusahaan selain **PT Merdeka Tsingshan Indonesia (MTI)** dan **PT Merdeka Battery Materials (MBM)**: daftar dan
+  filter perusahaan kini hanya berisi keduanya.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`
+(menghapus role Manager, pemegangnya mendapat role Employee, dan menghapus perusahaan lain).
+
 ## [0.19.3] - 2026-11-17
 
 ### Diperbaiki

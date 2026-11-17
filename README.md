@@ -53,14 +53,14 @@ Set `SEED_DEMO_DATA=true` (never in production) to seed demo employees and anony
 | --- | --- | --- |
 | **IT Admin** | By hand only (User Management) | Everything, including Role & Permission, Audit Log and System Log |
 | **Super Admin** | Job title *Support Services Deputy General Manager* | Survey management, master data, users, every result |
-| **Manager** | Job titles `*Manager`, `Deputy GM` (not `Assistant of *`) | *My Survey*, the results of the departments they manage |
 | **Employee** | Any other job title (default role) | Dashboard and *My Survey* |
 
 The job title comes from the directory (LDAP `title`, Microsoft `jobTitle`) and is refreshed at
 every sign-in; the roles given by job title follow it, roles given by hand are kept. Rules are
 edited in Role & Permission (one per line, `*` any text, `!` excludes) and applied to every user
-at once. A manager sees the departments whose *Manager Job Titles* (Master Data > Departments)
-match their job title. After upgrading an existing install, run
+at once. Three roles are built in (IT Admin > Super Admin > Employee). A role of your own can be limited to the
+results of the departments its people manage (Data Scope in Role & Permission): it sees the departments whose *Manager
+Job Titles* (Master Data > Departments) match the job title. After upgrading an existing install, run
 `php artisan migrate --force` then `php artisan db:seed --class=RoleSeeder --force`.
 
 The employee ID is recorded the same way (LDAP `employeeID`, Microsoft `employeeId`) whenever
@@ -75,7 +75,7 @@ accounts with a company e-mail and an employee ID whose AD `department` is a dep
 one of its *Directory Department Names* (Master Data > Departments), and creates or refreshes
 them (name, company, department, job title and roles, employee ID). Disabled AD accounts are
 deactivated; people who move to another department stop being respondents; accounts deleted
-here are not restored. The AD `company` maps to the companies (`MBMA` = MBM, empty = MTI; see
+here are not restored. The AD `company` maps to the two companies, MTI and MBM (`MBMA` = MBM, empty = MTI; see
 `config/ldap.php`). The department is also refreshed at sign-in. Reminders, Survey Progress and
 the participation rate count these respondents only.
 

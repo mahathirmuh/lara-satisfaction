@@ -15,13 +15,13 @@ use RuntimeException;
 /**
  * Built-in roles with their menu access and CRUD matrix, highest first:
  * IT Admin (everything, only given by hand), Super Admin (survey
- * administration and every result), Manager (fills in the survey and sees the
- * results of the departments they manage) and Employee (fills in the survey).
+ * administration and every result) and Employee (fills in the survey).
  *
- * Super Admin and Manager follow the job title from the directory; Employee
- * is given when no rule matches. Role ids 1 (IT Admin) and 3 (Employee) are
- * referenced by config/merdeka.php, so roles are created in this order on an
- * empty table.
+ * Super Admin follows the job title from the directory; Employee is given when
+ * no rule matches. Role ids 1 (IT Admin) and 3 (Employee) are referenced by
+ * config/merdeka.php, so roles are created in this order on an empty table.
+ * A role that only sees the results of the departments its job title manages
+ * can still be made in Role & Permission (Data Scope).
  */
 class RoleSeeder extends Seeder
 {
@@ -49,11 +49,6 @@ class RoleSeeder extends Seeder
             'dashboard.index' => [PermissionAction::Read],
             'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
         ],
-        'Manager' => [
-            'dashboard.index' => [PermissionAction::Read],
-            'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
-            'survey-report.index' => [PermissionAction::Read],
-        ],
     ];
 
     /**
@@ -72,7 +67,6 @@ class RoleSeeder extends Seeder
      */
     protected const JOB_TITLES = [
         'Super Admin' => ['Support Services Deputy General Manager'],
-        'Manager' => ['*Manager', 'Deputy GM', '!Assistant of *'],
     ];
 
     /**
@@ -80,7 +74,7 @@ class RoleSeeder extends Seeder
      *
      * @var array<int, string>
      */
-    protected const MANAGED_DEPARTMENTS_ONLY = ['Manager'];
+    protected const MANAGED_DEPARTMENTS_ONLY = [];
 
     /**
      * Run the database seeds.

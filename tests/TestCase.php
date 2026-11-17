@@ -2,10 +2,14 @@
 
 namespace Tests;
 
+use App\Enums\DepartmentScope;
+use App\Enums\PermissionAction;
 use App\Enums\QuestionType;
 use App\Models\Organization\Department;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyQuestion;
+use App\Models\UserManagement\Menu;
+use App\Models\UserManagement\MenuRolePermission;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use Database\Seeders\MenuSeeder;
@@ -65,13 +69,38 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * Fills in surveys; sees the results of the departments the job title manages.
+     * Fills in surveys and sees the results of the departments the job title manages only: a role of its own (Data Scope
+     * "managed departments"), as one can be made in Role & Permission. There is no such built-in role.
      *
      * @param  array<string, mixed>  $attributes
      */
     protected function manager(array $attributes = []): User
     {
-        return $this->userWithRole('Manager', $attributes);
+        if (Role::query()->doesntExist()) {
+            $this->seedAccessControl();
+        }
+
+        $role = Role::query()->where('name', 'Department Head')->first();
+
+        if ($role === null) {
+            $role = Role::query()->create(['name' => 'Department Head', 'department_scope' => DepartmentScope::Managed]);
+            $grants = [
+                'dashboard.index' => [PermissionAction::Read],
+                'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
+                'survey-report.index' => [PermissionAction::Read],
+            ];
+
+            foreach ($grants as $route => $actions) {
+                $menu = Menu::query()->where('route', $route)->firstOrFail();
+                $role->menus()->syncWithoutDetaching(array_filter([$menu->id, $menu->parent_id]));
+
+                foreach ($actions as $action) {
+                    MenuRolePermission::query()->create(['menu_id' => $menu->id, 'role_id' => $role->id, 'permission_id' => $action->value]);
+                }
+            }
+        }
+
+        return User::factory()->withRole($role)->create($attributes);
     }
 
     /**

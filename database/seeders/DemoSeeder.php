@@ -178,14 +178,14 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Demo employees spread over a few companies.
+     * Demo employees spread over the two companies (MTI and MBM).
      *
      * @return Collection<int, User>
      */
     protected function createEmployees(int $count): Collection
     {
-        $companies = Company::query()->whereIn('code', ['MBM', 'MTI', 'SCM', 'MCG', 'BSI'])->pluck('id', 'code');
-        $weights = ['MBM' => 22, 'MTI' => 18, 'SCM' => 10, 'MCG' => 7, 'BSI' => 3];
+        $companies = Company::query()->whereIn('code', ['MTI', 'MBM'])->pluck('id', 'code');
+        $weights = ['MTI' => 36, 'MBM' => 24];
         $faker = fake('id_ID');
         $employees = new Collection;
         $number = 0;

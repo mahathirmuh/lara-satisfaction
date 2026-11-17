@@ -133,25 +133,25 @@ class SsoTest extends TestCase
     public function test_microsoft_job_title_decides_the_roles(): void
     {
         $employee = $this->employee(['email' => 'budi@merdekabattery.com']);
-        $this->fakeMicrosoftUser('budi@merdekabattery.com', jobTitle: 'OHS Manager');
+        $this->fakeMicrosoftUser('budi@merdekabattery.com', jobTitle: 'Support Services Deputy General Manager');
 
         $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
 
         $employee->refresh();
-        $this->assertSame('OHS Manager', $employee->job_title);
-        $this->assertSame(['Manager'], $employee->roles->pluck('name')->all());
+        $this->assertSame('Support Services Deputy General Manager', $employee->job_title);
+        $this->assertSame(['Super Admin'], $employee->roles->pluck('name')->all());
     }
 
     public function test_microsoft_account_without_a_job_title_keeps_the_known_one(): void
     {
-        $manager = $this->manager(['email' => 'budi@merdekabattery.com', 'job_title' => 'OHS Manager']);
+        $superAdmin = $this->superAdmin(['email' => 'budi@merdekabattery.com', 'job_title' => 'Support Services Deputy General Manager']);
         $this->fakeMicrosoftUser('budi@merdekabattery.com');
 
         $this->get(route('sso.callback', 'microsoft'))->assertRedirect();
 
-        $manager->refresh();
-        $this->assertSame('OHS Manager', $manager->job_title);
-        $this->assertSame(['Manager'], $manager->roles->pluck('name')->all());
+        $superAdmin->refresh();
+        $this->assertSame('Support Services Deputy General Manager', $superAdmin->job_title);
+        $this->assertSame(['Super Admin'], $superAdmin->roles->pluck('name')->all());
     }
 
     public function test_microsoft_department_is_recorded_when_it_is_shared(): void

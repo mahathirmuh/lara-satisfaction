@@ -60,14 +60,14 @@ class UserRegisteredTest extends TestCase
 
         $this->actingAs($this->superAdmin())
             ->postJson(route('user-management.user-registered.store'), $this->payload([
-                'job_title' => '  OHS   Manager ',
+                'job_title' => '  Support Services   Deputy General Manager ',
                 'role_id' => [$employeeRoleId, $auditor->id],
             ]))
             ->assertCreated();
 
         $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
-        $this->assertSame('OHS Manager', $user->job_title);
-        $this->assertSame(['Manager', 'Auditor'], $user->roles->sortBy('id')->pluck('name')->values()->all());
+        $this->assertSame('Support Services Deputy General Manager', $user->job_title);
+        $this->assertSame(['Super Admin', 'Auditor'], $user->roles->sortBy('id')->pluck('name')->values()->all());
 
         $this->actingAs($this->superAdmin())
             ->putJson(route('user-management.user-registered.update', $user), $this->payload([
