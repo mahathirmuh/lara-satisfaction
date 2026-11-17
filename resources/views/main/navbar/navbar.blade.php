@@ -44,6 +44,9 @@
                     <a href="{{ route('profile.show') }}" class="dropdown-item rm-menu-item">
                         <i class="ti ti-user-circle" aria-hidden="true"></i> {{ __('My Profile') }}
                     </a>
+                    <a href="{{ route('user-guide') }}" class="dropdown-item rm-menu-item" target="_blank" rel="noopener">
+                        <i class="ti ti-book" aria-hidden="true"></i> {{ __('User Guide') }}
+                    </a>
                     <a href="{{ route('logout') }}" class="dropdown-item rm-menu-item is-danger" onclick="logout(event)">
                         <i class="ti ti-logout" aria-hidden="true"></i> {{ __('Logout') }}
                     </a>

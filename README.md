@@ -18,7 +18,9 @@ Documents are in the `docs/` folder, in Bahasa Indonesia (`-ID`) and English (`-
 cover (as in MTI Radio Management):
 
 - **Panduan Pengguna / User Guide**, for the users of the application:
-  [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf)
+  [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf).
+  The user menu opens it too (**User Guide**, `/user-guide`), in the language of the page (English for 中文), so the
+  Docker image keeps these PDFs.
 
 ## Requirements
 

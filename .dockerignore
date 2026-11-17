@@ -25,9 +25,9 @@ storage/framework/views/*
 storage/logs/*
 storage/pail
 
-# Development only (and the documents in docs/, which the server does not serve).
+# Development only (and the sources of the user guide; its PDFs in docs/ are served by the user menu).
 .git
-docs
+docs/.guide-src
 .claude
 .codex
 .cursor
