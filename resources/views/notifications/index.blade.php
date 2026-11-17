@@ -26,18 +26,15 @@
 @section('content')
     <div class="card">
         <div class="card-header p-2 px-3 d-flex flex-wrap align-items-center gap-2">
-            <ul class="nav nav-pills" role="tablist" aria-label="{{ __('Show') }}">
-                <li class="nav-item">
-                    <a href="{{ route('notifications.index') }}" @class(['nav-link', 'active' => ! $unreadOnly]) @if (! $unreadOnly) aria-current="page" @endif>
-                        {{ __('All') }} <span class="badge bg-secondary-lt ms-1">{{ $total }}</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('notifications.index', ['filter' => 'unread']) }}" @class(['nav-link', 'active' => $unreadOnly]) @if ($unreadOnly) aria-current="page" @endif>
-                        {{ __('Unread') }} <span class="badge bg-blue-lt ms-1">{{ $unreadCount }}</span>
-                    </a>
-                </li>
-            </ul>
+            {{-- All | Unread, as the other segmented controls of the application (.rm-seg). --}}
+            <nav class="rm-seg" aria-label="{{ __('Show') }}">
+                <a href="{{ route('notifications.index') }}" @class(['is-on' => ! $unreadOnly]) @if (! $unreadOnly) aria-current="page" @endif>
+                    {{ __('All') }} <span class="badge bg-secondary-lt ms-1">{{ $total }}</span>
+                </a>
+                <a href="{{ route('notifications.index', ['filter' => 'unread']) }}" @class(['is-on' => $unreadOnly]) @if ($unreadOnly) aria-current="page" @endif>
+                    {{ __('Unread') }} <span class="badge bg-blue-lt ms-1">{{ $unreadCount }}</span>
+                </a>
+            </nav>
             @if ($unreadCount > 0)
                 <form method="POST" action="{{ route('notifications.read-all') }}" class="ms-auto">
                     @csrf
