@@ -4,6 +4,14 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.19.1] - 2026-11-17
+
+### Fixed
+
+- **User Guide** always opens the guide in the language in use: English, Bahasa Indonesia or 简体中文. Each language now
+  has its own address (`/user-guide/en`, `/user-guide/id`, `/user-guide/zh_CN`), so after the language is changed a
+  browser no longer shows the PDF of the previous language from its cache.
+
 ## [0.19.0] - 2026-11-17
 
 ### Added

@@ -14,6 +14,16 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.19.1] - 2026-11-17
+
+### Diperbaiki
+
+- **User Guide** selalu membuka panduan dalam bahasa yang sedang dipakai: English, Bahasa Indonesia atau 简体中文.
+  Setiap bahasa kini punya alamat sendiri (`/user-guide/en`, `/user-guide/id`, `/user-guide/zh_CN`), jadi setelah
+  bahasa diganti browser tidak lagi menampilkan PDF bahasa sebelumnya dari cache-nya.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.19.0] - 2026-11-17
 
 ### Ditambahkan

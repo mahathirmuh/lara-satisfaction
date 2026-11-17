@@ -51,8 +51,10 @@ Route::middleware('auth')->group(function () {
     /** What changed in each version (the version in the footer opens it) */
     Route::get('changelog', ChangelogController::class)->name('changelog');
 
-    /** The user guide (PDF) in the language of the page, from the user menu */
-    Route::get('user-guide', UserGuideController::class)->name('user-guide');
+    /** The user guide (PDF) in the language of the page, from the user menu: one address per language (/user-guide/zh_CN) */
+    Route::get('user-guide/{language?}', UserGuideController::class)
+        ->whereIn('language', array_keys(UserGuideController::GUIDES))
+        ->name('user-guide');
 
     /** Employee photos (own, or everyone's for user management and survey progress) */
     Route::get('users/{user}/photo', UserPhotoController::class)->whereNumber('user')->name('users.photo');

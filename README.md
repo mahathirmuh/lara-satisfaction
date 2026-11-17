@@ -19,7 +19,7 @@ the version written on their cover (as in MTI Radio Management):
 
 - **Panduan Pengguna / User Guide**, for the users of the application:
   [ID](docs/User-Guide-Employee-Satisfaction-Survey-ID.pdf) · [EN](docs/User-Guide-Employee-Satisfaction-Survey-EN.pdf) ·
-  [中文](docs/User-Guide-Employee-Satisfaction-Survey-ZH.pdf). The user menu opens it too (**User Guide**, `/user-guide`),
+  [中文](docs/User-Guide-Employee-Satisfaction-Survey-ZH.pdf). The user menu opens it too (**User Guide**, `/user-guide/{en|id|zh_CN}`),
   in the language of the page, so the Docker image keeps these PDFs.
 
 ## Requirements

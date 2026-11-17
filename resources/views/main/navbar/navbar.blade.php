@@ -50,7 +50,7 @@
                             <span class="badge bg-red text-white ms-auto">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('user-guide') }}" class="dropdown-item rm-menu-item" target="_blank" rel="noopener">
+                    <a href="{{ route('user-guide', ['language' => app()->getLocale()]) }}" class="dropdown-item rm-menu-item" target="_blank" rel="noopener">
                         <i class="ti ti-book" aria-hidden="true"></i> {{ __('User Guide') }}
                     </a>
                     <a href="{{ route('logout') }}" class="dropdown-item rm-menu-item is-danger" onclick="logout(event)">
