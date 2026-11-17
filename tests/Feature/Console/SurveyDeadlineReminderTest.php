@@ -211,7 +211,7 @@ class SurveyDeadlineReminderTest extends TestCase
         $email = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages()->last()->getOriginalMessage();
         $logos = array_values(array_filter($email->getAttachments(), fn ($part): bool => $part->hasContentId()));
 
-        $this->assertCount(2, $logos);
+        $this->assertCount(3, $logos);
 
         foreach ($logos as $logo) {
             $this->assertStringContainsString('cid:'.$logo->getContentId(), (string) $email->getHtmlBody());

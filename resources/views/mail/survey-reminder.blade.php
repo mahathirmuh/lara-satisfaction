@@ -6,6 +6,7 @@
 @php
     $logos = isset($message) && $message instanceof \Illuminate\Mail\Message ? [
         'Merdeka Copper Gold' => $message->embed(public_path('assets/img/branding/email-mcg.png')),
+        'Merdeka Tsingshan Indonesia' => $message->embed(public_path('assets/img/branding/email-mti.png')),
         'Merdeka Battery Materials' => $message->embed(public_path('assets/img/branding/email-mbm.png')),
     ] : [];
 @endphp

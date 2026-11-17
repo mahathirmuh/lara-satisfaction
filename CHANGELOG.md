@@ -14,6 +14,15 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.16.1] - 2026-11-17
+
+### Diubah
+
+- Email pengingat juga memuat logo **Merdeka Tsingshan Indonesia**, di antara logo Merdeka Copper Gold dan Merdeka
+  Battery Materials.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.16.0] - 2026-11-17
 
 ### Diubah
