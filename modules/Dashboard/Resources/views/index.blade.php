@@ -71,7 +71,7 @@
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Participation Rate')"
                     :value="$summary['participation_rate'] === null ? '—' : $summary['participation_rate'] . '%'"
-                    color="purple" :info="__('The share of the employees of the assessed departments who sent the survey.')"
+                    color="purple" :info="__('The share of the respondents who sent the survey: every employee of :companies and of the assessed departments.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()])"
                     :subtitle="__(':participants of :eligible employees', ['participants' => number_format($summary['participants']), 'eligible' => number_format($summary['eligible'])])">
                     <x-slot:icon><i class="ti ti-users-group"></i></x-slot:icon>
                     <x-slot:trend>

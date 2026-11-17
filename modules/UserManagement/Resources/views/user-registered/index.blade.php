@@ -48,7 +48,7 @@
                                         </span>
                                         <x-global.btn-detail :label="__('Sync from Directory')" color="azure" size="sm" outline="true"
                                             id="syncDirectoryButton" data-bs-toggle="tooltip"
-                                            data-bs-title="{{ __('Import the employees of the assessed departments from Active Directory (also done every day at 06:00)') }}">
+                                            data-bs-title="{{ __('Import the respondents from Active Directory: every employee of :companies and of the assessed departments (also done every day at 06:00)', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()]) }}">
                                             <x-slot:icon><i class="ti ti-refresh"></i></x-slot:icon>
                                         </x-global.btn-detail>
                                     @endif
@@ -190,7 +190,7 @@
                 saveRecord({
                     url: @json(route('user-management.user-registered.sync')),
                     method: 'POST',
-                    confirmText: @json(__('The employees of the assessed departments will be imported from Active Directory now.')),
+                    confirmText: @json(__('Every employee of :companies and of the assessed departments will be imported from Active Directory now.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()])),
                     onSuccess: () => setTimeout(() => window.location.reload(), 2000),
                 });
             });

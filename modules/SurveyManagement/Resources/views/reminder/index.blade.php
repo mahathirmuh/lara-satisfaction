@@ -127,7 +127,7 @@
                                 {{ __('Each person gets the reminder in their own language, with a link to the survey. People who completed the survey already are left out.') }}
                             </div>
                             <div class="text-secondary small mb-3">
-                                {{ __('Reminders go to the employees of the assessed departments, imported every day from Active Directory.') }}
+                                {{ __('Reminders go to the respondents: every employee of :companies and of the assessed departments, imported every day from Active Directory.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()]) }}
                             </div>
 
                             @if ($can['create'])

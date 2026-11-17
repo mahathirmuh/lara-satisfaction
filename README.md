@@ -68,14 +68,14 @@ the directory has one; an empty directory value keeps the ID entered in User Man
 
 ### Respondents (employee import)
 
-The survey respondents are the employees of the assessed departments, imported from Active
-Directory before they ever sign in: `php artisan users:sync-directory` (`--dry-run` to preview)
-runs every day at 06:00 and from **User Management > Sync from Directory**. It takes the enabled
-accounts with a company e-mail and an employee ID whose AD `department` is a department name or
-one of its *Directory Department Names* (Master Data > Departments), and creates or refreshes
-them (name, company, department, job title and roles, employee ID). Disabled AD accounts are
-deactivated; people who move to another department stop being respondents; accounts deleted
-here are not restored. The AD `company` maps to the two companies, MTI and MBM (`MBMA` = MBM, empty = MTI; see
+The survey respondents are every employee of PT Merdeka Tsingshan Indonesia (`SURVEY_RESPONDENT_COMPANIES`, default
+`MTI`) and the employees of the assessed departments of any company, imported from Active Directory before they ever
+sign in: `php artisan users:sync-directory` (`--dry-run` to preview) runs every day at 06:00 and from **User Management
+> Sync from Directory**. It takes the enabled accounts with a company e-mail and an employee ID that belong to a
+respondent company or whose AD `department` is a department name or one of its *Directory Department Names* (Master
+Data > Departments), and creates or refreshes them (name, company, department when it is an assessed one, job title and
+roles, employee ID). Disabled AD accounts are deactivated; people who leave the respondents (another company and
+department, or gone from the directory) stop being respondents; accounts deleted here are not restored. The AD `company` maps to the two companies, MTI and MBM (`MBMA` = MBM, empty = MTI; see
 `config/ldap.php`). The department is also refreshed at sign-in. Reminders, Survey Progress and
 the participation rate count these respondents only.
 
@@ -126,6 +126,7 @@ changing `.env`, run `docker compose up -d --force-recreate`.
 | `SSO_AUTO_REGISTER`, `SSO_ALLOWED_DOMAINS` | Register unknown SSO / LDAP users of allowed domains as Employee on their first sign-in |
 | `SEED_ADMIN_EMAIL` | Company email of the first super admin |
 | `SURVEY_MIN_GROUP_SIZE` | Anonymity threshold for showing results (default 5) |
+| `SURVEY_RESPONDENT_COMPANIES` | Companies whose every employee is a respondent, besides the assessed departments (codes, default `MTI`) |
 | `SURVEY_REMINDER_DAYS` | Deadline reminder days before the end date (default `14`, e.g. `14,7,1`) |
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MAILER` | Reminder emails come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`, a shared mailbox) and are signed `MAIL_FROM_NAME` (`MTI Employee Communication`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
 | `MAIL_GRAPH_*` | App registration of the Graph mailer (`TENANT_ID`, `CLIENT_ID`, `CLIENT_SECRET`); empty ones use `MS_GRAPH_*`. `MAIL_GRAPH_SAVE_TO_SENT_ITEMS=true` keeps a copy in the Sent Items of the mailbox |

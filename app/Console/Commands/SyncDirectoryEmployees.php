@@ -12,12 +12,13 @@ use Illuminate\Console\Command;
 use Throwable;
 
 /**
- * Daily job (see routes/console.php): imports the employees of the assessed
- * departments from the network directory (see EmployeeDirectorySync), then
- * their photos from the access card system (see EmployeePhotoSync).
+ * Daily job (see routes/console.php): imports the survey respondents (every
+ * employee of the respondent companies and of the assessed departments) from
+ * the network directory (see EmployeeDirectorySync), then their photos from
+ * the access card system (see EmployeePhotoSync).
  */
 #[Signature('users:sync-directory {--dry-run : Only report what would change} {--without-photos : Do not take the photos}')]
-#[Description('Import the employees of the assessed departments from the network directory (LDAP) and their photos')]
+#[Description('Import the survey respondents (every employee of the respondent companies and of the assessed departments) from the network directory (LDAP) and their photos')]
 class SyncDirectoryEmployees extends Command
 {
     /**
@@ -42,7 +43,7 @@ class SyncDirectoryEmployees extends Command
         }
 
         $this->info(($dryRun ? 'Dry run, nothing saved. ' : '').sprintf(
-            '%d employees in the assessed departments: %d created, %d updated, %d unchanged. %d deactivated (disabled in the directory), %d no longer in an assessed department, %d deleted here (not restored).',
+            '%d respondents: %d created, %d updated, %d unchanged. %d deactivated (disabled in the directory), %d no longer respondents, %d deleted here (not restored).',
             $result['employees'], $result['created'], $result['updated'], $result['unchanged'],
             $result['deactivated'], $result['left'], $result['skipped_deleted'],
         ));

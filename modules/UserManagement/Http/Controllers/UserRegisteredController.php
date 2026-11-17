@@ -79,7 +79,7 @@ class UserRegisteredController extends Controller
 
         $audit->log(AuditLogger::USERS_SYNCED, new: EmployeeDirectorySync::auditValues($result));
 
-        $message = __(':employees employees imported from the directory: :created new, :updated updated, :deactivated deactivated, :left no longer in an assessed department.', [
+        $message = __(':employees respondents imported from the directory: :created new, :updated updated, :deactivated deactivated, :left no longer respondents.', [
             'employees' => $result['employees'],
             'created' => $result['created'],
             'updated' => $result['updated'],

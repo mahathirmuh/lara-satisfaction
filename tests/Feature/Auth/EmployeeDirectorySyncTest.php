@@ -14,7 +14,7 @@ use Mockery\MockInterface;
 use Tests\TestCase;
 
 /**
- * The employees of the assessed departments are imported from the directory
+ * The survey respondents, every employee of MTI and of the assessed departments, are imported from the directory
  * (users:sync-directory, daily, and from User Management) before they sign in.
  */
 class EmployeeDirectorySyncTest extends TestCase
@@ -45,7 +45,7 @@ class EmployeeDirectorySyncTest extends TestCase
         $this->mbm = Company::factory()->create(['code' => 'MBM', 'name' => 'PT Merdeka Battery Materials']);
     }
 
-    public function test_the_employees_of_the_assessed_departments_are_imported(): void
+    public function test_the_employees_of_mti_and_of_the_assessed_departments_are_imported(): void
     {
         $this->directoryHas([
             $this->person('budi@merdekabattery.com', 'Supply Chain Management', ['name' => 'Budi Santoso', 'jobTitle' => 'Supply Chain Manager', 'employeeId' => 'MTI240001', 'company' => 'PT. Merdeka Tsingshan Indonesia']),
@@ -55,12 +55,16 @@ class EmployeeDirectorySyncTest extends TestCase
             $this->person('fajar@merdekabattery.com', 'Supply Chain Management', ['isEnabled' => false]),
             $this->person('gita@merdekabattery.com', 'Supply Chain Management', ['employeeId' => null]),
             $this->person('hana@gmail.com', 'Supply Chain Management'),
+            $this->person('ika@merdekabattery.com', 'Maintenance', ['company' => 'MBMA']),
         ]);
 
         $result = app(EmployeeDirectorySync::class)->sync();
 
-        $this->assertSame(['employees' => 3, 'created' => 3, 'updated' => 0, 'unchanged' => 0, 'deactivated' => 0, 'left' => 0, 'skipped_deleted' => 0], $result);
-        $this->assertEqualsCanonicalizing(['budi@merdekabattery.com', 'citra@merdekabattery.com', 'dedi@merdekabattery.com'], User::query()->pluck('email')->all());
+        // Eko works for MTI outside the assessed departments: a respondent too. Ika (MBM, outside) is not.
+        $this->assertSame(['employees' => 4, 'created' => 4, 'updated' => 0, 'unchanged' => 0, 'deactivated' => 0, 'left' => 0, 'skipped_deleted' => 0], $result);
+        $this->assertEqualsCanonicalizing(['budi@merdekabattery.com', 'citra@merdekabattery.com', 'dedi@merdekabattery.com', 'eko@merdekabattery.com'], User::query()->pluck('email')->all());
+        $eko = User::query()->where('email', 'eko@merdekabattery.com')->sole();
+        $this->assertSame([null, $this->mti->id, ['Employee']], [$eko->department_id, $eko->company_id, $eko->roles->pluck('name')->all()]);
 
         $budi = User::query()->where('email', 'budi@merdekabattery.com')->sole();
         $this->assertSame(['Budi Santoso', 'MTI240001', 'Supply Chain Manager', $this->supplyChain->id, $this->mti->id, true], [
@@ -106,7 +110,7 @@ class EmployeeDirectorySyncTest extends TestCase
         $deleted->delete();
         $this->directoryHas([
             $this->person('budi@merdekabattery.com', 'Supply Chain Management', ['isEnabled' => false]),
-            $this->person('citra@merdekabattery.com', 'Maintenance'),
+            $this->person('citra@merdekabattery.com', 'Maintenance', ['company' => 'MBMA']),
             $this->person('eko@merdekabattery.com', 'Supply Chain Management'),
         ]);
 
@@ -120,12 +124,27 @@ class EmployeeDirectorySyncTest extends TestCase
         $this->assertSoftDeleted($deleted);
     }
 
+    public function test_an_mti_employee_who_left_the_directory_is_no_longer_a_respondent(): void
+    {
+        $gone = User::factory()->create([
+            'email' => 'dedi@merdekabattery.com', 'company_id' => $this->mti->id, 'employee_id' => 'MTI240009',
+            'directory_synced_at' => now()->subDay(),
+        ]);
+        $this->directoryHas([$this->person('budi@merdekabattery.com', 'Maintenance')]);
+
+        $result = app(EmployeeDirectorySync::class)->sync();
+
+        $this->assertSame([1, 1, 1], [$result['employees'], $result['created'], $result['left']]);
+        $this->assertNull($gone->fresh()->company_id);
+        $this->assertTrue($gone->fresh()->is_active);
+    }
+
     public function test_a_dry_run_changes_nothing(): void
     {
         $this->directoryHas([$this->person('budi@merdekabattery.com', 'Supply Chain Management')]);
 
         $this->artisan('users:sync-directory', ['--dry-run' => true])
-            ->expectsOutputToContain('Dry run, nothing saved. 1 employees in the assessed departments: 1 created')
+            ->expectsOutputToContain('Dry run, nothing saved. 1 respondents: 1 created')
             ->assertSuccessful();
 
         $this->assertDatabaseCount('users', 0);
@@ -137,7 +156,7 @@ class EmployeeDirectorySyncTest extends TestCase
         $this->directoryHas([$this->person('budi@merdekabattery.com', 'Supply Chain Management')]);
 
         $this->artisan('users:sync-directory')
-            ->expectsOutputToContain('1 employees in the assessed departments: 1 created, 0 updated, 0 unchanged.')
+            ->expectsOutputToContain('1 respondents: 1 created, 0 updated, 0 unchanged.')
             ->assertSuccessful();
 
         $this->assertDatabaseHas('users', ['email' => 'budi@merdekabattery.com', 'department_id' => $this->supplyChain->id]);
@@ -160,7 +179,7 @@ class EmployeeDirectorySyncTest extends TestCase
         $this->actingAs($this->superAdmin())
             ->postJson(route('user-management.user-registered.sync'))
             ->assertOk()
-            ->assertJsonPath('message', '1 employees imported from the directory: 1 new, 0 updated, 0 deactivated, 0 no longer in an assessed department.');
+            ->assertJsonPath('message', '1 respondents imported from the directory: 1 new, 0 updated, 0 deactivated, 0 no longer respondents.');
 
         $this->actingAs($this->superAdmin())
             ->get(route('user-management.user-registered.index'))

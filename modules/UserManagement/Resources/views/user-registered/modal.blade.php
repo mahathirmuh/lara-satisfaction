@@ -71,7 +71,7 @@
                                             <option value="{{ $department->id }}">{{ $department->name }}</option>
                                         @endforeach
                                     </select>
-                                    <small class="form-hint">{{ __('Filled from the directory every day for the employees of the assessed departments: they are the survey respondents.') }}</small>
+                                    <small class="form-hint">{{ __('Filled from the directory every day for the respondents: every employee of :companies and of the assessed departments.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()]) }}</small>
                                 </div>
                             </div>
                         </div>

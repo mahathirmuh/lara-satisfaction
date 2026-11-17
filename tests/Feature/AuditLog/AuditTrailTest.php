@@ -206,7 +206,7 @@ class AuditTrailTest extends TestCase
         $entry = AuditLog::query()->sole();
         $this->assertSame(AuditLogger::USERS_SYNCED, $entry->action);
         $this->assertNull($entry->user_id);
-        $this->assertSame(['Employees' => 174, 'Created' => 2, 'Updated' => 1, 'Deactivated' => 0, 'No longer in an assessed department' => 0], $entry->new_values);
+        $this->assertSame(['Employees' => 174, 'Created' => 2, 'Updated' => 1, 'Deactivated' => 0, 'No longer respondents' => 0], $entry->new_values);
     }
 
     /**

@@ -4,6 +4,16 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.21.0] - 2026-11-17
+
+### Changed
+
+- The survey respondents are **every employee of PT Merdeka Tsingshan Indonesia (MTI)**, besides the employees of the
+  assessed departments of the other company (MBM). The daily import from Active Directory (and **Sync from Directory**
+  in User Management) brings every MTI employee, also outside the assessed departments; they fill in the survey, are
+  reminded, and count in Survey Progress and in the participation rate. The texts saying who the respondents are
+  follow. Their photos are taken from the access card system too.
+
 ## [0.20.0] - 2026-11-17
 
 ### Removed

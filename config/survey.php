@@ -17,6 +17,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Respondents
+    |--------------------------------------------------------------------------
+    |
+    | Every employee of these companies (codes, comma separated) fills in the
+    | surveys, besides the employees of the assessed departments of any
+    | company. All of them are imported every day from the directory
+    | (users:sync-directory), reminded, and counted in Survey Progress and in
+    | the participation rate.
+    |
+    */
+
+    'respondent_companies' => array_values(array_filter(array_map(
+        fn (string $code): string => strtoupper(trim($code)),
+        explode(',', (string) env('SURVEY_RESPONDENT_COMPANIES', 'MTI')),
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Rating Scales
     |--------------------------------------------------------------------------
     |

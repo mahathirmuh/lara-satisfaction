@@ -12,19 +12,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Imports the employees of the assessed departments from the network
- * directory, so they are listed, reminded and counted as survey respondents
- * before they ever sign in. Run daily (users:sync-directory) and from User
+ * Imports the survey respondents from the network directory, so they are
+ * listed, reminded and counted before they ever sign in: every employee of a
+ * respondent company (config survey.respondent_companies, MTI) and of the
+ * assessed departments. Run daily (users:sync-directory) and from User
  * Management.
  *
- * - An enabled account with a company e-mail (SSO_ALLOWED_DOMAINS), an
- *   employee ID and a directory department of an assessed department
- *   (Department::directoryNameMap()) gets an account here, or has it
- *   refreshed: name, company, department, job title (and so its roles) and
- *   employee ID. New accounts get the default role, like at first sign-in.
+ * - An enabled account with a company e-mail (SSO_ALLOWED_DOMAINS) and an
+ *   employee ID, of a respondent company or with a directory department of an
+ *   assessed department (Department::directoryNameMap()), gets an account
+ *   here, or has it refreshed: name, company, department (the assessed one,
+ *   else none), job title (and so its roles) and employee ID. New accounts get
+ *   the default role, like at first sign-in.
  * - A disabled directory account deactivates the account here.
- * - Someone who moved to another department, or is no longer in the
- *   directory, keeps their account but stops being a respondent.
+ * - Someone who left the assessed departments for another company, or is no
+ *   longer in the directory, keeps their account but stops being a
+ *   respondent.
  * - An account deleted here is never brought back, and the activation an
  *   administrator set is left alone.
  */
@@ -60,6 +63,7 @@ class EmployeeDirectorySync
 
         $departments = Department::directoryNameMap();
         $companyIds = $this->companyIds();
+        $respondentCompanyIds = $this->respondentCompanyIds();
         $users = User::withTrashed()->get()->keyBy('email');
         $seen = [];
         $result = ['employees' => 0, 'created' => 0, 'updated' => 0, 'unchanged' => 0, 'deactivated' => 0, 'left' => 0, 'skipped_deleted' => 0];
@@ -74,6 +78,8 @@ class EmployeeDirectorySync
             $departmentId = $person->department === null
                 ? null
                 : ($departments[Department::normalizeDirectoryName($person->department)] ?? null);
+            $companyId = $this->companyIdFor($person->company, $companyIds);
+            $isRespondent = $departmentId !== null || in_array($companyId, $respondentCompanyIds, true);
 
             if (! $person->isEnabled) {
                 if ($user !== null && ! $user->trashed() && $user->is_active) {
@@ -84,7 +90,7 @@ class EmployeeDirectorySync
                 continue;
             }
 
-            if ($departmentId === null || blank($person->employeeId) || ! $this->hasCompanyEmail($person->email)) {
+            if (! $isRespondent || blank($person->employeeId) || ! $this->hasCompanyEmail($person->email)) {
                 $this->leaveDepartment($user, $dryRun, $result);
 
                 continue;
@@ -97,13 +103,13 @@ class EmployeeDirectorySync
             }
 
             $result['employees']++;
-            $result[$this->import($person, $user, $departmentId, $this->companyIdFor($person->company, $companyIds), $dryRun)]++;
+            $result[$this->import($person, $user, $departmentId, $companyId, $dryRun)]++;
         }
 
         // People no longer in the directory keep their account but stop being respondents.
         foreach ($users as $user) {
             if (! isset($seen[$user->email]) && $user->directory_synced_at !== null) {
-                $this->leaveDepartment($user, $dryRun, $result);
+                $this->leaveDirectory($user, $respondentCompanyIds, $dryRun, $result);
             }
         }
 
@@ -128,7 +134,7 @@ class EmployeeDirectorySync
      * Create or refresh the account of an employee; "created", "updated" or
      * "unchanged" (counted as updated only when something changed).
      */
-    protected function import(DirectoryPerson $person, ?User $user, int $departmentId, ?int $companyId, bool $dryRun): string
+    protected function import(DirectoryPerson $person, ?User $user, ?int $departmentId, ?int $companyId, bool $dryRun): string
     {
         $name = Str::limit(trim((string) $person->name) ?: Str::before((string) $person->email, '@'), 255, '');
 
@@ -182,7 +188,7 @@ class EmployeeDirectorySync
     }
 
     /**
-     * The person no longer works in an assessed department.
+     * The person no longer works in an assessed department (nor for a respondent company).
      *
      * @param  array<string, int>  $result
      */
@@ -194,6 +200,42 @@ class EmployeeDirectorySync
 
         $dryRun || $user->forceFill(['department_id' => null])->saveQuietly();
         $result['left']++;
+    }
+
+    /**
+     * The person is no longer in the directory: no longer a respondent, by their department nor by their company (which
+     * is not known any more).
+     *
+     * @param  array<int, int>  $respondentCompanyIds
+     * @param  array<string, int>  $result
+     */
+    protected function leaveDirectory(User $user, array $respondentCompanyIds, bool $dryRun, array &$result): void
+    {
+        $changes = array_filter([
+            'department_id' => $user->department_id !== null,
+            'company_id' => in_array($user->company_id, $respondentCompanyIds, true),
+        ]);
+
+        if ($user->trashed() || $changes === []) {
+            return;
+        }
+
+        $dryRun || $user->forceFill(array_fill_keys(array_keys($changes), null))->saveQuietly();
+        $result['left']++;
+    }
+
+    /**
+     * The ids of the respondent companies (config survey.respondent_companies).
+     *
+     * @return array<int, int>
+     */
+    protected function respondentCompanyIds(): array
+    {
+        return Company::query()
+            ->whereIn('code', (array) config('survey.respondent_companies', []))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 
     /**
@@ -272,7 +314,7 @@ class EmployeeDirectorySync
             'Created' => $result['created'] ?? 0,
             'Updated' => $result['updated'] ?? 0,
             'Deactivated' => $result['deactivated'] ?? 0,
-            'No longer in an assessed department' => $result['left'] ?? 0,
+            'No longer respondents' => $result['left'] ?? 0,
         ];
     }
 

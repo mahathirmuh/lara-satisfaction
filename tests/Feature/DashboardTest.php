@@ -58,7 +58,7 @@ class DashboardTest extends TestCase
             ->assertSee('data-bs-toggle="tooltip"', false)
             ->assertSeeInOrder([
                 'Jumlah orang yang sudah mengirim survei.',
-                'Persentase karyawan departemen yang dinilai yang sudah mengirim survei.',
+                'Persentase responden yang sudah mengirim survei: seluruh karyawan',
                 'Rata-rata semua penilaian Kualitas Layanan, dari 1 (Sangat Buruk) sampai 5 (Sangat Baik).',
                 'Kepuasan pelanggan: persentase penilaian Kualitas Layanan bernilai 4 atau lebih, dari skala 5.',
             ]);

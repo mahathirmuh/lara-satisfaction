@@ -37,8 +37,8 @@
 
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Employees')" :value="$summary['eligible']" icon="users" color="blue"
-                    :info="__('The employees of the assessed departments who fill in surveys, imported every day from Active Directory.')"
-                    :subtitle="__('Employees of the assessed departments')" />
+                    :info="__('Everyone who fills in the survey: every employee of :companies and of the assessed departments, imported every day from Active Directory.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()])"
+                    :subtitle="__('The respondents of the survey')" />
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Not Started')" :value="$summary['not_started']" icon="circle-dashed"
@@ -112,7 +112,7 @@
                             </div>
                             <div class="col-12 text-secondary small">
                                 <i class="ti ti-shield-lock me-1"></i>
-                                {{ __('Only the filling status is shown: answers stay anonymous and are never linked to a person. The list holds the employees of the assessed departments, imported every day from Active Directory.') }}
+                                {{ __('Only the filling status is shown: answers stay anonymous and are never linked to a person. The list holds every employee of :companies and of the assessed departments, imported every day from Active Directory.', ['companies' => \App\Services\Survey\SurveyReminders::respondentCompanyNames()]) }}
                             </div>
                         </div>
                     </div>

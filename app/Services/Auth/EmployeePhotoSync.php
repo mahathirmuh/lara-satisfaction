@@ -3,8 +3,10 @@
 namespace App\Services\Auth;
 
 use App\Helpers\FileApps;
+use App\Models\Organization\Company;
 use App\Models\UserManagement\User;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -35,16 +37,18 @@ class EmployeePhotoSync
     }
 
     /**
-     * Take the photos of the employees of the assessed departments.
+     * Take the photos of the respondents: the employees of the assessed departments and of the respondent companies
+     * (config survey.respondent_companies).
      *
      * @return array{updated: int, unchanged: int, missing: int}
      */
     public function sync(): array
     {
         $result = ['updated' => 0, 'unchanged' => 0, 'missing' => 0];
+        $respondentCompanies = Company::query()->whereIn('code', (array) config('survey.respondent_companies', []))->select('id');
         $users = User::query()
-            ->whereNotNull('department_id')
             ->whereNotNull('employee_id')
+            ->where(fn (EloquentBuilder $query) => $query->whereNotNull('department_id')->orWhereIn('company_id', $respondentCompanies))
             ->get(['id', 'employee_id', 'photo_path', 'photo_updated_at']);
 
         $cards = $this->latestCards($users->pluck('employee_id')->map(fn (string $id): string => trim($id))->all());

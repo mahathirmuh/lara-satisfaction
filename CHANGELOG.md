@@ -14,6 +14,20 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.21.0] - 2026-11-17
+
+### Diubah
+
+- Responden survei kini **seluruh karyawan PT Merdeka Tsingshan Indonesia (MTI)**, ditambah karyawan departemen yang
+  dinilai dari perusahaan lain (MBM). Impor harian dari Active Directory (dan **Sync from Directory** di User
+  Management) membawa semua karyawan MTI, juga yang di luar departemen yang dinilai; mereka bisa mengisi survei,
+  diingatkan, dan dihitung di Survey Progress serta tingkat partisipasi. Teks yang menyebut siapa respondennya ikut
+  diperbarui. Fotonya juga diambil dari sistem kartu akses.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan users:sync-directory`
+sekali agar karyawan MTI langsung masuk (selanjutnya otomatis setiap hari pukul 06.00). Setting baru (opsional):
+`SURVEY_RESPONDENT_COMPANIES`, bawaannya `MTI`.
+
 ## [0.20.0] - 2026-11-17
 
 ### Dihapus

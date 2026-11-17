@@ -5,6 +5,7 @@ namespace Tests\Feature\SurveyManagement;
 use App\Enums\PermissionAction;
 use App\Enums\ReminderChannel;
 use App\Models\Log\AuditLog;
+use App\Models\Organization\Company;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Models\Survey\SurveyParticipation;
@@ -73,6 +74,23 @@ class ReminderTest extends TestCase
             'via_app' => true,
             'via_email' => true,
         ]);
+    }
+
+    public function test_every_employee_of_mti_is_a_respondent_too(): void
+    {
+        $mti = Company::factory()->create(['code' => 'MTI', 'name' => 'PT Merdeka Tsingshan Indonesia']);
+        $mbm = Company::factory()->create(['code' => 'MBM', 'name' => 'PT Merdeka Battery Materials']);
+        $mtiEmployee = $this->employee(['company_id' => $mti->id, 'employee_id' => 'MTI250001']);
+        $mtiAccountWithoutEmployeeId = $this->employee(['company_id' => $mti->id, 'employee_id' => null]);
+        $mbmEmployee = $this->employee(['company_id' => $mbm->id, 'employee_id' => 'MBM250001']);
+        Notification::fake();
+
+        $this->actingAs($this->admin)
+            ->postJson(route('survey-management.reminder.store'), ['survey_id' => $this->survey->id, 'audience' => 'all', 'channels' => ['app']])
+            ->assertOk();
+
+        Notification::assertSentTo($mtiEmployee, SurveyDeadlineReminder::class);
+        Notification::assertNotSentTo([$mtiAccountWithoutEmployeeId, $mbmEmployee], SurveyDeadlineReminder::class);
     }
 
     public function test_only_the_chosen_people_who_can_be_reminded_are(): void

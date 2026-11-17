@@ -4,6 +4,7 @@ namespace App\Services\Survey;
 
 use App\Enums\PermissionAction;
 use App\Enums\ReminderChannel;
+use App\Models\Organization\Company;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Models\UserManagement\Menu;
@@ -16,17 +17,19 @@ use Throwable;
 
 /**
  * Who the survey respondents are, and the reminding: the active employees of
- * the assessed departments (department_id, imported daily from the directory)
- * whose role may fill in surveys (Create on My Survey). The same people are
- * reminded, listed in Survey Progress and counted in the participation rate.
- * Used by the daily scheduled reminders and by the reminders sent by hand
- * from Survey Management > Reminders.
+ * the respondent companies (config survey.respondent_companies, MTI) and of
+ * the assessed departments (department_id), all imported daily from the
+ * directory, whose role may fill in surveys (Create on My Survey). The same
+ * people are reminded, listed in Survey Progress and counted in the
+ * participation rate. Used by the daily scheduled reminders and by the
+ * reminders sent by hand from Survey Management > Reminders.
  */
 class SurveyReminders
 {
     /**
-     * The respondents: active employees of an assessed department whose role
-     * may fill in surveys.
+     * The respondents: active people whose role may fill in surveys and who
+     * work in an assessed department, or are employees (with an employee ID) of
+     * a respondent company.
      *
      * @return Builder<User>
      */
@@ -36,11 +39,28 @@ class SurveyReminders
             ->where('menu_id', Menu::idForKey('survey-form'))
             ->where('permission_id', PermissionAction::Create->value)
             ->select('role_id');
+        $respondentCompanies = Company::query()->whereIn('code', (array) config('survey.respondent_companies', []))->select('id');
 
         return User::query()
             ->active()
-            ->whereNotNull('department_id')
+            ->where(fn (Builder $query) => $query
+                ->whereNotNull('department_id')
+                ->orWhere(fn (Builder $query) => $query->whereIn('company_id', $respondentCompanies)->whereNotNull('employee_id')))
             ->whereHas('roles', fn (Builder $query) => $query->whereIn('roles.id', $rolesThatTakeSurveys));
+    }
+
+    /**
+     * The names of the respondent companies, for the texts that say who the
+     * respondents are ("every employee of PT Merdeka Tsingshan Indonesia and of
+     * the assessed departments").
+     */
+    public static function respondentCompanyNames(): string
+    {
+        return once(fn (): string => Company::query()
+            ->whereIn('code', (array) config('survey.respondent_companies', []))
+            ->orderBy('name')
+            ->pluck('name')
+            ->implode(', '));
     }
 
     /**
