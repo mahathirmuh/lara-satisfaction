@@ -57,9 +57,16 @@ Route::middleware('auth')->group(function () {
     /** Employee photos (own, or everyone's for user management and survey progress) */
     Route::get('users/{user}/photo', UserPhotoController::class)->whereNumber('user')->name('users.photo');
 
-    /** In-app notifications (own notifications only) */
+    /** In-app notifications (own notifications only): the bell and the Inbox page */
+    Route::get('inbox', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::get('notifications/{notification}', [NotificationController::class, 'show'])
         ->whereUuid('notification')
         ->name('notifications.show');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+        ->whereUuid('notification')
+        ->name('notifications.read');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])
+        ->whereUuid('notification')
+        ->name('notifications.destroy');
 });

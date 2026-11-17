@@ -42,6 +42,12 @@
                     </a>
                 </li>
                 <li class="rm-nav-item d-lg-none">
+                    <a class="rm-nav-link" href="{{ route('notifications.index') }}">
+                        <span class="rm-nav-icon"><i class="ti ti-inbox"></i></span>
+                        <span class="rm-nav-label">{{ __('Inbox') }}</span>
+                    </a>
+                </li>
+                <li class="rm-nav-item d-lg-none">
                     <a class="rm-nav-link" href="{{ route('user-guide') }}" target="_blank" rel="noopener">
                         <span class="rm-nav-icon"><i class="ti ti-book"></i></span>
                         <span class="rm-nav-label">{{ __('User Guide') }}</span>

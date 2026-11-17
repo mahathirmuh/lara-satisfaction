@@ -14,6 +14,16 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.18.0] - 2026-11-17
+
+### Ditambahkan
+
+- Halaman **Inbox** (Kotak Masuk) yang menampung semua notifikasi Anda, terbaru di atas: **Semua** atau **Belum
+  dibaca**, buka (sekaligus menandai sudah dibaca), tandai sudah dibaca, hapus, dan tandai semua sudah dibaca. Dibuka
+  dari **Open Inbox** di lonceng notifikasi, dari menu pengguna (dengan jumlah yang belum dibaca) dan dari menu ponsel.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.17.0] - 2026-11-17
 
 ### Dihapus

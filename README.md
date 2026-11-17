@@ -138,7 +138,7 @@ deadline reminders daily at 08:00 and prunes drafts of surveys that are no longe
 
 Deadline reminders (`php artisan survey:send-deadline-reminders`, `--dry-run` to preview) go to
 active users whose role may fill in surveys and who have not submitted yet, as an in-app
-notification (navbar bell) and an email. Each reminder day is sent once per survey. The same
+notification (navbar bell; every notification stays in the **Inbox** page, `/inbox`) and an email. Each reminder day is sent once per survey. The same
 reminder can be sent by hand from **Survey Management > Reminders**, to everyone who has not
 completed an open survey or to chosen people (e.g. yourself, to test), with a history of every
 send, and from **Survey Progress**: to everyone who has not completed the survey shown, or to one person (the send

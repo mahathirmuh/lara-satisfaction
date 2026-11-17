@@ -44,6 +44,12 @@
                     <a href="{{ route('profile.show') }}" class="dropdown-item rm-menu-item">
                         <i class="ti ti-user-circle" aria-hidden="true"></i> {{ __('My Profile') }}
                     </a>
+                    <a href="{{ route('notifications.index') }}" class="dropdown-item rm-menu-item">
+                        <i class="ti ti-inbox" aria-hidden="true"></i> {{ __('Inbox') }}
+                        @if ($unreadNotificationCount > 0)
+                            <span class="badge bg-red text-white ms-auto">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('user-guide') }}" class="dropdown-item rm-menu-item" target="_blank" rel="noopener">
                         <i class="ti ti-book" aria-hidden="true"></i> {{ __('User Guide') }}
                     </a>

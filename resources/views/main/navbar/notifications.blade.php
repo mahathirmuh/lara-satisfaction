@@ -40,5 +40,6 @@
                 <div class="rm-notif-empty">{{ __('No notifications yet.') }}</div>
             @endforelse
         </div>
+        <a href="{{ route('notifications.index') }}" class="rm-notif-foot">{{ __('Open Inbox') }}</a>
     </div>
 </div>

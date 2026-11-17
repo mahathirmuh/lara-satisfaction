@@ -4,6 +4,14 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.18.0] - 2026-11-17
+
+### Added
+
+- An **Inbox** page that keeps all your notifications, newest first: **All** or **Unread**, open (which marks it read),
+  mark as read, delete, and mark all as read. It opens from **Open Inbox** in the notification bell, from the user menu
+  (with the number of unread ones) and from the phone menu.
+
 ## [0.17.0] - 2026-11-17
 
 ### Removed
