@@ -83,8 +83,10 @@ After the import, their photos are taken from the access card system (`CARD_DB_D
 `DataDBEnt`, table `CardDB`, as in employee-central-hub): the card whose `StaffNo` is the
 employee ID, not deleted and last updated. Only `StaffNo`, `Photo`, `Del_State` and `LastUpdate`
 are read. Each photo is kept as a 160 px WebP thumbnail on the private disk
-(`storage/app/private/user-photos`) and taken again only when its card changes; it is served by
-`users.photo` to the person and to whoever manages users or follows the survey progress.
+(`storage/app/private/user-photos`) and taken again when its card changes, or when the thumbnail is not on the disk of
+the server that runs the import: the database may be shared with another machine (e.g. a developer's) whose thumbnails
+stay there. Until then the initials show. It is served by `users.photo` to the person and to whoever manages users or
+follows the survey progress.
 
 ### Docker
 
@@ -128,7 +130,7 @@ changing `.env`, run `docker compose up -d --force-recreate`.
 | `SURVEY_MIN_GROUP_SIZE` | Anonymity threshold for showing results (default 5) |
 | `SURVEY_RESPONDENT_COMPANIES` | Companies whose every employee is a respondent, besides the assessed departments (codes, default `MTI`) |
 | `SURVEY_REMINDER_DAYS` | Deadline reminder days before the end date (default `14`, e.g. `14,7,1`) |
-| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MAILER` | Reminder emails come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`, a shared mailbox) and are signed `MAIL_FROM_NAME` (`MTI Employee Communication`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
+| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MAILER` | Reminder emails and the thank-you email after a completed survey come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`, a shared mailbox) and are signed `MAIL_FROM_NAME` (`MTI Employee Communication`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
 | `MAIL_GRAPH_*` | App registration of the Graph mailer (`TENANT_ID`, `CLIENT_ID`, `CLIENT_SECRET`); empty ones use `MS_GRAPH_*`. `MAIL_GRAPH_SAVE_TO_SENT_ITEMS=true` keeps a copy in the Sent Items of the mailbox |
 | `APP_URL` | Used for the links in emails |
 | `LOG_ACTIVITY_ENABLED`, `LOG_ERRORS_TO_DATABASE` | Merdeka internal monitoring |

@@ -77,6 +77,20 @@ class EmployeePhotoSyncTest extends TestCase
         $this->assertSame('2026-11-16', $employee->fresh()->photo_updated_at->toDateString());
     }
 
+    public function test_a_photo_taken_by_another_server_sharing_the_database_is_taken_here_too(): void
+    {
+        $employee = $this->departmentEmployee(['employee_id' => 'MTI240001']);
+        $this->card('MTI240001', $this->jpeg(), '2026-01-01 08:00:00');
+        $sync = app(EmployeePhotoSync::class);
+        $sync->sync();
+        Storage::disk('local')->delete($employee->fresh()->photo_path);
+
+        $this->assertNull($employee->fresh()->photoUrl(), 'The initials show instead of a broken picture.');
+        $this->assertSame(['updated' => 1, 'unchanged' => 0, 'missing' => 0], $sync->sync());
+        Storage::disk('local')->assertExists($employee->fresh()->photo_path);
+        $this->assertNotNull($employee->fresh()->photoUrl());
+    }
+
     public function test_photos_are_shown_to_the_person_and_to_those_who_follow_people(): void
     {
         $employee = $this->departmentEmployee(['employee_id' => 'MTI240001']);

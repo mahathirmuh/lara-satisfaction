@@ -18,8 +18,11 @@ use Illuminate\Support\Facades\Storage;
  * employee-central-hub): the card whose StaffNo is the employee ID, the one
  * not deleted and last updated when there are several. Only StaffNo, Photo,
  * Del_State and LastUpdate are read. A photo is stored once as a small
- * square WebP thumbnail on the private disk and taken again only when its
- * card was updated since. Run after the daily directory import.
+ * square WebP thumbnail on the private disk and taken again when its card
+ * was updated since, or when the thumbnail is not on the disk of this server:
+ * the database may be shared with another one (e.g. a developer's machine
+ * that ran the import), whose files stay there. Run after the daily
+ * directory import.
  */
 class EmployeePhotoSync
 {
@@ -57,14 +60,14 @@ class EmployeePhotoSync
             $card = $cards->get(trim((string) $user->employee_id));
 
             if ($card === null) {
-                $result[$user->photo_path === null ? 'missing' : 'unchanged']++;
+                $result[$this->hasThumbnailHere($user) ? 'unchanged' : 'missing']++;
 
                 continue;
             }
 
             $cardUpdatedAt = $card->LastUpdate === null ? null : Carbon::parse($card->LastUpdate);
 
-            if ($user->photo_path !== null && ($cardUpdatedAt === null || $user->photo_updated_at?->greaterThanOrEqualTo($cardUpdatedAt))) {
+            if ($this->hasThumbnailHere($user) && ($cardUpdatedAt === null || $user->photo_updated_at?->greaterThanOrEqualTo($cardUpdatedAt))) {
                 $result['unchanged']++;
 
                 continue;
@@ -74,6 +77,14 @@ class EmployeePhotoSync
         }
 
         return $result;
+    }
+
+    /**
+     * Whether the user's thumbnail is on the disk of this server.
+     */
+    protected function hasThumbnailHere(User $user): bool
+    {
+        return $user->photo_path !== null && Storage::disk('local')->exists($user->photo_path);
     }
 
     /**

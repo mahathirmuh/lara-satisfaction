@@ -4,6 +4,20 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.23.0] - 2026-11-17
+
+### Added
+
+- An **automatic thank-you e-mail** after an employee completes a survey, from `mti.communication@merdekabattery.com` and
+  in the employee's language: the survey title, when it was submitted, the **Open My Survey** button, and that the
+  answers stay anonymous. The answers themselves are never in the e-mail. When the mail server refuses it, the answers
+  are kept all the same.
+
+### Fixed
+
+- The employee photos did not show on the production server. Photos imported from another machine sharing the database
+  are now taken again by a server that does not have their files; until then the initials show, not a broken picture.
+
 ## [0.22.0] - 2026-11-17
 
 ### Changed

@@ -8,10 +8,14 @@ use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyQuestion;
 use App\Models\Survey\SurveyResponse;
 use App\Models\UserManagement\User;
+use App\Notifications\SurveyCompleted;
+use Carbon\CarbonInterface;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\SurveyForm\Exceptions\SurveySubmissionException;
 use Modules\SurveyForm\Repositories\SurveyFormInterface;
+use Throwable;
 
 /**
  * Stores a completed survey anonymously.
@@ -22,7 +26,8 @@ use Modules\SurveyForm\Repositories\SurveyFormInterface;
  *    no timestamps), with only the respondent's company kept for segmentation
  *
  * The unique (survey_id, user_id) index makes double submissions impossible
- * even for concurrent requests.
+ * even for concurrent requests. Once both are saved, the person is thanked
+ * by e-mail (SurveyCompleted), which never holds the answers.
  */
 class SurveySubmissionService
 {
@@ -45,12 +50,14 @@ class SurveySubmissionService
             throw SurveySubmissionException::notOpen();
         }
 
+        $submittedAt = now();
+
         try {
-            return DB::transaction(function () use ($survey, $user, $answers, $evaluations): SurveyResponse {
+            $response = DB::transaction(function () use ($survey, $user, $answers, $evaluations, $submittedAt): SurveyResponse {
                 SurveyParticipation::create([
                     'survey_id' => $survey->getKey(),
                     'user_id' => $user->getKey(),
-                    'submitted_at' => now(),
+                    'submitted_at' => $submittedAt,
                 ]);
 
                 $response = SurveyResponse::create([
@@ -67,6 +74,24 @@ class SurveySubmissionService
             });
         } catch (UniqueConstraintViolationException) {
             throw SurveySubmissionException::alreadySubmitted();
+        }
+
+        $this->thank($survey, $user, $submittedAt);
+
+        return $response;
+    }
+
+    /**
+     * Thank the person by e-mail. The answers are saved whatever becomes of
+     * the e-mail: one the mail server refuses (sent at once when the queue is
+     * "sync") is only reported.
+     */
+    protected function thank(Survey $survey, User $user, CarbonInterface $submittedAt): void
+    {
+        try {
+            $user->notify(new SurveyCompleted($survey, Carbon::instance($submittedAt)));
+        } catch (Throwable $exception) {
+            report($exception);
         }
     }
 

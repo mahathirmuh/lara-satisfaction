@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -87,11 +88,14 @@ class User extends Authenticatable implements HasLocalePreference
 
     /**
      * Address of the user's photo (signed-in users only), or null without
-     * one. The version changes with the photo so browsers refresh it.
+     * one, so the initials show instead. Also null while the thumbnail is not
+     * on the disk of this server (another server sharing the database took
+     * it; the next photo sync takes it here too, see EmployeePhotoSync). The
+     * version changes with the photo so browsers refresh it.
      */
     public function photoUrl(): ?string
     {
-        return $this->photo_path === null
+        return $this->photo_path === null || ! Storage::disk('local')->exists($this->photo_path)
             ? null
             : route('users.photo', ['user' => $this, 'v' => $this->photo_updated_at?->timestamp]);
     }

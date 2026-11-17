@@ -1,6 +1,7 @@
 {{--
-    The survey reminder e-mail (App\Notifications\SurveyDeadlineReminder): the greeting, what is due, the survey at a
-    glance with the recipient's own status, the button, and who sends it. The company logos are embedded in the e-mail
+    The survey e-mails: the reminder (App\Notifications\SurveyDeadlineReminder) and the thank-you after completing a
+    survey (App\Notifications\SurveyCompleted). The greeting, what it is about, the survey at a glance (the recipient's
+    own status, or when it was submitted), the button, and who sends it. The company logos are embedded in the e-mail
     (only in its HTML part), so mail clients show them without loading pictures from elsewhere.
 --}}
 @php

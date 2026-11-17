@@ -14,6 +14,23 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.23.0] - 2026-11-17
+
+### Ditambahkan
+
+- **Email terima kasih otomatis** setelah karyawan menyelesaikan survei, dari `mti.communication@merdekabattery.com` dan
+  dalam bahasa karyawan itu: judul survei, waktu pengiriman, tombol **Buka Survei Saya**, dan pengingat bahwa jawaban
+  tetap anonim. Isi jawabannya tidak pernah ikut di email. Bila server email menolak, jawaban tetap tersimpan.
+
+### Diperbaiki
+
+- Foto karyawan tidak tampil di server production. Foto yang diimpor dari komputer lain yang memakai database yang sama
+  kini diambil lagi oleh server yang belum memiliki filenya; selama belum ada, yang tampil inisial, bukan gambar rusak.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan users:sync-directory`
+sekali agar foto langsung diambil ke server (selanjutnya otomatis setiap hari pukul 06.00). Tanpa migrasi dan tanpa
+setting baru.
+
 ## [0.22.0] - 2026-11-17
 
 ### Diubah

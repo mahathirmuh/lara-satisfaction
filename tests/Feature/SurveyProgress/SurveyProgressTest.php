@@ -13,6 +13,7 @@ use App\Models\UserManagement\MenuRolePermission;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SurveyProgressTest extends TestCase
@@ -100,13 +101,17 @@ class SurveyProgressTest extends TestCase
 
     public function test_each_person_shows_with_their_photo_or_initials(): void
     {
-        $this->people['not_started']->forceFill(['photo_path' => 'user-photos/'.$this->people['not_started']->id.'.webp', 'photo_updated_at' => now()])->save();
+        Storage::fake('local');
+        $photoPath = 'user-photos/'.$this->people['not_started']->id.'.webp';
+        Storage::disk('local')->put($photoPath, 'thumbnail');
+        $this->people['not_started']->forceFill(['photo_path' => $photoPath, 'photo_updated_at' => now()])->save();
 
         $rows = collect($this->actingAs($this->admin)
             ->getJson(route('survey-progress.list', ['survey_id' => $this->survey->id]))
             ->assertOk()
             ->json('data'))->keyBy('name');
 
+        $this->assertNotNull($rows['Ani Belum']['photo_url']);
         $this->assertSame($this->people['not_started']->fresh()->photoUrl(), $rows['Ani Belum']['photo_url']);
         $this->assertNull($rows['Budi Buka']['photo_url']);
         $this->assertSame('BB', $rows['Budi Buka']['initials']);

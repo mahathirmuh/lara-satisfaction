@@ -13,12 +13,19 @@ use App\Models\Survey\SurveyParticipation;
 use App\Models\Survey\SurveyQuestion;
 use App\Models\Survey\SurveyResponse;
 use App\Models\UserManagement\User;
+use App\Notifications\SurveyCompleted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Modules\SurveyForm\Exceptions\SurveySubmissionException;
 use Modules\SurveyForm\Services\SurveySubmissionService;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Mailer\Exception\TransportException;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Tests\TestCase;
 
 class SurveySubmissionTest extends TestCase
@@ -370,6 +377,69 @@ class SurveySubmissionTest extends TestCase
             ->get(route('survey-form.thanks', $this->survey))
             ->assertOk()
             ->assertSee('Thank you for your feedback!');
+    }
+
+    public function test_completing_the_survey_thanks_the_respondent_by_email(): void
+    {
+        Notification::fake();
+
+        $this->actingAs($this->employee)
+            ->post(route('survey-form.store', $this->survey), ['answers' => $this->validAnswers()])
+            ->assertRedirect(route('survey-form.thanks', $this->survey));
+
+        Notification::assertSentTo(
+            $this->employee,
+            SurveyCompleted::class,
+            fn (SurveyCompleted $notification, array $channels): bool => $notification->survey->is($this->survey) && $channels === ['mail'],
+        );
+    }
+
+    public function test_a_refused_second_submission_sends_no_second_thanks(): void
+    {
+        Notification::fake();
+
+        $this->actingAs($this->employee)->post(route('survey-form.store', $this->survey), ['answers' => $this->validAnswers()]);
+        $this->actingAs($this->employee)->post(route('survey-form.store', $this->survey), ['answers' => $this->validAnswers()]);
+
+        Notification::assertSentToTimes($this->employee, SurveyCompleted::class, 1);
+    }
+
+    public function test_the_thank_you_email_never_holds_the_answers(): void
+    {
+        $this->actingAs($this->employee)->post(route('survey-form.store', $this->survey), ['answers' => $this->validAnswers()]);
+
+        $email = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages()->sole()->getOriginalMessage();
+
+        $this->assertSame($this->employee->email, $email->getTo()[0]->getAddress());
+        $this->assertSame('Thank you for completing Operational Audit 2026', $email->getSubject());
+        $this->assertStringNotContainsString('Great onboarding programme', (string) $email->getHtmlBody());
+        $this->assertStringNotContainsString('Great onboarding programme', (string) $email->getTextBody());
+    }
+
+    public function test_a_refused_thank_you_email_keeps_the_answers(): void
+    {
+        Mail::extend('refusing', fn (): AbstractTransport => new class extends AbstractTransport
+        {
+            protected function doSend(SentMessage $message): void
+            {
+                throw new TransportException('ErrorAccessDenied');
+            }
+
+            public function __toString(): string
+            {
+                return 'refusing';
+            }
+        });
+        config(['mail.mailers.refusing' => ['transport' => 'refusing'], 'mail.default' => 'refusing']);
+        Exceptions::fake();
+
+        $this->actingAs($this->employee)
+            ->post(route('survey-form.store', $this->survey), ['answers' => $this->validAnswers()])
+            ->assertRedirect(route('survey-form.thanks', $this->survey));
+
+        $this->assertDatabaseHas('survey_participations', ['survey_id' => $this->survey->id, 'user_id' => $this->employee->id]);
+        $this->assertSame(1, SurveyResponse::query()->count());
+        Exceptions::assertReported(TransportException::class);
     }
 
     public function test_response_and_answer_ids_are_random_and_do_not_reveal_submission_order(): void
