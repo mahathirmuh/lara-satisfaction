@@ -59,9 +59,9 @@ The job title comes from the directory (LDAP `title`, Microsoft `jobTitle`) and 
 every sign-in; the roles given by job title follow it, roles given by hand are kept. Rules are
 edited in Role & Permission (one per line, `*` any text, `!` excludes) and applied to every user
 at once. Three roles are built in (IT Admin > Super Admin > Employee). A role of your own can be limited to the
-results of the departments its people manage (Data Scope in Role & Permission): it sees the departments whose *Manager
-Job Titles* (Master Data > Departments) match the job title. After upgrading an existing install, run
-`php artisan migrate --force` then `php artisan db:seed --class=RoleSeeder --force`.
+results of the departments its people manage (Role & Permission, **Survey Results**: Departments managed by the job
+title): it sees the departments whose *Manager Job Titles* (Master Data > Departments) match the job title. After
+upgrading an existing install, run `php artisan migrate --force` then `php artisan db:seed --class=RoleSeeder --force`.
 
 The employee ID is recorded the same way (LDAP `employeeID`, Microsoft `employeeId`) whenever
 the directory has one; an empty directory value keeps the ID entered in User Management.

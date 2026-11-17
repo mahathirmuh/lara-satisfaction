@@ -21,7 +21,8 @@ use RuntimeException;
  * no rule matches. Role ids 1 (IT Admin) and 3 (Employee) are referenced by
  * config/merdeka.php, so roles are created in this order on an empty table.
  * A role that only sees the results of the departments its job title manages
- * can still be made in Role & Permission (Data Scope).
+ * can still be made in Role & Permission (Survey Results: Departments managed
+ * by the job title).
  */
 class RoleSeeder extends Seeder
 {

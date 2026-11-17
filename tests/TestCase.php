@@ -69,8 +69,9 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * Fills in surveys and sees the results of the departments the job title manages only: a role of its own (Data Scope
-     * "managed departments"), as one can be made in Role & Permission. There is no such built-in role.
+     * Fills in surveys and sees the results of the departments the job title manages only: a role of its own (Survey
+     * Results: "Departments managed by the job title"), as one can be made in Role & Permission. There is no such
+     * built-in role.
      *
      * @param  array<string, mixed>  $attributes
      */

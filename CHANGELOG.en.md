@@ -4,6 +4,14 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.21.2] - 2026-11-17
+
+### Changed
+
+- The user guide (Bahasa Indonesia, English, 中文) follows versions 0.20.0 to 0.21.1: three roles (IT Admin > Super
+  Admin > Employee), two companies (MTI and MBM), every employee of PT Merdeka Tsingshan Indonesia as a respondent,
+  and the time in the **Last Update** column of Survey Progress. Its screenshots are taken again.
+
 ## [0.21.1] - 2026-11-17
 
 ### Changed
@@ -26,7 +34,7 @@ only in CHANGELOG.md.
 
 - The **Manager** role: three roles are left, IT Admin > Super Admin > Employee. Whoever was a Manager (job titles
   `*Manager`, `Deputy GM`) is an Employee. A role of your own that only sees the results of the departments its people
-  manage can still be made in Role & Permission (Data Scope).
+  manage can still be made in Role & Permission (**Survey Results**: Departments managed by the job title).
 - The companies other than **PT Merdeka Tsingshan Indonesia (MTI)** and **PT Merdeka Battery Materials (MBM)**: the
   lists and filters of companies only hold these two.
 
