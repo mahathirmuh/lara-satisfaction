@@ -825,7 +825,6 @@
     "Your account is inactive. Please contact the IT Helpdesk.": "您的账户已停用，请联系IT服务台。",
     "Your account is only used to make sure everyone answers once. Your answers are stored separately without your name; only your company is kept so results can be compared between companies. A draft you save is encrypted, visible only to you and deleted as soon as you submit.": "您的账户仅用于确保每人只作答一次。您的答案与您的姓名分开存储；仅保留您所在的公司，以便在各公司之间比较结果。您保存的草稿经过加密，仅您本人可见，并会在您提交后立即删除。",
     "Your answers are stored anonymously and cannot be changed after submission.": "您的答案将匿名保存，提交后无法修改。",
-    "Your answers are stored anonymously — they are never linked to your name, and results are only reported for groups of at least :count respondents.": "您的答案以匿名方式保存——绝不会与您的姓名关联，且只有在群组人数不少于:count人时才会报告结果。",
     "Your answers are stored separately without your name and can no longer be changed after submission.": "您的答案与您的姓名分开存储，提交后无法再修改。",
     "Your answers for “:survey” have been recorded anonymously. They cannot be traced back to you and can no longer be changed.": "您对“:survey”的答案已匿名记录，无法追溯到您本人，也无法再修改。",
     "Your evaluation is anonymous.": "您的评价是匿名的。",

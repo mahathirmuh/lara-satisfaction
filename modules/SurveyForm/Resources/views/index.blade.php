@@ -5,24 +5,6 @@
 @section('content')
     <div class="row g-3">
         <div class="col-12">
-            <div class="card mdka-bg-brand-500 text-white border-0 rounded-3">
-                <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
-                    <span class="avatar avatar-lg rounded-3 bg-white mdka-text-brand-500">
-                        <i class="ti ti-message-heart fs-1"></i>
-                    </span>
-                    <div>
-                        <h2 class="mb-1 text-white">{{ __(config('merdeka.app_tagline')) }}</h2>
-                        <div class="text-white-50">
-                            {{ __('Your answers are stored anonymously — they are never linked to your name, and results are only reported for groups of at least :count respondents.', [
-                                'count' => config('survey.min_group_size'),
-                            ]) }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12">
             <h3 class="mb-0">{{ __('Open Surveys') }}</h3>
         </div>
         @forelse ($surveys as $survey)

@@ -4,6 +4,13 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.11.1] - 2026-11-17
+
+### Removed
+
+- The blue "Your Voice Shapes Our Collective Future" banner at the top of **My Survey**: the page starts with the open
+  surveys.
+
 ## [0.11.0] - 2026-11-17
 
 ### Added
