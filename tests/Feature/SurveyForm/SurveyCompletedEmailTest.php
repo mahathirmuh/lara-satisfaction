@@ -22,7 +22,7 @@ class SurveyCompletedEmailTest extends TestCase
         $survey = Survey::factory()->create(['title' => 'Operational Audit 2026']);
         $employee = $this->departmentEmployee(['name' => 'Budi Santoso [MTI]']);
 
-        $mail = (new SurveyCompleted($survey, Carbon::parse('2026-11-17 14:30:00', 'Asia/Jakarta')))->toMail($employee);
+        $mail = (new SurveyCompleted($survey, Carbon::parse('2026-11-17 14:30:00', 'Asia/Makassar')))->toMail($employee);
         $html = (string) $mail->render();
 
         $this->assertSame('Thank you for completing Operational Audit 2026', $mail->subject);
@@ -30,7 +30,7 @@ class SurveyCompletedEmailTest extends TestCase
         $this->assertSame(route('survey-form.index'), $mail->actionUrl);
         $this->assertStringContainsString('Hello Budi Santoso,', $html);
         $this->assertStringContainsString('We have received your answers to the Operational Audit 2026.', $html);
-        $this->assertStringContainsString('Submitted: 17 Nov 2026 14:30 WIB', $html);
+        $this->assertStringContainsString('Submitted: 17 Nov 2026 14:30 WITA', $html);
         $this->assertStringContainsString('Your answers are anonymous: they are never linked to your name.', $html);
         $this->assertStringContainsString('MTI Employee Communication', $html);
     }

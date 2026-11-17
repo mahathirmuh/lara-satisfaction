@@ -14,6 +14,20 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.24.0] - 2026-11-17
+
+### Diubah
+
+- Jam aplikasi kini **WITA** (Asia/Makassar, waktu Morowali), bukan lagi WIB: kolom Last Update, riwayat pengingat, log,
+  Inbox dan email terima kasih menampilkan jam WITA, dan semua waktu yang sudah tersimpan digeser satu jam agar tetap
+  menunjuk saat yang sama. Impor karyawan otomatis kini berjalan pukul 06.00 WITA dan pengingat otomatis pukul 08.00
+  WITA.
+
+**Deploy:** di server ubah dulu `.env` menjadi `APP_TIMEZONE=Asia/Makassar`
+(`sed -i 's#^APP_TIMEZONE=.*#APP_TIMEZONE=Asia/Makassar#' .env`), lalu `git pull && docker compose up -d --build` dan
+`docker compose exec app php artisan migrate --force` untuk menggeser waktu yang tersimpan. Migrasinya menolak berjalan
+selama `.env` masih WIB.
+
 ## [0.23.0] - 2026-11-17
 
 ### Ditambahkan

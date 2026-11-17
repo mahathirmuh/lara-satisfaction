@@ -133,6 +133,7 @@ changing `.env`, run `docker compose up -d --force-recreate`.
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_MAILER` | Reminder emails and the thank-you email after a completed survey come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`, a shared mailbox) and are signed `MAIL_FROM_NAME` (`MTI Employee Communication`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
 | `MAIL_GRAPH_*` | App registration of the Graph mailer (`TENANT_ID`, `CLIENT_ID`, `CLIENT_SECRET`); empty ones use `MS_GRAPH_*`. `MAIL_GRAPH_SAVE_TO_SENT_ITEMS=true` keeps a copy in the Sent Items of the mailbox |
 | `APP_URL` | Used for the links in emails |
+| `APP_TIMEZONE` | The time of the application, of the stored times and of the scheduled runs (06:00 import, 08:00 reminders): `Asia/Makassar` (WITA, Morowali) since 0.24.0. The stored times have no zone, so a change of zone needs a migration that moves them (see `2026_11_17_140115_move_stored_times_from_wib_to_wita`) |
 | `LOG_ACTIVITY_ENABLED`, `LOG_ERRORS_TO_DATABASE` | Merdeka internal monitoring |
 
 Production: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS with `SESSION_SECURE_COOKIE=true`,
