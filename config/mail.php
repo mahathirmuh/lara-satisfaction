@@ -49,6 +49,22 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        /*
+        | Microsoft Graph (App\Services\Mail\MicrosoftGraphTransport): sends from
+        | the Exchange Online mailbox in "sender" (by default MAIL_FROM_ADDRESS,
+        | e.g. mti.communication@merdekabattery.com) with an Entra app
+        | registration that has the Mail.Send application permission, without
+        | a mailbox password. Empty MAIL_GRAPH_* use the MS_GRAPH_* registration.
+        */
+        'microsoft-graph' => [
+            'transport' => 'microsoft-graph',
+            'tenant_id' => env('MAIL_GRAPH_TENANT_ID') ?: env('MS_GRAPH_TENANT_ID'),
+            'client_id' => env('MAIL_GRAPH_CLIENT_ID') ?: env('MS_GRAPH_CLIENT_ID'),
+            'client_secret' => env('MAIL_GRAPH_CLIENT_SECRET') ?: env('MS_GRAPH_CLIENT_SECRET'),
+            'sender' => env('MAIL_GRAPH_SENDER') ?: env('MAIL_FROM_ADDRESS'),
+            'save_to_sent_items' => (bool) env('MAIL_GRAPH_SAVE_TO_SENT_ITEMS', false),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

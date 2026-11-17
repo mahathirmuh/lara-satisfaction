@@ -43,6 +43,7 @@ class AuditLog extends Model
         'Survey' => 'Survey',
         'SurveyQuestion' => 'Question',
         'SurveyManualReminder' => 'Reminder',
+        'SurveyReminderSetting' => 'Automatic Reminders',
         'Department' => 'Department',
         'DepartmentSection' => 'Section',
         'LandingContent' => 'Landing Page',

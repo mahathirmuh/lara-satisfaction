@@ -4,6 +4,17 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.11.0] - 2026-11-17
+
+### Added
+
+- Reminder e-mails come from `mti.communication@merdekabattery.com`, sent through Microsoft Graph without a mailbox
+  password. **Survey Management > Reminders** shows the sender, or a warning when e-mails are only written to the log.
+- The automatic reminders can be turned off and on again in **Survey Management > Reminders** (the **Automatic
+  Reminders** card, for whoever may update the Reminders menu: IT Admin and Super Admin). While they are off no
+  automatic reminder is sent; turned on again, the reminder that is due goes at the next run (08:00). Reminders sent by
+  hand are not affected. Every switch is recorded in the Audit Log.
+
 ## [0.10.2] - 2026-11-16
 
 ### Fixed

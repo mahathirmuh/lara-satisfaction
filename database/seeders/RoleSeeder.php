@@ -38,7 +38,7 @@ class RoleSeeder extends Seeder
             'survey-form.index' => [PermissionAction::Create, PermissionAction::Read],
             'survey-management.survey.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
             'survey-management.question.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],
-            'survey-management.reminder.index' => [PermissionAction::Create, PermissionAction::Read],
+            'survey-management.reminder.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update],
             'survey-report.index' => [PermissionAction::Read],
             'survey-progress.index' => [PermissionAction::Read],
             'user-management.user-registered.index' => [PermissionAction::Create, PermissionAction::Read, PermissionAction::Update, PermissionAction::Delete],

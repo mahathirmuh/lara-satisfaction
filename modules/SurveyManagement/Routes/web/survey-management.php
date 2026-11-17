@@ -35,5 +35,6 @@ Route::middleware(['web', 'auth', 'permission'])->prefix('survey-management')->n
         Route::get('/', 'index')->name('index');
         Route::get('recipients', 'recipients')->name('recipients');
         Route::post('/', 'store')->name('store');
+        Route::put('automatic', 'automatic')->name('automatic');
     });
 });

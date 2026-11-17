@@ -417,6 +417,7 @@
     /**
      * Confirm, then send a create/update request; shows validation errors.
      * `data` may be a plain object or a FormData (for file uploads).
+     * `onCancel` and `onError` let a control (a switch) go back to its state.
      */
     function saveRecord({
         url,
@@ -424,9 +425,13 @@
         data = {},
         confirmText = @json(__('Data will be saved!')),
         onSuccess = () => {},
+        onCancel = () => {},
+        onError = () => {},
     }) {
         return confirmSave(confirmText).then((result) => {
             if (!result.isConfirmed) {
+                onCancel();
+
                 return;
             }
 
@@ -450,7 +455,10 @@
                     toastSuccess(response.message || @json(__('Data has been saved.')));
                     onSuccess(response);
                 },
-                error: showAjaxError,
+                error: (xhr) => {
+                    showAjaxError(xhr);
+                    onError(xhr);
+                },
             });
         });
     }

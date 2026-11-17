@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\PermissionAction;
+use App\Services\Mail\MicrosoftGraphTransport;
 use App\View\Composers\BreadcrumbComposer;
 use App\View\Composers\NotificationComposer;
 use App\View\Composers\SidebarComposer;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureSecurity();
         $this->configureUrls();
         $this->registerSocialiteProviders();
+        $this->registerMailTransports();
         $this->registerBladeDirectives();
 
         View::composer('main.sidebar.menulist', SidebarComposer::class);
@@ -85,6 +88,21 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(function (SocialiteWasCalled $event): void {
             $event->extendSocialite('azure', AzureProvider::class);
         });
+    }
+
+    /**
+     * The "microsoft-graph" mail transport (config/mail.php): e-mail sent
+     * through Microsoft Graph from one Exchange Online mailbox.
+     */
+    protected function registerMailTransports(): void
+    {
+        Mail::extend('microsoft-graph', fn (array $config): MicrosoftGraphTransport => new MicrosoftGraphTransport(
+            tenantId: (string) ($config['tenant_id'] ?? ''),
+            clientId: (string) ($config['client_id'] ?? ''),
+            clientSecret: (string) ($config['client_secret'] ?? ''),
+            sender: filled($config['sender'] ?? null) ? (string) $config['sender'] : null,
+            saveToSentItems: (bool) ($config['save_to_sent_items'] ?? false),
+        ));
     }
 
     /**

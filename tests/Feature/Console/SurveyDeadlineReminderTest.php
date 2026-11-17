@@ -5,6 +5,7 @@ namespace Tests\Feature\Console;
 use App\Enums\SurveyStatus;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyParticipation;
+use App\Models\Survey\SurveyReminderSetting;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
 use App\Notifications\SurveyDeadlineReminder;
@@ -116,6 +117,37 @@ class SurveyDeadlineReminderTest extends TestCase
 
         Notification::assertSentToTimes($employee, SurveyDeadlineReminder::class, 2);
         Notification::assertSentTo($employee, SurveyDeadlineReminder::class, fn (SurveyDeadlineReminder $notification): bool => $notification->daysLeft === 7);
+    }
+
+    public function test_no_reminder_is_sent_while_the_automatic_reminders_are_off(): void
+    {
+        SurveyReminderSetting::factory()->off()->create();
+        $this->surveyEndingIn(14);
+        $this->departmentEmployee();
+        Notification::fake();
+
+        $this->artisan('survey:send-deadline-reminders')
+            ->expectsOutputToContain('Automatic reminders are turned off')
+            ->assertSuccessful();
+
+        Notification::assertNothingSent();
+        $this->assertDatabaseCount('survey_reminders', 0);
+    }
+
+    public function test_turned_on_again_the_reminder_that_is_due_goes_at_the_next_run(): void
+    {
+        $setting = SurveyReminderSetting::factory()->off()->create();
+        $this->surveyEndingIn(14);
+        $employee = $this->departmentEmployee();
+        Notification::fake();
+        $this->artisan('survey:send-deadline-reminders');
+        $this->travel(5)->days();
+        $setting->update(['automatic' => true]);
+
+        $this->artisan('survey:send-deadline-reminders');
+
+        Notification::assertSentToTimes($employee, SurveyDeadlineReminder::class, 1);
+        Notification::assertSentTo($employee, SurveyDeadlineReminder::class, fn (SurveyDeadlineReminder $notification): bool => $notification->daysLeft === 9);
     }
 
     public function test_dry_run_only_reports_how_many_employees_would_be_reminded(): void

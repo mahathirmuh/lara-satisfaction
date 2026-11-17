@@ -111,7 +111,8 @@ changing `.env`, run `docker compose up -d --force-recreate`.
    port 26113 is reachable from elsewhere.
 3. Add `https://survey.merdekabattery.com/auth/microsoft/callback` as a **Web** redirect URI of
    the Entra app registration (the one in `MS_GRAPH_CLIENT_ID`, shared with trilingual-docon).
-4. `docker compose up -d --build`, then `docker compose exec app php artisan migrate --force`.
+4. Emails: `MAIL_MAILER=microsoft-graph` with the `Mail.Send` permission (see [Sending email](#sending-email-microsoft-graph)).
+5. `docker compose up -d --build`, then `docker compose exec app php artisan migrate --force`.
 
 ## Configuration
 
@@ -124,7 +125,9 @@ changing `.env`, run `docker compose up -d --force-recreate`.
 | `SEED_ADMIN_EMAIL` | Company email of the first super admin |
 | `SURVEY_MIN_GROUP_SIZE` | Anonymity threshold for showing results (default 5) |
 | `SURVEY_REMINDER_DAYS` | Deadline reminder days before the end date (default `14`, e.g. `14,7,1`) |
-| `MAIL_*`, `APP_URL` | SMTP for reminder emails; `APP_URL` is used for the links in emails |
+| `MAIL_FROM_ADDRESS`, `MAIL_MAILER` | Reminder emails come from `MAIL_FROM_ADDRESS` (`mti.communication@merdekabattery.com`); `MAIL_MAILER=microsoft-graph` sends them through Microsoft Graph (see [Sending email](#sending-email-microsoft-graph)), `smtp` through an SMTP server (`MAIL_HOST`, …), `log` only writes them to the log |
+| `MAIL_GRAPH_*` | App registration of the Graph mailer (`TENANT_ID`, `CLIENT_ID`, `CLIENT_SECRET`); empty ones use `MS_GRAPH_*`. `MAIL_GRAPH_SAVE_TO_SENT_ITEMS=true` keeps a copy in the Sent Items of the mailbox |
+| `APP_URL` | Used for the links in emails |
 | `LOG_ACTIVITY_ENABLED`, `LOG_ERRORS_TO_DATABASE` | Merdeka internal monitoring |
 
 Production: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS with `SESSION_SECURE_COOKIE=true`,
@@ -139,6 +142,10 @@ completed an open survey or to chosen people (e.g. yourself, to test), with a hi
 send. Only people with an account here are reminded: accounts are created at the first sign-in
 (or in User Management). Reminders are queued (`App\Services\Survey\SurveyReminders`).
 
+The automatic reminders are switched off and on again on the same page (**Automatic Reminders**, for whoever has the
+Update permission of the Reminders menu; recorded in the Audit Log). While they are off the daily command sends
+nothing; turned on again, the reminder that is due goes at the next run. Reminders sent by hand do not depend on it.
+
 Survey drafts ("Save as Draft") are the only answers stored with a user: they are encrypted with
 `APP_KEY`, never shown to administrators, excluded from the activity log and deleted on submission.
 
@@ -151,6 +158,26 @@ Survey drafts ("Save as Draft") are the only answers stored with a user: they ar
    Run `php artisan config:cache` in production.
 3. Users sign in with the account whose email matches their registered account; with
    `SSO_AUTO_REGISTER=true`, unknown users of `SSO_ALLOWED_DOMAINS` are created as Employee.
+
+### Sending email (Microsoft Graph)
+
+Reminder emails come from the Exchange Online mailbox in `MAIL_FROM_ADDRESS`
+(`mti.communication@merdekabattery.com`), sent through Microsoft Graph without a mailbox password
+(`App\Services\Mail\MicrosoftGraphTransport`).
+
+1. In Microsoft Entra ID, give an app registration the **application** permission Microsoft Graph `Mail.Send` and grant
+   admin consent: the one in `MS_GRAPH_CLIENT_ID` ("Apps Internal ICT", shared with trilingual-docon), or a separate
+   one whose ids and secret go in `MAIL_GRAPH_TENANT_ID`, `MAIL_GRAPH_CLIENT_ID` and `MAIL_GRAPH_CLIENT_SECRET`.
+2. `Mail.Send` lets the app send as any mailbox of the tenant, so limit it to this one, in Exchange Online PowerShell:
+   `New-ApplicationAccessPolicy -AppId <client id> -PolicyScopeGroupId mti.communication@merdekabattery.com
+   -AccessRight RestrictAccess -Description "Employee Satisfaction Survey reminders"`, then check it with
+   `Test-ApplicationAccessPolicy -Identity mti.communication@merdekabattery.com -AppId <client id>`.
+3. Set `MAIL_MAILER=microsoft-graph` and `MAIL_FROM_ADDRESS=mti.communication@merdekabattery.com`, then
+   `docker compose up -d --force-recreate` (or `php artisan config:cache`).
+4. Try it: **Survey Management > Reminders**, Chosen people, yourself. A refused email fails its queued job with the
+   reason from Microsoft (e.g. `ErrorAccessDenied` while the permission is missing); see `php artisan queue:failed`.
+
+The Reminders page says where the emails come from, or that they are only written to the log (`MAIL_MAILER=log`).
 
 ### Activating network sign-in (LDAP)
 

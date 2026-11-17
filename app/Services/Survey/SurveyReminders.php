@@ -77,6 +77,24 @@ class SurveyReminders
     }
 
     /**
+     * Where the reminder e-mails come from (MAIL_FROM_ADDRESS, e.g.
+     * mti.communication@merdekabattery.com), and whether e-mail leaves the
+     * application at all: the "log" and "array" mailers only write it down.
+     *
+     * @return array{address: string, name: string, delivered: bool}
+     */
+    public function emailSender(): array
+    {
+        $transport = config('mail.mailers.'.config('mail.default').'.transport');
+
+        return [
+            'address' => (string) config('mail.from.address'),
+            'name' => (string) config('mail.from.name'),
+            'delivered' => ! in_array($transport, ['log', 'array'], true),
+        ];
+    }
+
+    /**
      * Remind by hand everyone who has not completed the survey (no ids), or
      * the chosen people among them, and record it. Chosen people who
      * completed it already, are inactive or do not take surveys are skipped.

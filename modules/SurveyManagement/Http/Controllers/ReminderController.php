@@ -2,11 +2,13 @@
 
 namespace Modules\SurveyManagement\Http\Controllers;
 
+use App\Console\Commands\SendSurveyDeadlineReminders;
 use App\Helpers\Apps;
 use App\Http\Controllers\Controller;
 use App\Models\Survey\Survey;
 use App\Models\Survey\SurveyManualReminder;
 use App\Models\Survey\SurveyReminder;
+use App\Models\Survey\SurveyReminderSetting;
 use App\Models\UserManagement\User;
 use App\Services\Audit\AuditLogger;
 use App\Services\Survey\SurveyReminders;
@@ -22,7 +24,8 @@ use Modules\SurveyManagement\Http\Requests\SendReminderRequest;
  * Reminders sent by hand about an open survey: to everyone who has not
  * completed it, or to chosen people (handy for a test send to oneself).
  * Each person gets the same in-app notification and e-mail as the daily
- * scheduled reminder, in their own language.
+ * scheduled reminder, in their own language. The daily automatic reminders
+ * are switched on and off here too.
  */
 class ReminderController extends Controller
 {
@@ -42,6 +45,7 @@ class ReminderController extends Controller
     public function index(Request $request): View
     {
         $surveys = Survey::query()->open()->orderBy('end_date')->get();
+        $automatic = SurveyReminderSetting::current()->loadMissing('updater:id,name');
 
         return view('SurveyManagement::reminder.index', [
             'surveys' => $surveys,
@@ -50,7 +54,43 @@ class ReminderController extends Controller
             ]),
             'history' => $this->history(),
             'maxChosen' => SendReminderRequest::MAX_CHOSEN,
+            'automatic' => $automatic->automatic,
+            'automaticChanged' => $this->lastChanged($automatic),
+            'reminderDays' => collect(config('survey.reminder_days', []))->sortDesc()->implode(', '),
+            'runsAt' => SendSurveyDeadlineReminders::RUNS_AT,
+            'emailSender' => $this->reminders->emailSender(),
             'can' => $request->user()->menuAbilities('survey-management.reminder'),
+        ]);
+    }
+
+    /**
+     * Turn the automatic reminders on or off (JSON). Only a real change is
+     * saved and written to the audit trail.
+     */
+    public function automatic(Request $request, AuditLogger $audit): JsonResponse
+    {
+        $request->validate(['automatic' => ['required', 'boolean']]);
+
+        $turnOn = $request->boolean('automatic');
+        $setting = SurveyReminderSetting::current();
+        $wasOn = $setting->automatic;
+
+        if ($wasOn !== $turnOn) {
+            $setting->fill(['automatic' => $turnOn, 'updated_by' => $request->user()->id])->save();
+            $audit->log(
+                $turnOn ? AuditLogger::AUTOMATIC_REMINDERS_ON : AuditLogger::AUTOMATIC_REMINDERS_OFF,
+                $setting,
+                old: ['Automatic reminders' => $wasOn],
+                new: ['Automatic reminders' => $turnOn],
+            );
+        }
+
+        return response()->json([
+            'message' => $turnOn ? __('Automatic reminders are on.') : __('Automatic reminders are off.'),
+            'data' => [
+                'automatic' => $turnOn,
+                'changed' => $this->lastChanged($setting->loadMissing('updater:id,name')),
+            ],
         ]);
     }
 
@@ -122,6 +162,22 @@ class ReminderController extends Controller
         return response()->json([
             'message' => $message,
             'data' => ['recipients' => $send->recipients, 'skipped' => $send->skipped],
+        ]);
+    }
+
+    /**
+     * Who switched the automatic reminders last, and when; nothing while they
+     * were never switched.
+     */
+    protected function lastChanged(SurveyReminderSetting $setting): ?string
+    {
+        if (! $setting->exists || $setting->updated_at === null) {
+            return null;
+        }
+
+        return __('Last changed by :name, :date', [
+            'name' => $setting->updater?->name ?? '-',
+            'date' => $setting->updated_at->translatedFormat(__('d M Y H:i')),
         ]);
     }
 

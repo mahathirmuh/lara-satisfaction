@@ -46,6 +46,37 @@
 
 @section('content')
     <div class="row g-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header p-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <h4 class="mb-0"><i class="ti ti-alarm me-1"></i> {{ __('Automatic Reminders') }}</h4>
+                    <label class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="automaticReminders" role="switch"
+                            @checked($automatic) @disabled(! $can['update'])>
+                        <span class="form-check-label fw-medium" id="automaticRemindersState">{{ $automatic ? __('On') : __('Off') }}</span>
+                    </label>
+                </div>
+                <div class="card-body py-2 px-3 small">
+                    <div>
+                        {{ __('Every day at :time, everyone who has not completed an open survey is reminded :days days before it closes, in the application and by e-mail.', ['time' => $runsAt, 'days' => $reminderDays]) }}
+                    </div>
+                    <div class="text-secondary">
+                        {{ __('Turning them off stops the automatic reminders only: reminders can still be sent by hand below.') }}
+                    </div>
+                    @if ($emailSender['delivered'])
+                        <div class="mt-1">
+                            <i class="ti ti-mail me-1" aria-hidden="true"></i>{{ __('Reminder e-mails are sent from :sender.', ['sender' => $emailSender['name'].' <'.$emailSender['address'].'>']) }}
+                        </div>
+                    @else
+                        <div class="mt-1 text-warning">
+                            <i class="ti ti-alert-triangle me-1" aria-hidden="true"></i>{{ __('E-mails are not sent yet: the application only writes them to its log (MAIL_MAILER). People get the notification in the application only.') }}
+                        </div>
+                    @endif
+                    <div class="text-secondary mt-1 {{ $automaticChanged ? '' : 'd-none' }}" id="automaticRemindersChanged">{{ $automaticChanged }}</div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-lg-5">
             <div class="card">
                 <div class="card-header p-2 px-3">
@@ -160,6 +191,38 @@
     <script>
         const urlReminderStore = @json(route('survey-management.reminder.store'));
         const urlReminderRecipients = @json(route('survey-management.reminder.recipients'));
+        const urlAutomaticReminders = @json(route('survey-management.reminder.automatic'));
+        const automaticTexts = {
+            on: @json(__('On')),
+            off: @json(__('Off')),
+            confirmOn: @json(__('Automatic reminders will be sent again: a reminder that is due goes at the next run (:time).', ['time' => $runsAt])),
+            confirmOff: @json(__('No automatic reminder will be sent until they are turned on again. Reminders sent by hand are not affected.')),
+        };
+
+        // The switch of the automatic reminders: back where it was when the change is cancelled or refused.
+        $(function() {
+            const automaticSwitch = $('#automaticReminders');
+
+            automaticSwitch.on('change', function() {
+                const turnOn = this.checked;
+                const restore = () => automaticSwitch.prop('checked', !turnOn);
+
+                saveRecord({
+                    url: urlAutomaticReminders,
+                    method: 'PUT',
+                    data: {
+                        automatic: turnOn ? 1 : 0,
+                    },
+                    confirmText: turnOn ? automaticTexts.confirmOn : automaticTexts.confirmOff,
+                    onSuccess: (response) => {
+                        $('#automaticRemindersState').text(response.data.automatic ? automaticTexts.on : automaticTexts.off);
+                        $('#automaticRemindersChanged').text(response.data.changed || '').toggleClass('d-none', !response.data.changed);
+                    },
+                    onCancel: restore,
+                    onError: restore,
+                });
+            });
+        });
         const reminderTexts = {
             chooseSomeone: @json(__('Choose at least one person.')),
             confirmAll: @json(__('This will remind :count people who have not completed the survey.')),

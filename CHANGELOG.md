@@ -14,6 +14,24 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.11.0] - 2026-11-17
+
+### Ditambahkan
+
+- Email pengingat dikirim dari `mti.communication@merdekabattery.com` lewat Microsoft Graph, tanpa password mailbox.
+  **Survey Management > Reminders** menampilkan alamat pengirimnya, atau peringatan bila email belum benar-benar
+  dikirim (hanya ditulis ke log).
+- Pengingat otomatis bisa dinonaktifkan dan diaktifkan lagi di **Survey Management > Reminders** (kartu **Pengingat
+  Otomatis**, untuk yang punya izin Update di menu Reminders: IT Admin dan Super Admin). Selama nonaktif tidak ada
+  pengingat otomatis yang dikirim; setelah diaktifkan lagi, pengingat yang sudah waktunya terkirim pada jadwal
+  berikutnya (pukul 08.00). Pengingat yang dikirim manual tidak terpengaruh. Setiap perubahan tercatat di Audit Log.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`
+(tabel setelan pengingat, dan izin Update di Reminders untuk role yang bisa mengirim pengingat). Setting:
+`MAIL_MAILER=microsoft-graph` dan `MAIL_FROM_ADDRESS=mti.communication@merdekabattery.com`. App registration di
+`MS_GRAPH_*` (atau `MAIL_GRAPH_*` tersendiri) perlu izin aplikasi Microsoft Graph `Mail.Send` dengan admin consent,
+dibatasi ke mailbox itu (README, "Sending email").
+
 ## [0.10.2] - 2026-11-16
 
 ### Diperbaiki

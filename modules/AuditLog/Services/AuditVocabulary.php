@@ -54,6 +54,8 @@ final class AuditVocabulary
         AuditLogger::QUESTION_UPDATED => 'Question updated',
         AuditLogger::QUESTION_DELETED => 'Question deleted',
         AuditLogger::REMINDER_SENT => 'Reminder sent',
+        AuditLogger::AUTOMATIC_REMINDERS_ON => 'Automatic reminders turned on',
+        AuditLogger::AUTOMATIC_REMINDERS_OFF => 'Automatic reminders turned off',
         AuditLogger::MASTER_CREATED => 'Master data added',
         AuditLogger::MASTER_UPDATED => 'Master data updated',
         AuditLogger::MASTER_DELETED => 'Master data deleted',
@@ -84,6 +86,8 @@ final class AuditVocabulary
         AuditLogger::QUESTION_UPDATED => 'updated question',
         AuditLogger::QUESTION_DELETED => 'deleted question',
         AuditLogger::REMINDER_SENT => 'sent a reminder for',
+        AuditLogger::AUTOMATIC_REMINDERS_ON => 'turned on',
+        AuditLogger::AUTOMATIC_REMINDERS_OFF => 'turned off',
         AuditLogger::MASTER_CREATED => 'added',
         AuditLogger::MASTER_UPDATED => 'updated',
         AuditLogger::MASTER_DELETED => 'deleted',
@@ -103,6 +107,8 @@ final class AuditVocabulary
         AuditLogger::SURVEY_STATUS_CHANGED => ['orange', 'toggle-right', 'Status changed'],
         AuditLogger::SURVEY_DUPLICATED => ['blue', 'copy', 'Duplicated'],
         AuditLogger::REMINDER_SENT => ['blue', 'send', 'Sent'],
+        AuditLogger::AUTOMATIC_REMINDERS_ON => ['green', 'player-play', 'Turned on'],
+        AuditLogger::AUTOMATIC_REMINDERS_OFF => ['gray', 'player-pause', 'Turned off'],
     ];
 
     /**

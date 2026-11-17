@@ -70,6 +70,13 @@ class AuditLogger
     public const REMINDER_SENT = 'reminder.sent';
 
     /**
+     * The automatic deadline reminders turned on or off (Survey Management > Reminders).
+     */
+    public const AUTOMATIC_REMINDERS_ON = 'reminder.automatic_on';
+
+    public const AUTOMATIC_REMINDERS_OFF = 'reminder.automatic_off';
+
+    /**
      * Departments, sections and the landing page (Master Data): the entry names which.
      */
     public const MASTER_CREATED = 'master_data.created';
