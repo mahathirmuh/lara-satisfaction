@@ -52,6 +52,7 @@ class UserRegisteredController extends Controller
             'departments' => Department::query()->ordered()->get(['id', 'code', 'name']),
             'roles' => $this->assignableRoles($actor),
             'automaticRoleIds' => $this->jobTitleRoles->automaticRoleIds(),
+            'canGiveJobTitleRoles' => $actor->isItAdmin(),
             'can' => $actor->menuAbilities('user-management.user-registered'),
             'canSyncDirectory' => $directory->isConfigured(),
             'lastSync' => $lastSync === null ? null : [
@@ -132,11 +133,14 @@ class UserRegisteredController extends Controller
     }
 
     /**
-     * A user (JSON for the edit modal).
+     * A user (JSON for the edit modal): role_id holds the roles given by hand
+     * (ticked and free), job_title_role_id those the job title gives (ticked
+     * and locked).
      */
     public function show(Request $request, User $user): JsonResponse
     {
         $this->ensureManageable($request->user(), $user);
+        $byHand = $this->jobTitleRoles->roleIdsByHand($user);
 
         return response()->json([
             'data' => [
@@ -148,7 +152,8 @@ class UserRegisteredController extends Controller
                 'company_id' => $user->company_id,
                 'department_id' => $user->department_id,
                 'is_active' => $user->is_active,
-                'role_id' => $user->roles()->pluck('roles.id'),
+                'role_id' => $byHand,
+                'job_title_role_id' => array_values(array_diff($user->roles()->pluck('roles.id')->map(fn ($id): int => (int) $id)->all(), $byHand)),
             ],
         ]);
     }
@@ -161,6 +166,7 @@ class UserRegisteredController extends Controller
         $user = $this->users->create(
             $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'department_id', 'is_active']),
             $request->validated('role_id') ?? [],
+            $request->user()->isItAdmin(),
         );
         $audit->log(AuditLogger::USER_CREATED, $user, new: $user->auditValues(), label: $user->email);
 
@@ -182,6 +188,7 @@ class UserRegisteredController extends Controller
             $user,
             $request->safe()->only(['name', 'email', 'employee_id', 'job_title', 'company_id', 'department_id', 'is_active']),
             $request->validated('role_id') ?? [],
+            $request->user()->isItAdmin(),
         );
         $audit->logChanges(AuditLogger::USER_UPDATED, $user, $before, $user->refresh()->auditValues(), $user->email);
 

@@ -164,7 +164,7 @@ class User extends Authenticatable implements HasLocalePreference
      */
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class)->withTimestamps();
+        return $this->belongsToMany(Role::class)->withPivot('by_hand')->withTimestamps();
     }
 
     /**

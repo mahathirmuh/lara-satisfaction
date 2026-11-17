@@ -4,6 +4,15 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.25.0] - 2026-11-17
+
+### Added
+
+- **An IT Admin can give a role of the job title by hand**, e.g. Super Admin to someone whose job title does not give
+  it, in User Management > User Registered. It then stays whatever the job title, until it is unticked. A role the job
+  title gives shows ticked and locked. Others who manage users (Super Admin) still cannot give such a role, and saving
+  a user keeps the ones an IT Admin gave.
+
 ## [0.24.0] - 2026-11-17
 
 ### Changed

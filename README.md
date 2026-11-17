@@ -56,7 +56,9 @@ Set `SEED_DEMO_DATA=true` (never in production) to seed demo employees and anony
 | **Employee** | Any other job title (default role) | Dashboard and *My Survey* |
 
 The job title comes from the directory (LDAP `title`, Microsoft `jobTitle`) and is refreshed at
-every sign-in; the roles given by job title follow it, roles given by hand are kept. Rules are
+every sign-in; the roles given by job title follow it, roles given by hand are kept. An IT Admin may also give a
+role of the job title by hand in User Registered (e.g. Super Admin to someone whose job title does not give it,
+`role_user.by_hand`): it then stays whatever the job title, until it is unticked. Rules are
 edited in Role & Permission (one per line, `*` any text, `!` excludes) and applied to every user
 at once. Three roles are built in (IT Admin > Super Admin > Employee). A role of your own can be limited to the
 results of the departments its people manage (Role & Permission, **Survey Results**: Departments managed by the job

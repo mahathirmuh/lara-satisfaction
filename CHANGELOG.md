@@ -14,6 +14,18 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.25.0] - 2026-11-17
+
+### Ditambahkan
+
+- **IT Admin bisa memberikan role jabatan secara manual**, misalnya Super Admin untuk orang yang jabatannya tidak
+  memberikan role itu, di User Management > User Registered. Role tersebut tetap ada apa pun jabatannya sampai
+  centangnya dihapus. Role yang diberikan jabatan tampil tercentang dan terkunci. Pengelola lain (Super Admin) tetap
+  tidak bisa memberikannya, dan tidak menghapus role yang diberikan IT Admin saat menyimpan pengguna.
+
+**Deploy:** `git pull && docker compose up -d --build`, lalu `docker compose exec app php artisan migrate --force`
+(kolom baru di `role_user`; di database lara-kpi sudah dijalankan, jadi hasilnya "Nothing to migrate").
+
 ## [0.24.0] - 2026-11-17
 
 ### Diubah

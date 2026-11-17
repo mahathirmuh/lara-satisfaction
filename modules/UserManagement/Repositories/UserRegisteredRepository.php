@@ -53,9 +53,9 @@ class UserRegisteredRepository implements UserRegisteredInterface
     /**
      * {@inheritDoc}
      */
-    public function create(array $data, array $roleIds): User
+    public function create(array $data, array $roleIds, bool $byItAdmin): User
     {
-        return DB::transaction(function () use ($data, $roleIds): User {
+        return DB::transaction(function () use ($data, $roleIds, $byItAdmin): User {
             // Never used: users sign in with SSO or their network account only.
             $data['password'] = Str::password(32);
 
@@ -70,8 +70,7 @@ class UserRegisteredRepository implements UserRegisteredInterface
                 $user = User::create($data);
             }
 
-            $user->roles()->sync($roleIds);
-            $this->jobTitleRoles->sync($user);
+            $this->jobTitleRoles->assign($user, $roleIds, $byItAdmin);
 
             return $user;
         });
@@ -80,14 +79,13 @@ class UserRegisteredRepository implements UserRegisteredInterface
     /**
      * {@inheritDoc}
      */
-    public function update(User $user, array $data, array $roleIds): User
+    public function update(User $user, array $data, array $roleIds, bool $byItAdmin): User
     {
-        return DB::transaction(function () use ($user, $data, $roleIds): User {
+        return DB::transaction(function () use ($user, $data, $roleIds, $byItAdmin): User {
             $this->releaseEmployeeId($data['employee_id'] ?? null, $user->getKey());
 
             $user->update($data);
-            $user->roles()->sync($roleIds);
-            $this->jobTitleRoles->sync($user);
+            $this->jobTitleRoles->assign($user, $roleIds, $byItAdmin);
 
             return $user;
         });

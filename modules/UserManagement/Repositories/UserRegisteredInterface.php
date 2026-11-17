@@ -19,21 +19,23 @@ interface UserRegisteredInterface
     /**
      * Register a user (restoring a previously deleted account with the same
      * email). The given roles are the ones assigned by hand; the roles given
-     * by job title are added from the user's job title.
+     * by job title are added from the user's job title. Only an IT Admin
+     * ($byItAdmin) gives a role of the job title by hand (JobTitleRoles::assign()).
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, int>  $roleIds
      */
-    public function create(array $data, array $roleIds): User;
+    public function create(array $data, array $roleIds, bool $byItAdmin): User;
 
     /**
      * Update a user and the roles assigned by hand; the roles given by job
-     * title follow the user's job title.
+     * title follow the user's job title. Only an IT Admin ($byItAdmin) gives
+     * a role of the job title by hand (JobTitleRoles::assign()).
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, int>  $roleIds
      */
-    public function update(User $user, array $data, array $roleIds): User;
+    public function update(User $user, array $data, array $roleIds, bool $byItAdmin): User;
 
     /**
      * Remove a user's access (soft delete).

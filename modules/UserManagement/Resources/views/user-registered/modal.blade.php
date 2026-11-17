@@ -102,13 +102,15 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {{-- A role of the job title is only given by hand by an IT Admin; for anyone else it stays locked. --}}
                                                 @foreach ($roles as $role)
-                                                    @php($isByJobTitle = in_array($role->id, $automaticRoleIds, true))
+                                                    @php($isByJobTitle = in_array((int) $role->id, $automaticRoleIds, true))
+                                                    @php($isLocked = $isByJobTitle && ! $canGiveJobTitleRoles)
                                                     <tr>
                                                         <td class="text-center">
                                                             <input class="form-check-input user-role-checkbox" type="checkbox"
                                                                 value="{{ $role->id }}" aria-label="{{ $role->name }}"
-                                                                @disabled($isByJobTitle) />
+                                                                data-locked="{{ $isLocked ? 1 : 0 }}" @disabled($isLocked) />
                                                         </td>
                                                         <td>
                                                             {{ $role->name }}
@@ -121,7 +123,13 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <small class="form-hint">{{ __('Roles "by job title" are given from the job title at every sign-in (Role & Permission); only the others are given here.') }}</small>
+                                    <small class="form-hint">
+                                        @if ($canGiveJobTitleRoles)
+                                            {{ __('Roles "by job title" follow the job title at every sign-in (Role & Permission). As IT Admin you may also give one by hand: it then stays whatever the job title. A role the job title gives is ticked and locked.') }}
+                                        @else
+                                            {{ __('Roles "by job title" are given from the job title at every sign-in (Role & Permission); only the others are given here.') }}
+                                        @endif
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -169,6 +177,9 @@
             form.find('#companySelect').val(null).trigger('change');
             form.find('#userDepartment').val('');
             form.find('.user-role-checkbox, #selectAllRoles').prop('checked', false);
+            form.find('.user-role-checkbox').each(function() {
+                $(this).prop('disabled', $(this).data('locked') === 1);
+            });
             form.find('#userActive').prop('checked', true);
         }
 
@@ -201,6 +212,10 @@
                     modal.find('#userActive').prop('checked', !!data.is_active);
                     (data.role_id || []).forEach((roleId) => {
                         modal.find(`.user-role-checkbox[value="${parseInt(roleId, 10)}"]`).prop('checked', true);
+                    });
+                    // The roles the job title gives: ticked and locked, they follow the job title.
+                    (data.job_title_role_id || []).forEach((roleId) => {
+                        modal.find(`.user-role-checkbox[value="${parseInt(roleId, 10)}"]`).prop('checked', true).prop('disabled', true);
                     });
                     modal.modal('show');
                 })

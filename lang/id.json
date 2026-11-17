@@ -504,6 +504,7 @@
     "role overview": "gambaran peran",
     "Roles": "Peran",
     "Roles \"by job title\" are given from the job title at every sign-in (Role & Permission); only the others are given here.": "Peran \"sesuai jabatan\" diberikan berdasarkan jabatan setiap kali masuk (Peran & Izin); hanya peran lainnya yang diberikan di sini.",
+    "Roles \"by job title\" follow the job title at every sign-in (Role & Permission). As IT Admin you may also give one by hand: it then stays whatever the job title. A role the job title gives is ticked and locked.": "Peran \"sesuai jabatan\" mengikuti jabatan setiap kali masuk (Peran & Izin). Sebagai IT Admin, Anda juga bisa memberikannya secara manual: peran itu lalu tetap ada apa pun jabatannya. Peran yang diberikan jabatan tercentang dan terkunci.",
     "Role updated": "Peran diubah",
     "Role updated successfully.": "Peran berhasil diperbarui.",
     "Route": "Rute",

@@ -504,6 +504,7 @@
     "role overview": "职能概述",
     "Roles": "角色",
     "Roles \"by job title\" are given from the job title at every sign-in (Role & Permission); only the others are given here.": "“按职位”的角色在每次登录时根据职位授予（角色与权限）；此处仅分配其他角色。",
+    "Roles \"by job title\" follow the job title at every sign-in (Role & Permission). As IT Admin you may also give one by hand: it then stays whatever the job title. A role the job title gives is ticked and locked.": "“按职位”的角色在每次登录时随职位更新（角色与权限）。作为 IT Admin，您也可以手动授予此类角色：之后无论职位如何都会保留。由职位授予的角色会被勾选并锁定。",
     "Role updated": "角色已更新",
     "Role updated successfully.": "角色更新成功。",
     "Route": "路由",

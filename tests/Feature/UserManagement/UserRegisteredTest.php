@@ -5,6 +5,7 @@ namespace Tests\Feature\UserManagement;
 use App\Models\Organization\Company;
 use App\Models\UserManagement\Role;
 use App\Models\UserManagement\User;
+use App\Services\Auth\JobTitleRoles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -77,6 +78,76 @@ class UserRegisteredTest extends TestCase
             ->assertOk();
 
         $this->assertSame(['Employee'], $user->fresh()->roles->pluck('name')->all());
+    }
+
+    public function test_an_it_admin_gives_a_job_title_role_by_hand_and_it_stays_whatever_the_job_title(): void
+    {
+        $superAdminRoleId = Role::query()->where('name', 'Super Admin')->value('id');
+        $employeeRoleId = (int) config('merdeka.default_role_id');
+        $itAdmin = $this->itAdmin();
+
+        $this->actingAs($itAdmin)
+            ->postJson(route('user-management.user-registered.store'), $this->payload([
+                'job_title' => 'IT System & Support Supervisor',
+                'role_id' => [$superAdminRoleId],
+            ]))
+            ->assertCreated();
+
+        $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
+        app(JobTitleRoles::class)->sync($user);
+
+        $this->assertSame(['Super Admin', 'Employee'], $user->fresh()->roles->sortBy('id')->pluck('name')->values()->all());
+        $this->actingAs($itAdmin)
+            ->getJson(route('user-management.user-registered.show', $user))
+            ->assertOk()
+            ->assertJsonPath('data.role_id', [$superAdminRoleId])
+            ->assertJsonPath('data.job_title_role_id', [$employeeRoleId]);
+
+        $this->actingAs($itAdmin)
+            ->putJson(route('user-management.user-registered.update', $user), $this->payload([
+                'job_title' => 'IT System & Support Supervisor',
+                'role_id' => [],
+            ]))
+            ->assertOk();
+
+        $this->assertSame(['Employee'], $user->fresh()->roles->pluck('name')->all(), 'Taken back, the role follows the job title again.');
+    }
+
+    public function test_only_an_it_admin_gives_a_job_title_role_by_hand_and_others_keep_what_it_gave(): void
+    {
+        $superAdminRoleId = Role::query()->where('name', 'Super Admin')->value('id');
+        $payload = $this->payload(['job_title' => 'IT System & Support Supervisor', 'role_id' => [$superAdminRoleId]]);
+
+        $this->actingAs($this->superAdmin())
+            ->postJson(route('user-management.user-registered.store'), $payload)
+            ->assertCreated();
+
+        $user = User::query()->where('email', 'siti@merdekabattery.com')->sole();
+        $this->assertSame(['Employee'], $user->roles->pluck('name')->all());
+
+        $this->actingAs($this->itAdmin())
+            ->putJson(route('user-management.user-registered.update', $user), $payload)
+            ->assertOk();
+        $this->actingAs($this->superAdmin())
+            ->putJson(route('user-management.user-registered.update', $user), [...$payload, 'name' => 'Siti R.', 'role_id' => []])
+            ->assertOk();
+
+        $this->assertSame(['Super Admin', 'Employee'], $user->fresh()->roles->sortBy('id')->pluck('name')->values()->all());
+    }
+
+    public function test_the_job_title_roles_are_open_in_the_form_for_an_it_admin_only(): void
+    {
+        $this->actingAs($this->itAdmin())
+            ->get(route('user-management.user-registered.index'))
+            ->assertOk()
+            ->assertViewHas('canGiveJobTitleRoles', true)
+            ->assertSee('As IT Admin you may also give one by hand');
+
+        $this->actingAs($this->superAdmin())
+            ->get(route('user-management.user-registered.index'))
+            ->assertOk()
+            ->assertViewHas('canGiveJobTitleRoles', false)
+            ->assertDontSee('As IT Admin you may also give one by hand');
     }
 
     public function test_registering_the_email_of_a_deleted_account_restores_it(): void
