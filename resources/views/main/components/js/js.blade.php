@@ -452,7 +452,16 @@
                 processData: !isFormData,
                 contentType: isFormData ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
                 success: (response) => {
-                    toastSuccess(response.message || @json(__('Data has been saved.')));
+                    // Done, but with something to read (e.g. e-mails the mail server refused): a dialog, not a toast.
+                    if (response.warning) {
+                        Swal.fire({
+                            icon: 'warning',
+                            text: response.message,
+                            confirmButtonText: @json(__('OK')),
+                        });
+                    } else {
+                        toastSuccess(response.message || @json(__('Data has been saved.')));
+                    }
                     onSuccess(response);
                 },
                 error: (xhr) => {
@@ -653,7 +662,7 @@
     function toastSuccess(message) {
         Swal.fire({
             toast: true,
-            position: 'top-end',
+            position: 'bottom-end',
             icon: 'success',
             title: message,
             showConfirmButton: false,

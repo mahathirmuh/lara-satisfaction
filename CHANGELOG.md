@@ -14,6 +14,17 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.19.3] - 2026-11-17
+
+### Diperbaiki
+
+- Pesan singkat (toast) seperti "Reminder sent to 1 person." muncul di kanan bawah, tidak lagi menutupi pilihan bahasa,
+  lonceng dan menu pengguna di bar atas.
+- Pengingat yang email-nya ditolak server email tidak lagi dihitung "0 orang": notifikasi di aplikasi yang sampai tetap
+  terhitung, dan jumlah email yang gagal ditampilkan dalam dialog peringatan (alasannya tercatat di log error).
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.19.2] - 2026-11-17
 
 ### Diubah

@@ -4,6 +4,7 @@
     ":change pt": ":change个百分点",
     ":completed of :total sections evaluated": "已评价:completed/:total个科室",
     ":count chosen people were left out: they completed the survey already, are inactive or do not fill in surveys.": "所选人员中有 :count 人被跳过：他们已完成调查、已停用或不参与调查。",
+    ":count e-mail could not be sent: the mail server refused it. The reason is in the error log.|:count e-mails could not be sent: the mail server refused them. The reason is in the error log.": ":count 封电子邮件未能发送：邮件服务器拒绝了它们。原因已记录在错误日志中。",
     ":count Key Department|:count Key Departments": ":count个关键部门",
     ":count left out": "跳过 :count 人",
     ":count min": ":count分钟",

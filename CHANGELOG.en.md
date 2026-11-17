@@ -4,6 +4,15 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.19.3] - 2026-11-17
+
+### Fixed
+
+- Short messages (toasts) such as "Reminder sent to 1 person." show at the bottom right, no longer over the language,
+  the bell and the user menu of the top bar.
+- A reminder whose e-mail the mail server refused no longer counts "0 people": the notification in the application that
+  arrived still counts, and the number of failed e-mails shows in a warning dialog (the reason is in the error log).
+
 ## [0.19.2] - 2026-11-17
 
 ### Changed

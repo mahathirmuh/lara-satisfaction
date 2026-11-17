@@ -66,7 +66,7 @@ class SendSurveyDeadlineReminders extends Command
                 continue;
             }
 
-            $sent = $reminders->remind($survey, $recipients);
+            $sent = $reminders->remind($survey, $recipients)['reminded'];
 
             SurveyReminder::create([
                 'survey_id' => $survey->id,

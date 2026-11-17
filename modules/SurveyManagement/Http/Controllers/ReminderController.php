@@ -147,7 +147,7 @@ class ReminderController extends Controller
     public function store(SendReminderRequest $request, AuditLogger $audit): JsonResponse
     {
         $survey = $request->survey();
-        $send = $this->reminders->sendManually($survey, $request->user(), $request->recipientIds(), $request->channels());
+        ['send' => $send, 'emailFailures' => $emailFailures] = $this->reminders->sendManually($survey, $request->user(), $request->recipientIds(), $request->channels());
         $audit->log(AuditLogger::REMINDER_SENT, $send, new: [
             'Survey' => $survey->title,
             'Recipients' => $send->audience === SurveyManualReminder::AUDIENCE_ALL ? 'Everyone who has not completed it' : 'Chosen people',
@@ -162,9 +162,15 @@ class ReminderController extends Controller
             $message .= ' '.__(':count chosen people were left out: they completed the survey already, are inactive or do not fill in surveys.', ['count' => $send->skipped]);
         }
 
+        // A refused e-mail is said plainly (a warning, not a toast that goes away): the reason is in the error log.
+        if ($emailFailures > 0) {
+            $message .= ' '.trans_choice(':count e-mail could not be sent: the mail server refused it. The reason is in the error log.|:count e-mails could not be sent: the mail server refused them. The reason is in the error log.', $emailFailures, ['count' => $emailFailures]);
+        }
+
         return response()->json([
             'message' => $message,
-            'data' => ['recipients' => $send->recipients, 'skipped' => $send->skipped],
+            'warning' => $emailFailures > 0,
+            'data' => ['recipients' => $send->recipients, 'skipped' => $send->skipped, 'email_failures' => $emailFailures],
         ]);
     }
 

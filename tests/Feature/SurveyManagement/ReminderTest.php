@@ -17,8 +17,13 @@ use App\Models\UserManagement\User;
 use App\Notifications\SurveyDeadlineReminder;
 use App\Services\Audit\AuditLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Mailer\Exception\TransportException;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Tests\TestCase;
 
 class ReminderTest extends TestCase
@@ -85,7 +90,7 @@ class ReminderTest extends TestCase
                 'channels' => ['app', 'email'],
             ])
             ->assertOk()
-            ->assertJsonPath('data', ['recipients' => 1, 'skipped' => 1]);
+            ->assertJsonPath('data', ['recipients' => 1, 'skipped' => 1, 'email_failures' => 0]);
 
         Notification::assertSentTo($chosen, SurveyDeadlineReminder::class);
         Notification::assertNotSentTo([$notChosen, $completed, $this->admin], SurveyDeadlineReminder::class);
@@ -128,6 +133,41 @@ class ReminderTest extends TestCase
             'via_app' => $way === ReminderChannel::App,
             'via_email' => $way === ReminderChannel::Email,
         ]);
+    }
+
+    public function test_a_refused_e_mail_is_said_and_the_notification_still_counts(): void
+    {
+        $employee = $this->departmentEmployee();
+        Mail::extend('refusing', fn (): AbstractTransport => new class extends AbstractTransport
+        {
+            protected function doSend(SentMessage $message): void
+            {
+                throw new TransportException('ErrorAccessDenied');
+            }
+
+            public function __toString(): string
+            {
+                return 'refusing';
+            }
+        });
+        config(['mail.mailers.refusing' => ['transport' => 'refusing'], 'mail.default' => 'refusing']);
+        Exceptions::fake();
+
+        $this->actingAs($this->admin)
+            ->postJson(route('survey-management.reminder.store'), [
+                'survey_id' => $this->survey->id,
+                'audience' => 'custom',
+                'user_ids' => [$employee->id],
+                'channels' => ['app', 'email'],
+            ])
+            ->assertOk()
+            ->assertJsonPath('warning', true)
+            ->assertJsonPath('data.recipients', 1)
+            ->assertJsonPath('data.email_failures', 1)
+            ->assertJsonPath('message', 'Reminder sent to 1 person. 1 e-mail could not be sent: the mail server refused it. The reason is in the error log.');
+
+        $this->assertSame(1, $employee->notifications()->count());
+        Exceptions::assertReported(TransportException::class);
     }
 
     /**

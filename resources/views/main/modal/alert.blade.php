@@ -10,7 +10,7 @@
 
             Swal.fire(Object.assign(isToast ? {
                 toast: true,
-                position: 'top-end',
+                position: 'bottom-end',
                 showConfirmButton: false,
                 timer: 3500,
                 timerProgressBar: true,

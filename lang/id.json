@@ -4,6 +4,7 @@
     ":change pt": ":change poin",
     ":completed of :total sections evaluated": ":completed dari :total seksi dievaluasi",
     ":count chosen people were left out: they completed the survey already, are inactive or do not fill in surveys.": ":count orang yang dipilih dilewati: mereka sudah mengisi survei, nonaktif, atau tidak mengisi survei.",
+    ":count e-mail could not be sent: the mail server refused it. The reason is in the error log.|:count e-mails could not be sent: the mail server refused them. The reason is in the error log.": ":count email tidak terkirim karena ditolak server email. Alasannya tercatat di log error.",
     ":count Key Department|:count Key Departments": ":count Departemen Utama",
     ":count left out": ":count dilewati",
     ":count min": ":count mnt",
