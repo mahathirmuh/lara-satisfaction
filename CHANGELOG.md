@@ -14,6 +14,20 @@ membawa migrasi. Migrasi cukup dijalankan sekali per database.
 Catatan yang sama dalam English ada di [CHANGELOG.en.md](CHANGELOG.en.md): Riwayat versi menampilkannya bila aplikasi
 sedang dalam English atau 中文. Setiap versi ditulis di kedua file.
 
+## [0.15.0] - 2026-11-17
+
+### Ditambahkan
+
+- Ikon ⓘ di samping judul kartu ringkasan **Dashboard**, **Survey Report** dan **Survey Progress**: diarahkan kursor,
+  muncul keterangan singkat cara menghitungnya (Responses, Participation Rate, Service Quality, CSAT; Employees, Not
+  Started, In Progress, Completed), dalam bahasa yang sedang dipakai.
+
+### Dihapus
+
+- Tombol **My Survey** di kartu sambutan Dashboard: My Survey tetap ada di menu.
+
+**Deploy:** `git pull && docker compose up -d --build`. Tanpa migrasi dan tanpa setting baru.
+
 ## [0.14.0] - 2026-11-17
 
 ### Ditambahkan

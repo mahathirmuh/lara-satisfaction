@@ -4,6 +4,18 @@ The release notes of CHANGELOG.md in English, for the version history of the app
 or Chinese. Every version is written in both files, with the same headings; the lines for the server (**Deploy**) are
 only in CHANGELOG.md.
 
+## [0.15.0] - 2026-11-17
+
+### Added
+
+- An ⓘ beside the titles of the summary cards of the **Dashboard**, **Survey Report** and **Survey Progress**: pointed
+  at, it says briefly how the figure is counted (Responses, Participation Rate, Service Quality, CSAT; Employees, Not
+  Started, In Progress, Completed), in the language in use.
+
+### Removed
+
+- The **My Survey** button of the welcome card of the Dashboard: My Survey stays in the menu.
+
 ## [0.14.0] - 2026-11-17
 
 ### Added

@@ -1,7 +1,9 @@
+{{-- A figure with its title; "info" puts an ⓘ beside the title that explains the figure when pointed at. --}}
 @props([
     'valueId' => null,
     'value' => '',
     'title' => '',
+    'info' => null,
     'subtitle' => null,
     'icon' => '',
     'color' => 'gray',
@@ -54,6 +56,17 @@
             right: -5px;
             bottom: -5px;
         }
+
+        .summary-info {
+            color: var(--tblr-secondary);
+            cursor: help;
+            line-height: 1;
+        }
+
+        .summary-info:hover,
+        .summary-info:focus-visible {
+            color: var(--tblr-primary);
+        }
     </style>
 @endPushOnce
 
@@ -70,7 +83,15 @@
                 <span class="summary-icon-clip {{ $clipColor }}"></span>
             </div>
             <div class="d-flex flex-column position-relative min-w-0">
-                <span class="fw-medium text-truncate" style="font-size: {{ $titleSize }}">{{ $title }}</span>
+                <div class="d-flex align-items-center gap-1 min-w-0">
+                    <span class="fw-medium text-truncate" style="font-size: {{ $titleSize }}">{{ $title }}</span>
+                    @if (filled($info))
+                        <span class="summary-info flex-shrink-0" tabindex="0" role="img" aria-label="{{ $info }}"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ $info }}">
+                            <i class="ti ti-info-circle" aria-hidden="true"></i>
+                        </span>
+                    @endif
+                </div>
                 <div class="d-flex align-items-center justify-content-start gap-2">
                     <span @if ($valueId) id="{{ $valueId }}" @endif class="fw-bolder"
                         style="font-size: {{ $valueSize }}">{{ $value }}</span>

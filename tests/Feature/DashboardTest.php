@@ -48,6 +48,22 @@ class DashboardTest extends TestCase
             ->assertViewHas('previousSummary', fn (array $summary): bool => $summary['average'] === 3.0);
     }
 
+    public function test_each_insight_explains_how_it_is_counted_when_pointed_at(): void
+    {
+        $this->openSurveyFor([Department::factory()->create()], ['title' => 'Operational Audit 2026']);
+
+        $this->actingAs($this->superAdmin(['locale' => 'id']))
+            ->get(route('dashboard.index'))
+            ->assertOk()
+            ->assertSee('data-bs-toggle="tooltip"', false)
+            ->assertSeeInOrder([
+                'Jumlah orang yang sudah mengirim survei.',
+                'Persentase karyawan departemen yang dinilai yang sudah mengirim survei.',
+                'Rata-rata semua penilaian Kualitas Layanan, dari 1 (Sangat Buruk) sampai 5 (Sangat Baik).',
+                'Kepuasan pelanggan: persentase penilaian Kualitas Layanan bernilai 4 atau lebih, dari skala 5.',
+            ]);
+    }
+
     public function test_comment_highlights_are_escaped(): void
     {
         $department = Department::factory()->create();

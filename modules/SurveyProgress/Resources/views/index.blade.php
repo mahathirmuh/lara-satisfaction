@@ -37,18 +37,21 @@
 
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Employees')" :value="$summary['eligible']" icon="users" color="blue"
+                    :info="__('The employees of the assessed departments who fill in surveys, imported every day from Active Directory.')"
                     :subtitle="__('Employees of the assessed departments')" />
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Not Started')" :value="$summary['not_started']" icon="circle-dashed"
-                    color="yellow" />
+                    color="yellow" :info="__('They have not opened the survey form yet.')" />
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('In Progress')" :value="$summary['in_progress']" icon="loader" color="purple"
+                    :info="__('They opened the survey form or saved a draft, but have not sent it yet.')"
                     :subtitle="__(':count saved as draft', ['count' => $summary['saved_draft']])" />
             </div>
             <div class="col-sm-6 col-xl-3">
                 <x-global.summary-card :title="__('Completed')" :value="$summary['completed']" icon="circle-check" color="green"
+                    :info="__('They sent the survey.')"
                     :subtitle="$summary['completion_rate'] === null ? null : __(':rate% completed', ['rate' => $summary['completion_rate']])" />
             </div>
 

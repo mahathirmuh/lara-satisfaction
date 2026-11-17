@@ -69,6 +69,7 @@
         {{-- Summary --}}
         <div class="col-sm-6 col-xl-3">
             <x-global.summary-card :title="__('Responses')" :value="number_format($summary['responses'])" color="blue"
+                :info="__('The number of people who sent the survey. Written comments counts every feedback they typed, one per section.')"
                 :subtitle="__(':count written comments', ['count' => number_format($summary['comments'])])">
                 <x-slot:icon><i class="ti ti-forms"></i></x-slot:icon>
             </x-global.summary-card>
@@ -76,6 +77,7 @@
         <div class="col-sm-6 col-xl-3">
             <x-global.summary-card :title="__('Participation Rate')"
                 :value="$summary['participation_rate'] === null ? '—' : $summary['participation_rate'] . '%'" color="purple"
+                :info="__('The share of the employees of the assessed departments who sent the survey.')"
                 :subtitle="__(':participants of :eligible active employees', [
                     'participants' => number_format($summary['participants']),
                     'eligible' => number_format($summary['eligible']),
@@ -86,6 +88,7 @@
         <div class="col-sm-6 col-xl-3">
             <x-global.summary-card :title="__('Service Quality')"
                 :value="$summary['average'] === null ? '—' : number_format($summary['average'], 2) . ' / 5'" color="green"
+                :info="__('The average of every Service Quality rating, from 1 (Very Poor) to 5 (Excellent). Criticality is the average of how critical the services are to the departments, also from 1 to 5.')"
                 :subtitle="__(':count ratings · criticality :criticality', [
                     'count' => number_format($summary['ratings']),
                     'criticality' => $summary['criticality'] === null ? '—' : number_format($summary['criticality'], 2),
@@ -95,7 +98,8 @@
         </div>
         <div class="col-sm-6 col-xl-3">
             <x-global.summary-card title="CSAT" :value="$summary['csat'] === null ? '—' : $summary['csat'] . '%'"
-                color="orange" :subtitle="__('Share of quality ratings ≥ :threshold', ['threshold' => config('survey.satisfied_threshold')])">
+                color="orange" :subtitle="__('Share of quality ratings ≥ :threshold', ['threshold' => config('survey.satisfied_threshold')])"
+                :info="__('Customer satisfaction: the share of Service Quality ratings of :threshold or more, out of 5.', ['threshold' => config('survey.satisfied_threshold')])">
                 <x-slot:icon><i class="ti ti-mood-happy"></i></x-slot:icon>
             </x-global.summary-card>
         </div>
